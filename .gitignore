@@ -1,0 +1,7 @@
+node_modules/
+.env
+cookies.json
+chrome-data/
+*.png
+error-screenshot.png
+payment-status*.png
