@@ -150,7 +150,46 @@ async function checkPaymentStatus() {
     // Wait a bit for the page to fully load
     await new Promise(resolve => setTimeout(resolve, 3000));
 
-    console.log('[*] Checking for notifications and payment information...');
+    console.log('[*] Looking for Messages/Notifications section...');
+
+    // Try to find and click on Messages or Notifications link
+    const messagesClicked = await page.evaluate(() => {
+      // Look for various possible link texts
+      const possibleTexts = [
+        'messages',
+        'notifications',
+        'inbox',
+        'alerts',
+        'my messages',
+        'view messages'
+      ];
+
+      const links = Array.from(document.querySelectorAll('a, button'));
+
+      for (const link of links) {
+        const text = link.innerText?.toLowerCase() || '';
+        const href = link.getAttribute('href')?.toLowerCase() || '';
+
+        for (const searchText of possibleTexts) {
+          if (text.includes(searchText) || href.includes(searchText)) {
+            console.log(`Found link: ${link.innerText || link.textContent}`);
+            link.click();
+            return true;
+          }
+        }
+      }
+
+      return false;
+    });
+
+    if (messagesClicked) {
+      console.log('[+] Clicked on Messages/Notifications link, waiting for page load...');
+      await new Promise(resolve => setTimeout(resolve, 3000));
+    } else {
+      console.log('[*] No Messages/Notifications link found, checking current page...');
+    }
+
+    console.log('[*] Extracting notifications and payment information...');
 
     // Look for notifications and payment-related information
     const notificationInfo = await page.evaluate(() => {
