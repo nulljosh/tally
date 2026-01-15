@@ -72,9 +72,17 @@ async function attemptLogin(page) {
 
     if (usernameField && passwordField) {
       console.log('[*] Filling in credentials...');
-      await usernameField.click({ clickCount: 3 }); // Select all
+
+      // Clear and fill username
+      await usernameField.click({ clickCount: 3 });
+      await page.keyboard.press('Backspace');
+      await usernameField.evaluate(el => el.value = '');
       await usernameField.type(username, { delay: 50 });
+
+      // Clear and fill password
       await passwordField.click({ clickCount: 3 });
+      await page.keyboard.press('Backspace');
+      await passwordField.evaluate(el => el.value = '');
       await passwordField.type(password, { delay: 50 });
 
       console.log('[*] Submitting login form...');

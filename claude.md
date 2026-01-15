@@ -1,7 +1,33 @@
 # Project Context for Claude
 
 ## Project Overview
-This is a web scraper for checking payment status on the BC government self-serve portal (myselfserve.gov.bc.ca). Built with Node.js and Puppeteer to automate the login and payment checking process.
+Web scraper for BC government self-serve portal (myselfserve.gov.bc.ca) to check notifications, messages, payment info, and service requests. Built with Node.js + Puppeteer for fully automated headless scraping.
+
+## Critical Breadcrumbs
+
+### Login Flow (WORKING)
+1. Navigate to homepage → click "Sign in" button
+2. Gets redirected to BCeID login: `logon7.gov.bc.ca/clp-cgi/capBceid/logon.cgi...`
+3. Clear form fields (pre-filled values cause issues)
+4. Type credentials: `input[name="user"]` and `input[name="password"]`
+5. Submit: `input[name="btnSubmit"]`
+6. Retry 5x because BC site is flaky (usually succeeds attempt 2-3)
+7. **Working reliably as of v1.0.0**
+
+### Session Issue (BC GOV BUG)
+- Login succeeds, cookies saved (4 cookies)
+- But sessions expire immediately when navigating to `/Auth/*` pages
+- **This is a BC government backend issue, not our code**
+- Workaround: Re-login for each section (inefficient but works)
+
+### Sections to Scrape
+1. **Notifications**: `https://myselfserve.gov.bc.ca/Auth`
+2. **Messages**: `https://myselfserve.gov.bc.ca/Auth/Messages`
+3. **Payment Info**: `https://myselfserve.gov.bc.ca/Auth/PaymentInfo`
+4. **Service Requests**: `https://myselfserve.gov.bc.ca/Auth/ServiceRequests`
+5. Monthly Reports: `https://myselfserve.gov.bc.ca/Auth/MonthlyReports` (not implemented)
+6. Employment Plans: `https://myselfserve.gov.bc.ca/Auth/EmploymentPlans` (not implemented)
+7. Account Info: `https://myselfserve.gov.bc.ca/Auth/AccountInfo` (not implemented)
 
 ## Key Information
 
