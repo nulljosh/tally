@@ -87,7 +87,7 @@ async function checkPaymentStatus() {
     });
 
     // Wait a bit to see if cookies work
-    await page.waitForTimeout(2000);
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Check if we're already logged in or need to login
     const currentUrl = page.url();
@@ -124,7 +124,7 @@ async function checkPaymentStatus() {
     }
 
     // Wait a bit for the page to fully load
-    await page.waitForTimeout(3000);
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
     console.log('[*] Checking for payment information...');
 
