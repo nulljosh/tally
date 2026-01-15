@@ -148,52 +148,30 @@ async function checkPaymentStatus(options = {}) {
       console.log('[+] Already logged in (cookies worked!)');
     }
 
-    // Wait a bit for the page to fully load
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    // Check multiple sections: Notifications, Messages, Payment Info, Service Requests
+    const sections = [
+      { name: 'Notifications', url: 'https://myselfserve.gov.bc.ca/Auth' },
+      { name: 'Messages', url: 'https://myselfserve.gov.bc.ca/Auth/Messages' },
+      { name: 'Payment Info', url: 'https://myselfserve.gov.bc.ca/Auth/PaymentInfo' },
+      { name: 'Service Requests', url: 'https://myselfserve.gov.bc.ca/Auth/ServiceRequests' }
+    ];
 
-    console.log('[*] Looking for Messages/Notifications section...');
+    const allResults = {};
 
-    // Try to find and click on Messages or Notifications link
-    const messagesClicked = await page.evaluate(() => {
-      // Look for various possible link texts
-      const possibleTexts = [
-        'messages',
-        'notifications',
-        'inbox',
-        'alerts',
-        'my messages',
-        'view messages'
-      ];
+    for (const section of sections) {
+      console.log(`\n[*] Checking ${section.name}...`);
 
-      const links = Array.from(document.querySelectorAll('a, button'));
+      try {
+        await page.goto(section.url, {
+          waitUntil: 'networkidle2',
+          timeout: 30000
+        });
 
-      for (const link of links) {
-        const text = link.innerText?.toLowerCase() || '';
-        const href = link.getAttribute('href')?.toLowerCase() || '';
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        console.log(`[+] ${section.name} page loaded!`);
 
-        for (const searchText of possibleTexts) {
-          if (text.includes(searchText) || href.includes(searchText)) {
-            console.log(`Found link: ${link.innerText || link.textContent}`);
-            link.click();
-            return true;
-          }
-        }
-      }
-
-      return false;
-    });
-
-    if (messagesClicked) {
-      console.log('[+] Clicked on Messages/Notifications link, waiting for page load...');
-      await new Promise(resolve => setTimeout(resolve, 3000));
-    } else {
-      console.log('[*] No Messages/Notifications link found, checking current page...');
-    }
-
-    console.log('[*] Extracting notifications and payment information...');
-
-    // Look for notifications and payment-related information
-    const notificationInfo = await page.evaluate(() => {
+        // Extract data from this section
+        const sectionData = await page.evaluate(() => {
       const body = document.body.innerText;
       const html = document.body.innerHTML;
 
@@ -248,39 +226,65 @@ async function checkPaymentStatus(options = {}) {
       const uniqueInfo = [...new Set(foundInfo)];
       const uniqueNotifications = [...new Set(notifications)];
 
-      return {
-        notifications: uniqueNotifications,
-        found: uniqueInfo,
-        pageTitle: document.title,
-        url: window.location.href
-      };
-    });
+          return {
+            notifications: uniqueNotifications,
+            found: uniqueInfo,
+            pageTitle: document.title,
+            url: window.location.href,
+            bodyText: body
+          };
+        });
 
-    console.log('\n[*] ═══════════════════════════════════════');
-    console.log(`[*] Page: ${notificationInfo.pageTitle}`);
-    console.log(`[*] URL: ${notificationInfo.url}`);
-    console.log('[*] ═══════════════════════════════════════');
+        allResults[section.name] = sectionData;
 
-    if (notificationInfo.notifications.length > 0) {
-      console.log('\n[+] NOTIFICATIONS FOUND:');
-      notificationInfo.notifications.forEach((notification, index) => {
-        console.log(`\n[${index + 1}] ${notification}`);
-      });
-    } else {
-      console.log('\n[*] No structured notifications found.');
+        console.log(`[+] Found ${sectionData.notifications.length} items from ${section.name}`);
+
+      } catch (error) {
+        console.log(`[!] Error checking ${section.name}: ${error.message}`);
+        allResults[section.name] = { error: error.message };
+      }
     }
 
-    console.log('\n[*] Payment-related text:');
-    if (notificationInfo.found.length > 0) {
-      notificationInfo.found.slice(0, 20).forEach((info, index) => {
-        console.log(`${index + 1}. ${info.trim()}`);
-      });
-      if (notificationInfo.found.length > 20) {
-        console.log(`... and ${notificationInfo.found.length - 20} more matches`);
+    // Display results summary
+    console.log('\n');
+    console.log('═══════════════════════════════════════');
+    console.log('         SCRAPER RESULTS SUMMARY        ');
+    console.log('═══════════════════════════════════════\n');
+
+    if (allResults.Notifications) {
+      const notifs = allResults.Notifications.notifications || [];
+      if (notifs.length > 0) {
+        console.log('[+] NOTIFICATIONS:');
+        notifs.slice(0, 10).forEach((n, i) => console.log(`  ${i + 1}. ${n}`));
+        if (notifs.length > 10) console.log(`  ... and ${notifs.length - 10} more`);
+      } else {
+        console.log('[*] You have no notifications at this time.');
       }
-    } else {
-      console.log('[*] No payment information found automatically.');
-      console.log('[*] The browser window will remain open for manual inspection.');
+    }
+
+    if (allResults['Payment Info']) {
+      console.log('\n[+] PAYMENT INFO:');
+      const payInfo = allResults['Payment Info'].notifications || [];
+      if (payInfo.length > 0) {
+        payInfo.slice(0, 10).forEach((p, i) => console.log(`  ${i + 1}. ${p}`));
+      } else {
+        console.log('  No payment information found.');
+      }
+    }
+
+    if (allResults.Messages) {
+      const msgs = allResults.Messages.notifications || [];
+      console.log(`\n[*] MESSAGES: ${msgs.length} items found`);
+    }
+
+    if (allResults['Service Requests']) {
+      const reqs = allResults['Service Requests'].notifications || [];
+      if (reqs.length > 0) {
+        console.log('\n[+] SERVICE REQUESTS:');
+        reqs.forEach((r, i) => console.log(`  ${i + 1}. ${r}`));
+      } else {
+        console.log('\n[*] No service requests at this time.');
+      }
     }
 
     // Take a screenshot
@@ -293,10 +297,7 @@ async function checkPaymentStatus(options = {}) {
     const result = {
       success: true,
       timestamp: new Date().toISOString(),
-      page: notificationInfo.pageTitle,
-      url: notificationInfo.url,
-      notifications: notificationInfo.notifications,
-      paymentInfo: notificationInfo.found,
+      sections: allResults,
       screenshot: screenshotPath
     };
 
