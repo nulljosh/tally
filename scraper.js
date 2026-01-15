@@ -114,11 +114,21 @@ async function checkPaymentStatus(options = {}) {
     // Wait a bit to see if cookies work
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Check if we're already logged in or need to login
+    // Check if we're already logged in by trying to access an auth-required page
     const currentUrl = page.url();
     console.log(`[*] Current URL: ${currentUrl}`);
 
-    if (currentUrl.includes('logon') || currentUrl.includes('login')) {
+    // Try to access a protected page to verify authentication
+    console.log('[*] Verifying authentication...');
+    await page.goto('https://myselfserve.gov.bc.ca/Auth', {
+      waitUntil: 'networkidle2',
+      timeout: 30000
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    const authUrl = page.url();
+
+    if (authUrl.includes('logon') || authUrl.includes('login')) {
       console.log('[*] Login required...');
 
       const loginSuccess = await attemptLogin(page);
@@ -141,11 +151,17 @@ async function checkPaymentStatus(options = {}) {
         }
       }
 
+      // Verify we're actually logged in now
+      const finalUrl = page.url();
+      if (finalUrl.includes('logon') || finalUrl.includes('login')) {
+        throw new Error('Login failed - still on login page');
+      }
+
       // Save cookies after successful login
       await saveCookies(page);
       console.log('[+] Login successful!');
     } else {
-      console.log('[+] Already logged in (cookies worked!)');
+      console.log('[+] Already authenticated!');
     }
 
     // Check multiple sections: Notifications, Messages, Payment Info, Service Requests
