@@ -6,9 +6,13 @@ require('dotenv').config();
 const COOKIES_PATH = path.join(__dirname, 'cookies.json');
 
 async function saveCookies(page) {
-  const cookies = await page.cookies();
-  await fs.writeFile(COOKIES_PATH, JSON.stringify(cookies, null, 2));
-  console.log('[*] Cookies saved for future use');
+  try {
+    const cookies = await page.cookies();
+    await fs.writeFile(COOKIES_PATH, JSON.stringify(cookies, null, 2));
+    console.log('[*] Cookies saved for future use');
+  } catch (error) {
+    console.log('[!] Failed to save cookies:', error.message);
+  }
 }
 
 async function loadCookies(page) {
@@ -67,11 +71,31 @@ async function attemptLogin(page) {
 }
 
 async function checkPaymentStatus() {
-  const browser = await puppeteer.launch({
-    headless: false,
-    defaultViewport: null,
-    args: ['--start-maximized'],
-    userDataDir: './chrome-data' // Persist Chrome profile
+  let browser;
+
+  try {
+    browser = await puppeteer.launch({
+      headless: false,
+      defaultViewport: null,
+      args: ['--start-maximized'],
+      userDataDir: './chrome-data'
+    });
+  } catch (error) {
+    if (error.message.includes('already running')) {
+      console.error('[!] Browser is already running. Please close existing instance or use a different profile.');
+      console.error('[!] Run: pkill -f "node scraper.js" to kill existing processes');
+      process.exit(1);
+    }
+    throw error;
+  }
+
+  // Handle graceful shutdown
+  process.on('SIGINT', async () => {
+    console.log('\n[*] Shutting down gracefully...');
+    if (browser) {
+      await browser.close();
+    }
+    process.exit(0);
   });
 
   try {
@@ -126,19 +150,42 @@ async function checkPaymentStatus() {
     // Wait a bit for the page to fully load
     await new Promise(resolve => setTimeout(resolve, 3000));
 
-    console.log('[*] Checking for payment information...');
+    console.log('[*] Checking for notifications and payment information...');
 
-    // Look for payment-related information
-    const paymentInfo = await page.evaluate(() => {
+    // Look for notifications and payment-related information
+    const notificationInfo = await page.evaluate(() => {
       const body = document.body.innerText;
       const html = document.body.innerHTML;
 
-      // Look for common payment indicators
-      const paymentKeywords = ['payment', 'paid', 'pending', 'processed', 'deposit', 'amount', 'balance', 'invoice', 'status'];
+      // Look for notification elements
+      const notifications = [];
+
+      // Common notification selectors
+      const notificationSelectors = [
+        '.notification',
+        '.alert',
+        '.message',
+        '[role="alert"]',
+        '.notice',
+        '#notifications'
+      ];
+
+      notificationSelectors.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(el => {
+          const text = el.innerText.trim();
+          if (text && text.length > 0) {
+            notifications.push(text);
+          }
+        });
+      });
+
+      // Look for common payment and notification keywords
+      const keywords = ['payment', 'paid', 'pending', 'processed', 'deposit', 'amount', 'balance', 'invoice', 'status', 'notification', 'message', 'alert'];
       const foundInfo = [];
 
-      paymentKeywords.forEach(keyword => {
-        const regex = new RegExp(`.{0,100}${keyword}.{0,100}`, 'gi');
+      keywords.forEach(keyword => {
+        const regex = new RegExp(`.{0,150}${keyword}.{0,150}`, 'gi');
         const matches = body.match(regex);
         if (matches) {
           foundInfo.push(...matches);
@@ -147,30 +194,41 @@ async function checkPaymentStatus() {
 
       // Remove duplicates
       const uniqueInfo = [...new Set(foundInfo)];
+      const uniqueNotifications = [...new Set(notifications)];
 
       return {
+        notifications: uniqueNotifications,
         found: uniqueInfo,
         pageTitle: document.title,
         url: window.location.href
       };
     });
 
-    console.log('\n[*] Payment Status Information:');
-    console.log('═══════════════════════════════════════');
-    console.log(`Page: ${paymentInfo.pageTitle}`);
-    console.log(`URL: ${paymentInfo.url}`);
-    console.log('\n[*] Found payment-related text:');
+    console.log('\n[*] ═══════════════════════════════════════');
+    console.log(`[*] Page: ${notificationInfo.pageTitle}`);
+    console.log(`[*] URL: ${notificationInfo.url}`);
+    console.log('[*] ═══════════════════════════════════════');
 
-    if (paymentInfo.found.length > 0) {
-      paymentInfo.found.slice(0, 20).forEach((info, index) => {
+    if (notificationInfo.notifications.length > 0) {
+      console.log('\n[+] NOTIFICATIONS FOUND:');
+      notificationInfo.notifications.forEach((notification, index) => {
+        console.log(`\n[${index + 1}] ${notification}`);
+      });
+    } else {
+      console.log('\n[*] No structured notifications found.');
+    }
+
+    console.log('\n[*] Payment-related text:');
+    if (notificationInfo.found.length > 0) {
+      notificationInfo.found.slice(0, 20).forEach((info, index) => {
         console.log(`${index + 1}. ${info.trim()}`);
       });
-      if (paymentInfo.found.length > 20) {
-        console.log(`... and ${paymentInfo.found.length - 20} more matches`);
+      if (notificationInfo.found.length > 20) {
+        console.log(`... and ${notificationInfo.found.length - 20} more matches`);
       }
     } else {
-      console.log('[!] No payment information found automatically.');
-      console.log('The browser window will remain open for manual inspection.');
+      console.log('[*] No payment information found automatically.');
+      console.log('[*] The browser window will remain open for manual inspection.');
     }
 
     // Take a screenshot
