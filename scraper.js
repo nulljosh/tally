@@ -39,7 +39,9 @@ async function attemptLogin(page) {
   }
 
   try {
-    console.log('[*] Attempting automated login...');
+    const currentUrl = page.url();
+    console.log(`[*] Attempting automated login to: ${currentUrl}`);
+    console.log(`[*] Username: ${username}`);
 
     // First, click the "Sign in" button on the homepage if present
     const signInButton = await page.evaluate(() => {
@@ -184,10 +186,10 @@ async function checkPaymentStatus(options = {}) {
     if (authUrl.includes('logon') || authUrl.includes('login')) {
       console.log('[*] Login required...');
 
-      // Retry login up to 3 times
+      // Retry login up to 5 times (BC gov site is flaky)
       let loginSuccess = false;
-      for (let attempt = 1; attempt <= 3; attempt++) {
-        console.log(`[*] Login attempt ${attempt}/3...`);
+      for (let attempt = 1; attempt <= 5; attempt++) {
+        console.log(`[*] Login attempt ${attempt}/5...`);
 
         loginSuccess = await attemptLogin(page);
 
@@ -195,7 +197,7 @@ async function checkPaymentStatus(options = {}) {
           break;
         }
 
-        if (attempt < 3) {
+        if (attempt < 5) {
           console.log('[!] Login failed, retrying...');
           await new Promise(resolve => setTimeout(resolve, 2000));
 
@@ -209,7 +211,7 @@ async function checkPaymentStatus(options = {}) {
       }
 
       if (!loginSuccess) {
-        throw new Error('Login failed after 3 attempts - check credentials in .env file');
+        throw new Error('Login automation failed after 5 attempts - form selectors or logic may need adjustment');
       }
 
       // Save cookies after successful login
