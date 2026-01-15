@@ -168,6 +168,15 @@ async function checkPaymentStatus(options = {}) {
         });
 
         await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Check if we got redirected to login
+        const currentUrl = page.url();
+        if (currentUrl.includes('logon') || currentUrl.includes('login')) {
+          console.log(`[!] Session expired for ${section.name}, need to re-authenticate`);
+          allResults[section.name] = { error: 'Session expired - authentication required' };
+          continue;
+        }
+
         console.log(`[+] ${section.name} page loaded!`);
 
         // Extract data from this section
