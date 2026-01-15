@@ -70,14 +70,15 @@ async function attemptLogin(page) {
   }
 }
 
-async function checkPaymentStatus() {
+async function checkPaymentStatus(options = {}) {
+  const { headless = false, keepOpen = false } = options;
   let browser;
 
   try {
     browser = await puppeteer.launch({
-      headless: false,
-      defaultViewport: null,
-      args: ['--start-maximized'],
+      headless: headless,
+      defaultViewport: headless ? { width: 1920, height: 1080 } : null,
+      args: headless ? [] : ['--start-maximized'],
       userDataDir: './chrome-data'
     });
   } catch (error) {
@@ -199,14 +200,26 @@ async function checkPaymentStatus() {
       // Look for notification elements
       const notifications = [];
 
-      // Common notification selectors
+      // Look for list items (notifications are in <li> elements)
+      const listItems = document.querySelectorAll('li');
+      listItems.forEach(li => {
+        const text = li.innerText?.trim();
+        // Filter out navigation items and only get substantial content
+        if (text && text.length > 10 && !text.toLowerCase().includes('menu')) {
+          notifications.push(text);
+        }
+      });
+
+      // Also check common notification selectors
       const notificationSelectors = [
         '.notification',
         '.alert',
         '.message',
         '[role="alert"]',
         '.notice',
-        '#notifications'
+        '#notifications',
+        '[class*="notification"]',
+        '[class*="message"]'
       ];
 
       notificationSelectors.forEach(selector => {
@@ -276,26 +289,74 @@ async function checkPaymentStatus() {
     await page.screenshot({ path: screenshotPath, fullPage: true });
     console.log(`\n[*] Screenshot saved as ${screenshotPath}`);
 
-    console.log('\n[*] Browser will remain open for manual inspection.');
-    console.log('Press Ctrl+C to close when done.');
+    // Prepare result object
+    const result = {
+      success: true,
+      timestamp: new Date().toISOString(),
+      page: notificationInfo.pageTitle,
+      url: notificationInfo.url,
+      notifications: notificationInfo.notifications,
+      paymentInfo: notificationInfo.found,
+      screenshot: screenshotPath
+    };
 
-    // Keep browser open for manual inspection
-    await new Promise(() => {});
+    // Save to JSON file
+    const jsonPath = `results-${timestamp}.json`;
+    await fs.writeFile(jsonPath, JSON.stringify(result, null, 2));
+    console.log(`[*] Results saved to ${jsonPath}`);
+
+    if (keepOpen) {
+      console.log('\n[*] Browser will remain open for manual inspection.');
+      console.log('Press Ctrl+C to close when done.');
+      await new Promise(() => {});
+    } else {
+      console.log('\n[+] Check complete! Closing browser...');
+      await browser.close();
+    }
+
+    return result;
 
   } catch (error) {
     console.error('[!] Error:', error.message);
 
+    const errorResult = {
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    };
+
     try {
-      const page = (await browser.pages())[0];
-      await page.screenshot({ path: 'error-screenshot.png' });
-      console.log('[*] Error screenshot saved as error-screenshot.png');
+      if (browser) {
+        const page = (await browser.pages())[0];
+        if (page) {
+          await page.screenshot({ path: 'error-screenshot.png' });
+          console.log('[*] Error screenshot saved as error-screenshot.png');
+          errorResult.screenshot = 'error-screenshot.png';
+        }
+        if (!keepOpen) {
+          await browser.close();
+        }
+      }
     } catch (screenshotError) {
       // Ignore screenshot errors
     }
-  } finally {
-    // Browser will be closed by Ctrl+C
+
+    return errorResult;
   }
 }
 
-// Run the scraper
-checkPaymentStatus();
+// Export for use as module
+module.exports = { checkPaymentStatus };
+
+// Run standalone if not imported
+if (require.main === module) {
+  checkPaymentStatus({ headless: true, keepOpen: false })
+    .then(result => {
+      console.log('\n[+] Done! Check the results JSON file for full output.');
+      process.exit(0);
+    })
+    .catch(error => {
+      console.error('[!] Fatal error:', error);
+      process.exit(1);
+    });
+}

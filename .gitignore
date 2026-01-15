@@ -5,3 +5,4 @@ chrome-data/
 *.png
 error-screenshot.png
 payment-status*.png
+results-*.json
