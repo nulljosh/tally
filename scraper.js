@@ -41,31 +41,84 @@ async function attemptLogin(page) {
   try {
     console.log('[*] Attempting automated login...');
 
-    // Wait for username field
-    await page.waitForSelector('input[name="user"], input[name="username"], input[type="text"]', {
-      timeout: 5000
+    // First, click the "Sign in" button on the homepage if present
+    const signInButton = await page.evaluate(() => {
+      const buttons = Array.from(document.querySelectorAll('a, button'));
+      for (const btn of buttons) {
+        const text = btn.innerText?.toLowerCase() || '';
+        if (text.includes('sign in') || text.includes('log in')) {
+          btn.click();
+          return true;
+        }
+      }
+      return false;
     });
 
-    // Fill in credentials - adjust selectors based on actual form
-    const usernameField = await page.$('input[name="user"], input[name="username"], input[type="text"]');
-    const passwordField = await page.$('input[name="password"], input[type="password"]');
+    if (signInButton) {
+      console.log('[*] Clicked Sign in button, waiting for login form...');
+      await new Promise(resolve => setTimeout(resolve, 3000));
+    }
+
+    // Wait for username field on the actual BCeID login page
+    await page.waitForSelector('input[name="user"], input[id="user"]', {
+      timeout: 10000
+    });
+
+    // Fill in credentials - BC login uses 'user' and 'password' fields
+    const usernameField = await page.$('input[name="user"], input[id="user"]');
+    const passwordField = await page.$('input[name="password"], input[id="password"]');
 
     if (usernameField && passwordField) {
-      await usernameField.type(username);
-      await passwordField.type(password);
+      console.log('[*] Filling in credentials...');
+      await usernameField.click({ clickCount: 3 }); // Select all
+      await usernameField.type(username, { delay: 50 });
+      await passwordField.click({ clickCount: 3 });
+      await passwordField.type(password, { delay: 50 });
 
-      // Look for submit button
-      const submitButton = await page.$('button[type="submit"], input[type="submit"], button:has-text("Login"), button:has-text("Sign In")');
+      console.log('[*] Submitting login form...');
+
+      // Submit the form and wait for navigation
+      const submitButton = await page.$('input[name="btnSubmit"], button[type="submit"], input[type="submit"]');
       if (submitButton) {
-        await submitButton.click();
-        console.log('[+] Login form submitted');
+        await Promise.all([
+          page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 }).catch(() => null),
+          submitButton.click()
+        ]);
+
+        console.log('[*] Form submitted, checking result...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Check if we're still on login page
+        const finalUrl = page.url();
+        if (finalUrl.includes('logon') || finalUrl.includes('login')) {
+          // Check for error messages on the page
+          const errorMessage = await page.evaluate(() => {
+            const bodyText = document.body.innerText;
+            const errorPatterns = ['error', 'invalid', 'incorrect', 'failed'];
+            for (const pattern of errorPatterns) {
+              const regex = new RegExp(`.{0,100}${pattern}.{0,100}`, 'i');
+              const match = bodyText.match(regex);
+              if (match) return match[0];
+            }
+            return null;
+          });
+
+          if (errorMessage) {
+            console.log(`[!] Login error: ${errorMessage.trim()}`);
+          } else {
+            console.log('[!] Still on login page - credentials may be incorrect');
+          }
+          return false;
+        }
+
+        console.log('[+] Login successful!');
         return true;
       }
     }
 
     return false;
   } catch (error) {
-    console.log('[!] Automated login failed, waiting for manual login...');
+    console.log(`[!] Automated login failed: ${error.message}`);
     return false;
   }
 }
@@ -131,35 +184,44 @@ async function checkPaymentStatus(options = {}) {
     if (authUrl.includes('logon') || authUrl.includes('login')) {
       console.log('[*] Login required...');
 
-      const loginSuccess = await attemptLogin(page);
+      // Retry login up to 3 times
+      let loginSuccess = false;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        console.log(`[*] Login attempt ${attempt}/3...`);
 
-      if (!loginSuccess) {
-        console.log('[*] Waiting for manual login (5 minutes timeout)...');
-        await page.waitForNavigation({
-          waitUntil: 'networkidle2',
-          timeout: 300000
-        });
-      } else {
-        // Wait for navigation after automated login
-        try {
-          await page.waitForNavigation({
+        loginSuccess = await attemptLogin(page);
+
+        if (loginSuccess) {
+          break;
+        }
+
+        if (attempt < 3) {
+          console.log('[!] Login failed, retrying...');
+          await new Promise(resolve => setTimeout(resolve, 2000));
+
+          // Go back to login page for retry
+          await page.goto('https://myselfserve.gov.bc.ca', {
             waitUntil: 'networkidle2',
             timeout: 30000
           });
-        } catch (e) {
-          console.log('[!] Navigation timeout, checking current page...');
+          await new Promise(resolve => setTimeout(resolve, 2000));
         }
       }
 
-      // Verify we're actually logged in now
-      const finalUrl = page.url();
-      if (finalUrl.includes('logon') || finalUrl.includes('login')) {
-        throw new Error('Login failed - still on login page');
+      if (!loginSuccess) {
+        throw new Error('Login failed after 3 attempts - check credentials in .env file');
       }
 
       // Save cookies after successful login
       await saveCookies(page);
-      console.log('[+] Login successful!');
+      console.log('[+] Login successful! Cookies saved.');
+
+      // Wait a bit to ensure session is fully established
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      // Verify session is actually valid by checking current page
+      const cookies = await page.cookies();
+      console.log(`[*] Session has ${cookies.length} cookies`);
     } else {
       console.log('[+] Already authenticated!');
     }
