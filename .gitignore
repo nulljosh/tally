@@ -11,3 +11,4 @@ network-log-*.json
 api-calls-*.json
 *.log
 .api.pid
+.vercel
