@@ -14,7 +14,19 @@
 
 ### P1 - High Priority
 
-#### 1. Improve Message Parsing
+#### 1. Make Dashboard Interactive
+**Current:** Messages/items are just text, not clickable
+**Want:** Click messages to expand full content, click service requests for details
+
+**Implementation:**
+- Parse message IDs from BC gov site
+- Make messages clickable → expand to show full text
+- Add "View on BC Self-Serve" link for each item
+- Maybe scrape full message content when clicked
+
+---
+
+#### 2. Improve Message Parsing
 **Current:** Only scrapes message titles and dates
 **Want:** Click into each message and get full content
 
