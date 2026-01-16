@@ -1,118 +1,129 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>BC Self-Serve Dashboard</title>
+  <title>Self Serve</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    }
+  </script>
   <style>
-    body {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-    .glass {
-      background: rgba(255, 255, 255, 0.25);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-    }
-    .glass-dark {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-    }
+    .transition-colors { transition: background-color 0.2s, border-color 0.2s, color 0.2s; }
   </style>
 </head>
-<body class="min-h-dvh p-4 sm:p-8">
+<body class="min-h-dvh bg-white dark:bg-black text-gray-900 dark:text-white p-4 sm:p-6 transition-colors">
   <div class="max-w-4xl mx-auto">
-    <!-- Header -->
-    <div class="glass rounded-3xl shadow-2xl p-4 sm:p-6 mb-4 sm:mb-6">
-      <h1 class="text-2xl sm:text-3xl font-bold text-white">Self Serve</h1>
+    <!-- Header with dark mode toggle -->
+    <div class="border-b border-gray-200 dark:border-gray-800 pb-4 mb-6 flex justify-between items-center">
+      <h1 class="text-xl sm:text-2xl font-medium">Self Serve</h1>
+      <button onclick="toggleDarkMode()" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Toggle dark mode">
+        <svg id="theme-icon-dark" class="w-5 h-5 hidden dark:block" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+        </svg>
+        <svg id="theme-icon-light" class="w-5 h-5 block dark:hidden" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+        </svg>
+      </button>
     </div>
 
     <!-- Messages Section -->
-    <div class="glass rounded-3xl shadow-2xl mb-3 sm:mb-4 overflow-hidden">
-      <button onclick="toggleSection('messages')" class="w-full text-left p-4 sm:p-6 flex justify-between items-center transition-all hover:bg-white/10">
-        <div class="flex-1 min-w-0">
-          <h2 class="text-lg sm:text-xl font-semibold text-white">Messages</h2>
-          <p class="text-xs sm:text-sm text-white/70 mt-1"><span id="messages-count">0</span> messages</p>
+    <div class="border-b border-gray-200 dark:border-gray-800 mb-4 transition-colors">
+      <button onclick="toggleSection('messages')" class="w-full text-left py-3 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors rounded-lg">
+        <div class="flex-1">
+          <h2 class="text-base font-medium">Messages</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-500 mt-0.5"><span id="messages-count">0</span> messages</p>
         </div>
-        <svg id="messages-icon" class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 ml-2 transform transition-transform rotate-180 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg id="messages-icon" class="w-4 h-4 transform transition-transform rotate-180 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
         </svg>
       </button>
-      <div id="messages-content" class="px-4 sm:px-6 pb-4 sm:pb-6">
-        <div id="messages-list" class="space-y-2">
+      <div id="messages-content" class="pb-4">
+        <div id="messages-list" class="space-y-1.5">
           <!-- Messages will be loaded here -->
         </div>
       </div>
     </div>
 
     <!-- Notifications Section -->
-    <div class="glass rounded-3xl shadow-2xl mb-3 sm:mb-4 overflow-hidden">
-      <button onclick="toggleSection('notifications')" class="w-full text-left p-4 sm:p-6 flex justify-between items-center transition-all hover:bg-white/10">
-        <div class="flex-1 min-w-0">
-          <h2 class="text-lg sm:text-xl font-semibold text-white">Notifications</h2>
-          <p class="text-xs sm:text-sm text-white/70 mt-1"><span id="notifications-count">0</span> items</p>
+    <div class="border-b border-gray-200 dark:border-gray-800 mb-4 transition-colors">
+      <button onclick="toggleSection('notifications')" class="w-full text-left py-3 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors rounded-lg">
+        <div class="flex-1">
+          <h2 class="text-base font-medium">Notifications</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-500 mt-0.5"><span id="notifications-count">0</span> items</p>
         </div>
-        <svg id="notifications-icon" class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 ml-2 transform transition-transform rotate-180 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg id="notifications-icon" class="w-4 h-4 transform transition-transform rotate-180 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
         </svg>
       </button>
-      <div id="notifications-content" class="px-4 sm:px-6 pb-4 sm:pb-6">
-        <div id="notifications-list" class="space-y-2">
+      <div id="notifications-content" class="pb-4">
+        <div id="notifications-list" class="space-y-1.5">
           <!-- Notifications will be loaded here -->
         </div>
       </div>
     </div>
 
     <!-- Payment Info Section -->
-    <div class="glass rounded-3xl shadow-2xl mb-3 sm:mb-4 overflow-hidden">
-      <button onclick="toggleSection('payment')" class="w-full text-left p-4 sm:p-6 flex justify-between items-center transition-all hover:bg-white/10">
-        <div class="flex-1 min-w-0">
-          <h2 class="text-lg sm:text-xl font-semibold text-white">Payment Info</h2>
-          <p class="text-xs sm:text-sm text-white/70 mt-1"><span id="payment-count">0</span> items</p>
+    <div class="border-b border-gray-200 dark:border-gray-800 mb-4 transition-colors">
+      <button onclick="toggleSection('payment')" class="w-full text-left py-3 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors rounded-lg">
+        <div class="flex-1">
+          <h2 class="text-base font-medium">Payment Info</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-500 mt-0.5"><span id="payment-count">0</span> items</p>
         </div>
-        <svg id="payment-icon" class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 ml-2 transform transition-transform rotate-180 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg id="payment-icon" class="w-4 h-4 transform transition-transform rotate-180 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
         </svg>
       </button>
-      <div id="payment-content" class="px-4 sm:px-6 pb-4 sm:pb-6">
-        <div id="payment-list" class="space-y-2">
+      <div id="payment-content" class="pb-4">
+        <div id="payment-list" class="space-y-1.5">
           <!-- Payment info will be loaded here -->
         </div>
       </div>
     </div>
 
     <!-- Service Requests Section -->
-    <div class="glass rounded-3xl shadow-2xl mb-3 sm:mb-4 overflow-hidden">
-      <button onclick="toggleSection('requests')" class="w-full text-left p-4 sm:p-6 flex justify-between items-center transition-all hover:bg-white/10">
-        <div class="flex-1 min-w-0">
-          <h2 class="text-lg sm:text-xl font-semibold text-white">Service Requests</h2>
-          <p class="text-xs sm:text-sm text-white/70 mt-1"><span id="requests-count">0</span> items</p>
+    <div class="border-b border-gray-200 dark:border-gray-800 mb-4 transition-colors">
+      <button onclick="toggleSection('requests')" class="w-full text-left py-3 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors rounded-lg">
+        <div class="flex-1">
+          <h2 class="text-base font-medium">Service Requests</h2>
+          <p class="text-sm text-gray-500 dark:text-gray-500 mt-0.5"><span id="requests-count">0</span> items</p>
         </div>
-        <svg id="requests-icon" class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 ml-2 transform transition-transform rotate-180 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg id="requests-icon" class="w-4 h-4 transform transition-transform rotate-180 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
         </svg>
       </button>
-      <div id="requests-content" class="px-4 sm:px-6 pb-4 sm:pb-6">
-        <div id="requests-list" class="space-y-2">
+      <div id="requests-content" class="pb-4">
+        <div id="requests-list" class="space-y-1.5">
           <!-- Service requests will be loaded here -->
         </div>
-        <div id="requests-table" class="mt-4">
+        <div id="requests-table" class="mt-2">
           <!-- Table data will be loaded here -->
         </div>
       </div>
     </div>
 
     <!-- Footer -->
-    <div class="text-center text-white/60 text-xs sm:text-sm mt-6 sm:mt-8 pb-4 space-y-1">
-      <p class="text-white/50">Last updated: <span id="last-updated">Loading...</span></p>
-      <p>&copy; 2026 <a href="https://github.com/nulljosh/selfserve" target="_blank" class="text-white hover:text-white/80 underline">BC Self-Serve Scraper v1.5.1</a></p>
+    <div class="text-center text-gray-600 dark:text-gray-600 text-xs mt-8 pb-4 space-y-1 transition-colors">
+      <p class="text-gray-500 dark:text-gray-700">Last updated: <span id="last-updated">Loading...</span></p>
+      <p>&copy; 2026 <a href="https://github.com/nulljosh/selfserve" target="_blank" class="text-gray-500 dark:text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">v1.5.1</a></p>
     </div>
   </div>
 
   <script>
+    // Dark mode toggle
+    function toggleDarkMode() {
+      const html = document.documentElement;
+      const isDark = html.classList.toggle('dark');
+      localStorage.setItem('darkMode', isDark ? 'dark' : 'light');
+    }
+
+    // Load dark mode preference
+    if (localStorage.getItem('darkMode') === 'light') {
+      document.documentElement.classList.remove('dark');
+    }
+
     function toggleSection(section) {
       const content = document.getElementById(`${section}-content`);
       const icon = document.getElementById(`${section}-icon`);
@@ -154,11 +165,11 @@
           const messagesList = document.getElementById('messages-list');
 
           if (messages.length === 0) {
-            messagesList.innerHTML = '<p class="text-sm sm:text-base text-white/50">No messages</p>';
+            messagesList.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-600">No messages</p>';
           } else {
             messagesList.innerHTML = messages.map(msg => {
               const isDate = msg.match(/^\d{4} \/ [A-Z]{3} \/ \d{2}/);
-              return `<div class="p-2 sm:p-3 text-sm sm:text-base glass-dark rounded-2xl ${isDate ? 'font-semibold text-white' : 'ml-2 sm:ml-4 text-white/80'}">${msg}</div>`;
+              return `<div class="text-sm py-1 ${isDate ? 'text-gray-900 dark:text-white font-medium mt-2' : 'text-gray-600 dark:text-gray-400 ml-4'}">${msg}</div>`;
             }).join('');
           }
         }
@@ -178,10 +189,10 @@
           const notificationsList = document.getElementById('notifications-list');
 
           if (notifications.length === 0 || notifications.some(n => n.includes('no notifications'))) {
-            notificationsList.innerHTML = '<p class="text-gray-500">No notifications at this time</p>';
+            notificationsList.innerHTML = '<p class="text-gray-500 dark:text-gray-500">No notifications at this time</p>';
           } else {
             notificationsList.innerHTML = notifications.map(msg =>
-              `<div class="p-3 bg-gray-50 rounded">${msg}</div>`
+              `<div class="p-3 bg-gray-100 dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100">${msg}</div>`
             ).join('');
           }
         }
@@ -201,10 +212,10 @@
           const paymentList = document.getElementById('payment-list');
 
           if (payment.length === 0) {
-            paymentList.innerHTML = '<p class="text-gray-500">No payment information</p>';
+            paymentList.innerHTML = '<p class="text-gray-500 dark:text-gray-500">No payment information</p>';
           } else {
             paymentList.innerHTML = payment.map(msg =>
-              `<div class="p-3 bg-gray-50 rounded">${msg}</div>`
+              `<div class="p-3 bg-gray-100 dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100">${msg}</div>`
             ).join('');
           }
         }
@@ -224,19 +235,19 @@
           const requestsList = document.getElementById('requests-list');
 
           if (requests.length === 0) {
-            requestsList.innerHTML = '<p class="text-gray-500">No service requests</p>';
+            requestsList.innerHTML = '<p class="text-gray-500 dark:text-gray-500">No service requests</p>';
           } else {
             requestsList.innerHTML = requests.map(msg =>
-              `<div class="p-3 bg-gray-50 rounded">${msg}</div>`
+              `<div class="p-3 bg-gray-100 dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100">${msg}</div>`
             ).join('');
           }
 
           // Load table data if available
           if (data.sections['Service Requests'].tableData && data.sections['Service Requests'].tableData.length > 0) {
             const tableDiv = document.getElementById('requests-table');
-            tableDiv.innerHTML = '<h3 class="font-semibold mb-2">Details:</h3>' +
+            tableDiv.innerHTML = '<h3 class="font-semibold mb-2 text-gray-900 dark:text-white">Details:</h3>' +
               data.sections['Service Requests'].tableData.map(row =>
-                `<div class="p-3 bg-blue-50 rounded border border-blue-200">${row}</div>`
+                `<div class="p-3 bg-blue-50 dark:bg-blue-950 rounded border border-blue-200 dark:border-blue-900 text-gray-900 dark:text-gray-100">${row}</div>`
               ).join('');
           }
         }

@@ -10,6 +10,11 @@
 
 ---
 
+- illegible
+- figure out css
+- dark mode toggle top right corner
+- git commit and push 
+
 ## Next Features (Prioritized)
 
 ### P1 - High Priority
