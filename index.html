@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BC Self-Serve Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-dvh p-4 sm:p-8">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
+      <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Self Serve</h1>
+    </div>
+
+    <!-- Messages Section -->
+    <div class="bg-white rounded-lg shadow-sm mb-3 sm:mb-4">
+      <button onclick="toggleSection('messages')" class="w-full text-left p-4 sm:p-6 flex justify-between items-center active:bg-gray-50 transition-colors">
+        <div class="flex-1 min-w-0">
+          <h2 class="text-lg sm:text-xl font-semibold text-gray-900">Messages</h2>
+          <p class="text-xs sm:text-sm text-gray-600 mt-1"><span id="messages-count">0</span> messages</p>
+        </div>
+        <svg id="messages-icon" class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 ml-2 transform transition-transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+      <div id="messages-content" class="px-4 sm:px-6 pb-4 sm:pb-6">
+        <div id="messages-list" class="space-y-2">
+          <!-- Messages will be loaded here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Notifications Section -->
+    <div class="bg-white rounded-lg shadow-sm mb-3 sm:mb-4">
+      <button onclick="toggleSection('notifications')" class="w-full text-left p-4 sm:p-6 flex justify-between items-center active:bg-gray-50 transition-colors">
+        <div class="flex-1 min-w-0">
+          <h2 class="text-lg sm:text-xl font-semibold text-gray-900">Notifications</h2>
+          <p class="text-xs sm:text-sm text-gray-600 mt-1"><span id="notifications-count">0</span> items</p>
+        </div>
+        <svg id="notifications-icon" class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 ml-2 transform transition-transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+      <div id="notifications-content" class="px-4 sm:px-6 pb-4 sm:pb-6">
+        <div id="notifications-list" class="space-y-2">
+          <!-- Notifications will be loaded here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Info Section -->
+    <div class="bg-white rounded-lg shadow-sm mb-3 sm:mb-4">
+      <button onclick="toggleSection('payment')" class="w-full text-left p-4 sm:p-6 flex justify-between items-center active:bg-gray-50 transition-colors">
+        <div class="flex-1 min-w-0">
+          <h2 class="text-lg sm:text-xl font-semibold text-gray-900">Payment Info</h2>
+          <p class="text-xs sm:text-sm text-gray-600 mt-1"><span id="payment-count">0</span> items</p>
+        </div>
+        <svg id="payment-icon" class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 ml-2 transform transition-transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+      <div id="payment-content" class="px-4 sm:px-6 pb-4 sm:pb-6">
+        <div id="payment-list" class="space-y-2">
+          <!-- Payment info will be loaded here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Service Requests Section -->
+    <div class="bg-white rounded-lg shadow-sm mb-3 sm:mb-4">
+      <button onclick="toggleSection('requests')" class="w-full text-left p-4 sm:p-6 flex justify-between items-center active:bg-gray-50 transition-colors">
+        <div class="flex-1 min-w-0">
+          <h2 class="text-lg sm:text-xl font-semibold text-gray-900">Service Requests</h2>
+          <p class="text-xs sm:text-sm text-gray-600 mt-1"><span id="requests-count">0</span> items</p>
+        </div>
+        <svg id="requests-icon" class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 ml-2 transform transition-transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+      <div id="requests-content" class="px-4 sm:px-6 pb-4 sm:pb-6">
+        <div id="requests-list" class="space-y-2">
+          <!-- Service requests will be loaded here -->
+        </div>
+        <div id="requests-table" class="mt-4">
+          <!-- Table data will be loaded here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="text-center text-gray-500 text-xs sm:text-sm mt-6 sm:mt-8 pb-4 space-y-1">
+      <p class="text-gray-400">Last updated: <span id="last-updated">Loading...</span></p>
+      <p>&copy; 2026 <a href="https://github.com/nulljosh/selfserve" target="_blank" class="text-blue-600 hover:underline active:text-blue-800">BC Self-Serve Scraper v1.5.0</a></p>
+    </div>
+  </div>
+
+  <script>
+    function toggleSection(section) {
+      const content = document.getElementById(`${section}-content`);
+      const icon = document.getElementById(`${section}-icon`);
+
+      if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        icon.classList.add('rotate-180');
+      } else {
+        content.classList.add('hidden');
+        icon.classList.remove('rotate-180');
+      }
+    }
+
+    async function loadLatestData() {
+      try {
+        // Get latest results from API
+        const response = await fetch('/api/latest');
+        const result = await response.json();
+        const data = result.data;
+
+        // Update timestamp (both locations)
+        const lastUpdated = new Date(data.timestamp).toLocaleString();
+        document.querySelectorAll('#last-updated').forEach(el => {
+          el.textContent = lastUpdated;
+        });
+
+        // Load Messages
+        if (data.sections.Messages && data.sections.Messages.allText) {
+          const messages = data.sections.Messages.allText.filter(msg =>
+            !msg.includes('Skip to') &&
+            !msg.includes('Accessibility') &&
+            !msg.includes('Terms of Use') &&
+            !msg.includes('logged out') &&
+            msg.trim().length > 0 &&
+            !msg.match(/^(Notifications|Service Requests|Monthly Reports|Payment Info|Employment Plans|Account Info)$/)
+          );
+
+          document.getElementById('messages-count').textContent = messages.length;
+          const messagesList = document.getElementById('messages-list');
+
+          if (messages.length === 0) {
+            messagesList.innerHTML = '<p class="text-sm sm:text-base text-gray-500">No messages</p>';
+          } else {
+            messagesList.innerHTML = messages.map(msg => {
+              const isDate = msg.match(/^\d{4} \/ [A-Z]{3} \/ \d{2}/);
+              return `<div class="p-2 sm:p-3 text-sm sm:text-base bg-gray-50 rounded ${isDate ? 'font-semibold text-blue-600' : 'ml-2 sm:ml-4'}">${msg}</div>`;
+            }).join('');
+          }
+        }
+
+        // Load Notifications
+        if (data.sections.Notifications && data.sections.Notifications.allText) {
+          const notifications = data.sections.Notifications.allText.filter(msg =>
+            !msg.includes('Skip to') &&
+            !msg.includes('Accessibility') &&
+            !msg.includes('Terms of Use') &&
+            !msg.includes('logged out') &&
+            msg.trim().length > 0 &&
+            !msg.match(/^(Notifications|Service Requests|Monthly Reports|Payment Info|Employment Plans|Account Info)$/)
+          );
+
+          document.getElementById('notifications-count').textContent = notifications.length;
+          const notificationsList = document.getElementById('notifications-list');
+
+          if (notifications.length === 0 || notifications.some(n => n.includes('no notifications'))) {
+            notificationsList.innerHTML = '<p class="text-gray-500">No notifications at this time</p>';
+          } else {
+            notificationsList.innerHTML = notifications.map(msg =>
+              `<div class="p-3 bg-gray-50 rounded">${msg}</div>`
+            ).join('');
+          }
+        }
+
+        // Load Payment Info
+        if (data.sections['Payment Info'] && data.sections['Payment Info'].allText) {
+          const payment = data.sections['Payment Info'].allText.filter(msg =>
+            !msg.includes('Skip to') &&
+            !msg.includes('Accessibility') &&
+            !msg.includes('Terms of Use') &&
+            !msg.includes('logged out') &&
+            msg.trim().length > 0 &&
+            !msg.match(/^(Notifications|Service Requests|Monthly Reports|Payment Info|Employment Plans|Account Info)$/)
+          );
+
+          document.getElementById('payment-count').textContent = payment.length;
+          const paymentList = document.getElementById('payment-list');
+
+          if (payment.length === 0) {
+            paymentList.innerHTML = '<p class="text-gray-500">No payment information</p>';
+          } else {
+            paymentList.innerHTML = payment.map(msg =>
+              `<div class="p-3 bg-gray-50 rounded">${msg}</div>`
+            ).join('');
+          }
+        }
+
+        // Load Service Requests
+        if (data.sections['Service Requests'] && data.sections['Service Requests'].allText) {
+          const requests = data.sections['Service Requests'].allText.filter(msg =>
+            !msg.includes('Skip to') &&
+            !msg.includes('Accessibility') &&
+            !msg.includes('Terms of Use') &&
+            !msg.includes('logged out') &&
+            msg.trim().length > 0 &&
+            !msg.match(/^(Notifications|Service Requests|Monthly Reports|Payment Info|Employment Plans|Account Info)$/)
+          );
+
+          document.getElementById('requests-count').textContent = requests.length;
+          const requestsList = document.getElementById('requests-list');
+
+          if (requests.length === 0) {
+            requestsList.innerHTML = '<p class="text-gray-500">No service requests</p>';
+          } else {
+            requestsList.innerHTML = requests.map(msg =>
+              `<div class="p-3 bg-gray-50 rounded">${msg}</div>`
+            ).join('');
+          }
+
+          // Load table data if available
+          if (data.sections['Service Requests'].tableData && data.sections['Service Requests'].tableData.length > 0) {
+            const tableDiv = document.getElementById('requests-table');
+            tableDiv.innerHTML = '<h3 class="font-semibold mb-2">Details:</h3>' +
+              data.sections['Service Requests'].tableData.map(row =>
+                `<div class="p-3 bg-blue-50 rounded border border-blue-200">${row}</div>`
+              ).join('');
+          }
+        }
+
+      } catch (error) {
+        console.error('Error loading data:', error);
+        alert('Error loading data. Make sure you have run the scraper first.');
+      }
+    }
+
+    // Load data on page load
+    loadLatestData();
+
+    // Auto-refresh every 30 seconds
+    setInterval(loadLatestData, 30000);
+  </script>
+</body>
+</html>

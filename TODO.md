@@ -1,5 +1,124 @@
 # TODO - BC Self-Serve Scraper
 
+## Current Status: v1.5.0 ✅
+
+**All 4 sections working:**
+- ✅ Notifications
+- ✅ Messages (10 found)
+- ✅ Payment Info
+- ✅ Service Requests (1 active: "Shelter Update" from Jan 08)
+
+---
+
+## Next Features (Prioritized)
+
+### P1 - High Priority
+
+#### 1. Improve Message Parsing
+**Current:** Only scrapes message titles and dates
+**Want:** Click into each message and get full content
+
+**Implementation:**
+- After getting messages list, click each one
+- Extract full message body
+- Parse sender, date, subject, body separately
+- Save structured JSON:
+  ```json
+  {
+    "id": "msg-123",
+    "date": "2026-01-06",
+    "subject": "Information Required",
+    "body": "Full message text here...",
+    "read": true/false
+  }
+  ```
+
+**Benefits:**
+- See full message content without logging in
+- Search through messages
+- Track read/unread status
+
+---
+
+#### 2. CLI Tool (`ss` command)
+**Goal:** Quick command-line access to data
+
+**Commands:**
+```bash
+ss messages              # List all messages
+ss messages 1            # View specific message
+ss notifications         # Check notifications
+ss payment               # View payment info
+ss requests              # View service requests
+ss check                 # Run scraper now
+ss --help                # Show help
+```
+
+**Implementation:**
+- Create `bin/ss` executable
+- Parse command + args
+- Read latest results JSON
+- Pretty-print output with colors
+
+**Installation:**
+```bash
+npm link
+# Now 'ss' command available globally
+```
+
+---
+
+### P2 - Medium Priority
+
+#### 3. Push Notifications
+**Goal:** Get notified of new messages without checking manually
+
+**Options:**
+- **Pushover** (easiest, $5 one-time)
+- **Twilio SMS** (pay per message)
+- **Email** (free, but might go to spam)
+- **Webhook** (Discord, Slack, custom)
+
+**Implementation:**
+- Track previous results
+- Compare with new scrape
+- If new message found, send notification
+- Run on cron (every hour)
+
+---
+
+#### 4. Better Message Display in Dashboard
+**Improvements:**
+- Show newest messages first (chronological)
+- Highlight unread messages
+- Click to expand full message content
+- Mark as read/unread
+- Filter by date range
+
+---
+
+### P3 - Nice to Have
+
+- [ ] Search functionality across all sections
+- [ ] Export to CSV/PDF
+- [ ] Historical tracking (store all past scrapes)
+- [ ] Email digest (daily/weekly summary)
+- [ ] Mobile-friendly dashboard
+- [ ] Dark mode for dashboard
+- [ ] Desktop app (Electron wrapper)
+
+---
+
+## Technical Debt
+
+- [ ] Clean up old result files (auto-delete after 30 days)
+- [ ] Add better error messages in dashboard when JSON load fails
+- [ ] Optimize bundle size (Tailwind CDN → local build)
+- [ ] Add tests for message parsing
+- [ ] Document API endpoints in README
+
+---
+
 ## KEY DISCOVERY - Jan 16, 2026 (Network Analysis)
 
 **FOUND THE BUG!** Network traffic analysis revealed the exact issue:
@@ -14,193 +133,45 @@
 5. ❌ All subsequent requests get `?SMSESSION=NO` parameter
 6. ❌ Everything redirects (302) back to login
 
-**Root Cause:** The site has an automatic session timeout/signout bug that fires immediately after successful login. This is a legacy ASP.NET session management issue with their SiteMinder (SM) configuration.
+**Root Cause:** The site has an automatic session timeout/signout bug that fires immediately after successful login. This is a legacy ASP.NET session management issue with their SiteMinder (SM) configuration (circa 2005-2008, ~18 years old).
 
-**Solution:** Re-login before scraping each section, or stay on the landing page after login without navigation.
+**Solution:** Re-login before scraping each section with 20-second delays to avoid rate limiting.
 
-## Progress Checklist (71% Complete)
+---
 
-### ✅ What's Working (40%)
-- ✅ Node.js + Puppeteer setup
-- ✅ GitHub repo with proper .gitignore
-- ✅ Automated headless browser
-- ✅ Navigate to homepage
-- ✅ Click "Sign in" button
-- ✅ Find BCeID login form
-- ✅ Clear pre-filled form fields
-- ✅ Type username & password
-- ✅ Submit login form
-- ✅ Detect login errors
-- ✅ Retry logic (5 attempts)
-- ✅ **LOGIN SUCCEEDS** (usually attempt 2-3)
-- ✅ Save 4 cookies
-- ✅ JSON output files
-- ✅ Screenshot capture
-- ✅ Express API scaffolded
-- ✅ npm scripts (test, start, api)
-- ✅ Runs fully headless
+## Completed (v1.5.0 - Jan 16, 2026)
 
-### ❌ What's Broken (60%)
-- ❌ **Navigate to `/Auth` → KICKED BACK TO LOGIN**
-- ❌ **Navigate to `/Auth/Messages` → KICKED BACK TO LOGIN**
-- ❌ **Navigate to `/Auth/PaymentInfo` → KICKED BACK TO LOGIN**
-- ❌ **Navigate to `/Auth/ServiceRequests` → KICKED BACK TO LOGIN**
-- ❌ Extract notifications (blocked by sessions)
-- ❌ Extract messages (blocked by sessions)
-- ❌ Extract payment info (blocked by sessions)
-- ❌ Extract service requests (blocked by sessions)
-- ❌ Monthly reports scraping
-- ❌ Employment plans scraping
-- ❌ Account info scraping
+- [x] Fix session timeout bug with re-login strategy
+- [x] Successfully scrape all 4 sections
+- [x] Add 20s delays between sections to avoid rate limiting
+- [x] Improve error handling and rate limit detection
+- [x] Create test suite with auto-grading
+- [x] Add comprehensive README with API docs
+- [x] Create web dashboard (index.html)
+- [x] Add SKILL.md reference guide
+- [x] Tag v1.0.0 and push to GitHub
+- [x] All sections working (Notifications, Messages, Payment, Service Requests)
 
-**Root Cause:** BC gov backend doesn't maintain sessions even with valid cookies. Not our bug - affects manual users too (especially mobile).
+---
 
-## The Problem
+## Completed (v1.0.0 - Jan 16, 2026)
 
-**What's happening:**
-1. We successfully log in to BCeID (`logon7.gov.bc.ca`)
-2. BCeID redirects back to `myselfserve.gov.bc.ca`
-3. We save 4 cookies from the session
-4. We try to navigate to `/Auth/Messages` or any protected page
-5. **BC gov immediately kicks us back to the login page**
-6. Even though we have valid cookies from 2 seconds ago
+- [x] Network debugging tool (network-debug.js)
+- [x] Document session bug in TODO.md
+- [x] Build Express API with /check, /status, /health endpoints
+- [x] Add countdown timer for wait periods
+- [x] Navigate to about:blank between sections
+- [x] Update package.json to v1.0.0
 
-**Why it happens:**
-- BC government's session management is broken/strict
-- Cookies aren't being validated properly on protected routes
-- Sessions expire on page navigation (even manual users have this issue)
-- Likely a backend configuration problem with their authentication middleware
+---
 
-## Potential Fixes (Easiest to Hardest)
+## Known Limitations
 
-### 1. Stay on Same Page After Login (EASIEST)
-- Don't navigate to different URLs
-- After login, check what page we land on
-- If it has data, scrape it there
-- Use browser console/network tab to find API endpoints
-- Call APIs directly instead of navigating
+- No real-time updates (must run scraper manually or via cron)
+- BC gov rate limits rapid logins (20s delays required)
+- Session bug is on BC's side (can't fix their 18-year-old code)
+- Message content requires clicking into each message (not implemented yet)
 
-### 2. Re-Login for Each Section
-- Log in once
-- Scrape Notifications
-- Log out and log back in
-- Scrape Messages
-- Repeat for each section
-- Inefficient but might work
+---
 
-### 3. Inspect Network Traffic
-- Use browser DevTools to watch what the site does manually
-- Find the actual API calls for data
-- Bypass the navigation entirely
-- Call the API endpoints directly with our cookies
-
-### 4. Single Page Scraping
-- After login, stay on landing page
-- Use JavaScript to click tabs/sections without page navigation
-- Scrape data as it loads dynamically
-- Might work if tabs use AJAX instead of full page loads
-
-### 5. Cookie Domain Investigation
-- Check if cookies are set for wrong domain
-- BC might be using `myselfserve.gov.bc.ca` but redirecting through `logon7.gov.bc.ca`
-- Try setting cookies for both domains
-- Check cookie `SameSite`, `Secure`, `Path` attributes
-
-### 6. Session Token Extraction
-- Find where BC stores the actual session token
-- Might be in localStorage, sessionStorage, or hidden form field
-- Extract and manually include in requests
-
-### 7. Reverse Engineer Their JS
-- Look at the site's JavaScript files
-- Find how they maintain sessions
-- Replicate their exact authentication flow
-
-### 8. Contact BC Gov IT (HARDEST/POINTLESS)
-- Report the session bug
-- Wait 5-10 business years for response
-- They probably won't fix it
-
-## Current Status (v1.0.1)
-- ✓ Automated headless login (working with retries)
-- ✓ Multi-section scraping structure
-- ✓ JSON output
-- ✓ Express API endpoints
-- ✗ Session persistence (BC gov backend issue)
-- ✗ Actually retrieving section data
-
-## Blocking Issues
-
-### 1. BC Government Session Expiration
-**Problem:** Login succeeds but sessions expire when navigating to protected pages
-**Root Cause:** BC government backend - sessions not persisting properly
-**Impact:** Can't scrape notifications, messages, payment info
-**Possible Solutions:**
-- [ ] Re-login before each section (inefficient but may work)
-- [ ] Investigate cookie domains and paths
-- [ ] Try staying on same page and using API calls instead
-- [ ] Contact BC gov IT (lol)
-
-### 2. Form Field Pre-filling
-**Problem:** First login attempt fails with "incorrect credentials"
-**Status:** Partially fixed with triple-clear but still happening sometimes
-**Current:** Succeeds on retry #2-3
-**Need:** Better field clearing or wait for page load
-
-## Features to Complete
-
-### Core Scraping (Priority 1)
-- [ ] Fix session persistence to actually retrieve data
-- [ ] Extract notifications from `/Auth`
-- [ ] Extract messages from `/Auth/Messages`
-- [ ] Extract payment info from `/Auth/PaymentInfo`
-- [ ] Extract service requests from `/Auth/ServiceRequests`
-- [ ] Parse structured data (not just grab all <li> elements)
-
-### Additional Sections (Priority 2)
-- [ ] Monthly Reports scraping
-- [ ] Employment Plans scraping
-- [ ] Account Info scraping
-
-### Improvements (Priority 3)
-- [ ] Interactive section selector (ask user which sections to check)
-- [ ] Better notification parsing (detect actual notifications vs nav items)
-- [ ] Payment status change detection
-- [ ] Historical data tracking
-- [ ] Headless mode works on first try (no retries needed)
-
-### Notifications & Alerts (Priority 4)
-- [ ] Twilio SMS integration
-- [ ] Pushover push notifications
-- [ ] Email alerts
-- [ ] Webhook support
-- [ ] Only notify on changes
-
-### Deployment (Priority 5)
-- [ ] Vercel serverless deployment
-- [ ] Cron job setup for automated checks
-- [ ] Environment variable configuration
-- [ ] Production error handling
-- [ ] Logging system (Winston/Pino)
-
-## Known Workarounds
-
-1. **Session Expiration**: Run scraper with `keepOpen: true` and manually navigate to verify what's happening
-2. **Login Retries**: Already implemented (5 attempts)
-3. **Field Clearing**: Triple-clear implemented but may need more robust solution
-
-## Nice to Have
-
-- [ ] Web UI for manual checks
-- [ ] Docker containerization
-- [ ] Multiple account support
-- [ ] Proxy rotation (if BC starts rate limiting)
-- [ ] CAPTCHA handling (not currently needed)
-- [ ] 2FA support (if BC adds it)
-
-## Questions for User
-
-1. What specific data do you want from each section?
-2. Should we re-login for each section as workaround?
-3. Priority: fix session vs add more features?
-4. Deploy timeline?
+**Next Session:** Implement message parsing improvements and/or CLI tool

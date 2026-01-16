@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
 const { checkAllSections } = require('./scraper');
 
 const app = express();
@@ -8,27 +10,60 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Serve static files (dashboard, results, screenshots)
+app.use(express.static(__dirname));
+
 let lastCheckResult = null;
 let isChecking = false;
 
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.json({
     status: 'ok',
     message: 'BC Self-Serve Scraper API',
     description: 'Scrapes all sections: Notifications, Messages, Payment Info, Service Requests',
     endpoints: {
-      '/check': 'Trigger a new scrape of all sections',
-      '/status': 'Get last check results',
-      '/health': 'Health check'
+      '/': 'Dashboard UI',
+      '/api': 'API info',
+      '/api/check': 'Trigger a new scrape of all sections',
+      '/api/status': 'Get last check results',
+      '/api/latest': 'Get latest results file',
+      '/api/health': 'Health check'
     }
   });
 });
 
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
 });
 
-app.get('/status', (req, res) => {
+app.get('/api/latest', (req, res) => {
+  try {
+    // Find latest results file
+    const files = fs.readdirSync(__dirname)
+      .filter(f => f.startsWith('results-') && f.endsWith('.json'))
+      .map(f => ({
+        name: f,
+        time: fs.statSync(path.join(__dirname, f)).mtime.getTime()
+      }))
+      .sort((a, b) => b.time - a.time);
+
+    if (files.length === 0) {
+      return res.status(404).json({ error: 'No results files found. Run the scraper first.' });
+    }
+
+    const latestFile = files[0].name;
+    const data = JSON.parse(fs.readFileSync(path.join(__dirname, latestFile), 'utf8'));
+
+    res.json({
+      file: latestFile,
+      data: data
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/status', (req, res) => {
   if (!lastCheckResult) {
     return res.json({
       checked: false,
@@ -39,7 +74,7 @@ app.get('/status', (req, res) => {
   res.json(lastCheckResult);
 });
 
-app.get('/check', async (req, res) => {
+app.get('/api/check', async (req, res) => {
   if (isChecking) {
     return res.status(429).json({
       error: 'Check already in progress',
