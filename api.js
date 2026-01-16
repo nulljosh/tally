@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { checkPaymentStatus } = require('./scraper');
+const { checkAllSections } = require('./scraper');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,9 +14,10 @@ let isChecking = false;
 app.get('/', (req, res) => {
   res.json({
     status: 'ok',
-    message: 'BC Self-Serve Payment Checker API',
+    message: 'BC Self-Serve Scraper API',
+    description: 'Scrapes all sections: Notifications, Messages, Payment Info, Service Requests',
     endpoints: {
-      '/check': 'Trigger a new payment check',
+      '/check': 'Trigger a new scrape of all sections',
       '/status': 'Get last check results',
       '/health': 'Health check'
     }
@@ -49,8 +50,8 @@ app.get('/check', async (req, res) => {
   isChecking = true;
 
   try {
-    console.log('[API] Starting payment check...');
-    const result = await checkPaymentStatus();
+    console.log('[API] Starting check for all sections...');
+    const result = await checkAllSections({ headless: true });
 
     lastCheckResult = {
       ...result,
