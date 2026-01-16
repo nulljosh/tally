@@ -5,22 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>BC Self-Serve Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+    .glass-dark {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+  </style>
 </head>
-<body class="bg-gray-50 min-h-dvh p-4 sm:p-8">
+<body class="min-h-dvh p-4 sm:p-8">
   <div class="max-w-4xl mx-auto">
     <!-- Header -->
-    <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
-      <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Self Serve</h1>
+    <div class="glass rounded-3xl shadow-2xl p-4 sm:p-6 mb-4 sm:mb-6">
+      <h1 class="text-2xl sm:text-3xl font-bold text-white">Self Serve</h1>
     </div>
 
     <!-- Messages Section -->
-    <div class="bg-white rounded-lg shadow-sm mb-3 sm:mb-4">
-      <button onclick="toggleSection('messages')" class="w-full text-left p-4 sm:p-6 flex justify-between items-center active:bg-gray-50 transition-colors">
+    <div class="glass rounded-3xl shadow-2xl mb-3 sm:mb-4 overflow-hidden">
+      <button onclick="toggleSection('messages')" class="w-full text-left p-4 sm:p-6 flex justify-between items-center transition-all hover:bg-white/10">
         <div class="flex-1 min-w-0">
-          <h2 class="text-lg sm:text-xl font-semibold text-gray-900">Messages</h2>
-          <p class="text-xs sm:text-sm text-gray-600 mt-1"><span id="messages-count">0</span> messages</p>
+          <h2 class="text-lg sm:text-xl font-semibold text-white">Messages</h2>
+          <p class="text-xs sm:text-sm text-white/70 mt-1"><span id="messages-count">0</span> messages</p>
         </div>
-        <svg id="messages-icon" class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 ml-2 transform transition-transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg id="messages-icon" class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 ml-2 transform transition-transform rotate-180 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
         </svg>
       </button>
@@ -32,13 +49,13 @@
     </div>
 
     <!-- Notifications Section -->
-    <div class="bg-white rounded-lg shadow-sm mb-3 sm:mb-4">
-      <button onclick="toggleSection('notifications')" class="w-full text-left p-4 sm:p-6 flex justify-between items-center active:bg-gray-50 transition-colors">
+    <div class="glass rounded-3xl shadow-2xl mb-3 sm:mb-4 overflow-hidden">
+      <button onclick="toggleSection('notifications')" class="w-full text-left p-4 sm:p-6 flex justify-between items-center transition-all hover:bg-white/10">
         <div class="flex-1 min-w-0">
-          <h2 class="text-lg sm:text-xl font-semibold text-gray-900">Notifications</h2>
-          <p class="text-xs sm:text-sm text-gray-600 mt-1"><span id="notifications-count">0</span> items</p>
+          <h2 class="text-lg sm:text-xl font-semibold text-white">Notifications</h2>
+          <p class="text-xs sm:text-sm text-white/70 mt-1"><span id="notifications-count">0</span> items</p>
         </div>
-        <svg id="notifications-icon" class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 ml-2 transform transition-transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg id="notifications-icon" class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 ml-2 transform transition-transform rotate-180 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
         </svg>
       </button>
@@ -50,13 +67,13 @@
     </div>
 
     <!-- Payment Info Section -->
-    <div class="bg-white rounded-lg shadow-sm mb-3 sm:mb-4">
-      <button onclick="toggleSection('payment')" class="w-full text-left p-4 sm:p-6 flex justify-between items-center active:bg-gray-50 transition-colors">
+    <div class="glass rounded-3xl shadow-2xl mb-3 sm:mb-4 overflow-hidden">
+      <button onclick="toggleSection('payment')" class="w-full text-left p-4 sm:p-6 flex justify-between items-center transition-all hover:bg-white/10">
         <div class="flex-1 min-w-0">
-          <h2 class="text-lg sm:text-xl font-semibold text-gray-900">Payment Info</h2>
-          <p class="text-xs sm:text-sm text-gray-600 mt-1"><span id="payment-count">0</span> items</p>
+          <h2 class="text-lg sm:text-xl font-semibold text-white">Payment Info</h2>
+          <p class="text-xs sm:text-sm text-white/70 mt-1"><span id="payment-count">0</span> items</p>
         </div>
-        <svg id="payment-icon" class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 ml-2 transform transition-transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg id="payment-icon" class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 ml-2 transform transition-transform rotate-180 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
         </svg>
       </button>
@@ -68,13 +85,13 @@
     </div>
 
     <!-- Service Requests Section -->
-    <div class="bg-white rounded-lg shadow-sm mb-3 sm:mb-4">
-      <button onclick="toggleSection('requests')" class="w-full text-left p-4 sm:p-6 flex justify-between items-center active:bg-gray-50 transition-colors">
+    <div class="glass rounded-3xl shadow-2xl mb-3 sm:mb-4 overflow-hidden">
+      <button onclick="toggleSection('requests')" class="w-full text-left p-4 sm:p-6 flex justify-between items-center transition-all hover:bg-white/10">
         <div class="flex-1 min-w-0">
-          <h2 class="text-lg sm:text-xl font-semibold text-gray-900">Service Requests</h2>
-          <p class="text-xs sm:text-sm text-gray-600 mt-1"><span id="requests-count">0</span> items</p>
+          <h2 class="text-lg sm:text-xl font-semibold text-white">Service Requests</h2>
+          <p class="text-xs sm:text-sm text-white/70 mt-1"><span id="requests-count">0</span> items</p>
         </div>
-        <svg id="requests-icon" class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 ml-2 transform transition-transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg id="requests-icon" class="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 ml-2 transform transition-transform rotate-180 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
         </svg>
       </button>
@@ -89,9 +106,9 @@
     </div>
 
     <!-- Footer -->
-    <div class="text-center text-gray-500 text-xs sm:text-sm mt-6 sm:mt-8 pb-4 space-y-1">
-      <p class="text-gray-400">Last updated: <span id="last-updated">Loading...</span></p>
-      <p>&copy; 2026 <a href="https://github.com/nulljosh/selfserve" target="_blank" class="text-blue-600 hover:underline active:text-blue-800">BC Self-Serve Scraper v1.5.0</a></p>
+    <div class="text-center text-white/60 text-xs sm:text-sm mt-6 sm:mt-8 pb-4 space-y-1">
+      <p class="text-white/50">Last updated: <span id="last-updated">Loading...</span></p>
+      <p>&copy; 2026 <a href="https://github.com/nulljosh/selfserve" target="_blank" class="text-white hover:text-white/80 underline">BC Self-Serve Scraper v1.5.1</a></p>
     </div>
   </div>
 
@@ -137,11 +154,11 @@
           const messagesList = document.getElementById('messages-list');
 
           if (messages.length === 0) {
-            messagesList.innerHTML = '<p class="text-sm sm:text-base text-gray-500">No messages</p>';
+            messagesList.innerHTML = '<p class="text-sm sm:text-base text-white/50">No messages</p>';
           } else {
             messagesList.innerHTML = messages.map(msg => {
               const isDate = msg.match(/^\d{4} \/ [A-Z]{3} \/ \d{2}/);
-              return `<div class="p-2 sm:p-3 text-sm sm:text-base bg-gray-50 rounded ${isDate ? 'font-semibold text-blue-600' : 'ml-2 sm:ml-4'}">${msg}</div>`;
+              return `<div class="p-2 sm:p-3 text-sm sm:text-base glass-dark rounded-2xl ${isDate ? 'font-semibold text-white' : 'ml-2 sm:ml-4 text-white/80'}">${msg}</div>`;
             }).join('');
           }
         }

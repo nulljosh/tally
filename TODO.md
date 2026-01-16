@@ -82,7 +82,25 @@ npm link
 
 ### P2 - Medium Priority
 
-#### 3. Push Notifications
+#### 3. Deploy to Vercel with Security
+**Goal:** Public dashboard but only you can access
+
+**Security Options:**
+- Add basic HTTP authentication (username/password)
+- Use Vercel password protection (Pro feature - $20/mo)
+- Add custom auth middleware (simple password in code)
+- Use environment variable for password
+
+**Implementation:**
+- Add middleware to api.js to check password
+- Set password as Vercel environment variable
+- Test locally first
+- Deploy to Vercel
+- Add auth UI (simple password prompt)
+
+---
+
+#### 4. Push Notifications
 **Goal:** Get notified of new messages without checking manually
 
 **Options:**
