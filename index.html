@@ -312,10 +312,23 @@
           // Load table data if available
           if (data.sections['Service Requests'].tableData && data.sections['Service Requests'].tableData.length > 0) {
             const tableDiv = document.getElementById('requests-table');
-            tableDiv.innerHTML = '<h3 class="font-semibold mb-2 text-gray-900 dark:text-white">Details:</h3>' +
-              data.sections['Service Requests'].tableData.map(row =>
-                `<div class="p-3 bg-blue-50 dark:bg-blue-950 rounded border border-blue-200 dark:border-blue-900 text-gray-900 dark:text-gray-100">${row}</div>`
-              ).join('');
+            const cleanedRows = data.sections['Service Requests'].tableData
+              .map(row => {
+                // Clean up formatting
+                return row
+                  .replace(/\|\s*$/g, '')  // Remove trailing pipes
+                  .replace(/\s*\|\s*/g, ' • ')  // Replace pipes with bullets
+                  .replace(/\s+/g, ' ')  // Normalize whitespace
+                  .trim();
+              })
+              .filter(row => row.length > 0);  // Remove empty rows
+
+            if (cleanedRows.length > 0) {
+              tableDiv.innerHTML = '<h3 class="font-semibold mb-2 mt-3 text-gray-900 dark:text-white">Details:</h3>' +
+                cleanedRows.map(row =>
+                  `<div class="p-3 bg-blue-50 dark:bg-blue-950 rounded border border-blue-200 dark:border-blue-900 text-gray-900 dark:text-gray-100">${row}</div>`
+                ).join('');
+            }
           }
         }
 

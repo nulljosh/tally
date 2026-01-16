@@ -2,21 +2,75 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const session = require('express-session');
 const { checkAllSections } = require('./scraper');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const DASHBOARD_PASSWORD = process.env.DASHBOARD_PASSWORD || 'hunter2';
 
 app.use(cors());
 app.use(express.json());
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'selfserve-secret-key-change-me',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+  }
+}));
 
-// Serve static files (dashboard, results, screenshots)
-app.use(express.static(__dirname));
+// Auth middleware
+const requireAuth = (req, res, next) => {
+  if (req.session.authenticated) {
+    next();
+  } else {
+    res.status(401).sendFile(path.join(__dirname, 'login.html'));
+  }
+};
+
+// Login endpoint
+app.post('/api/login', (req, res) => {
+  const { password } = req.body;
+
+  if (password === DASHBOARD_PASSWORD) {
+    req.session.authenticated = true;
+    res.json({ success: true });
+  } else {
+    res.status(401).json({ success: false, error: 'Invalid password' });
+  }
+});
+
+// Logout endpoint
+app.post('/api/logout', (req, res) => {
+  req.session.destroy();
+  res.json({ success: true });
+});
+
+// Serve static files (dashboard, results, screenshots) - protected
+app.use(express.static(__dirname, {
+  setHeaders: (res, filePath) => {
+    // Allow login.html to be accessed without auth
+    if (filePath.endsWith('login.html')) {
+      return;
+    }
+  }
+}));
 
 let lastCheckResult = null;
 let isChecking = false;
 
-app.get('/api', (req, res) => {
+// Serve dashboard or login page
+app.get('/', (req, res) => {
+  if (req.session.authenticated) {
+    res.sendFile(path.join(__dirname, 'index.html'));
+  } else {
+    res.sendFile(path.join(__dirname, 'login.html'));
+  }
+});
+
+app.get('/api', requireAuth, (req, res) => {
   res.json({
     status: 'ok',
     message: 'BC Self-Serve Scraper API',
@@ -24,6 +78,8 @@ app.get('/api', (req, res) => {
     endpoints: {
       '/': 'Dashboard UI',
       '/api': 'API info',
+      '/api/login': 'Login (POST)',
+      '/api/logout': 'Logout (POST)',
       '/api/check': 'Trigger a new scrape of all sections',
       '/api/status': 'Get last check results',
       '/api/latest': 'Get latest results file',
@@ -36,7 +92,7 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
 });
 
-app.get('/api/latest', (req, res) => {
+app.get('/api/latest', requireAuth, (req, res) => {
   try {
     // Find latest results file
     const files = fs.readdirSync(__dirname)
@@ -63,7 +119,7 @@ app.get('/api/latest', (req, res) => {
   }
 });
 
-app.get('/api/status', (req, res) => {
+app.get('/api/status', requireAuth, (req, res) => {
   if (!lastCheckResult) {
     return res.json({
       checked: false,
@@ -74,7 +130,7 @@ app.get('/api/status', (req, res) => {
   res.json(lastCheckResult);
 });
 
-app.get('/api/check', async (req, res) => {
+app.get('/api/check', requireAuth, async (req, res) => {
   if (isChecking) {
     return res.status(429).json({
       error: 'Check already in progress',
