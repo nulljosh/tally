@@ -94,20 +94,8 @@ app.get('/api/health', (req, res) => {
 
 app.get('/api/latest', requireAuth, (req, res) => {
   try {
-    // Find latest results file
-    const files = fs.readdirSync(__dirname)
-      .filter(f => f.startsWith('results-') && f.endsWith('.json'))
-      .map(f => ({
-        name: f,
-        time: fs.statSync(path.join(__dirname, f)).mtime.getTime()
-      }))
-      .sort((a, b) => b.time - a.time);
-
-    if (files.length === 0) {
-      return res.status(404).json({ error: 'No results files found. Run the scraper first.' });
-    }
-
-    const latestFile = files[0].name;
+    // Use committed results file for Vercel (serverless doesn't support fs.readdirSync well)
+    const latestFile = 'results-2026-01-16T23-06-39-292Z.json';
     const data = JSON.parse(fs.readFileSync(path.join(__dirname, latestFile), 'utf8'));
 
     res.json({
