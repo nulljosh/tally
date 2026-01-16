@@ -1,19 +1,29 @@
 # TODO - BC Self-Serve Scraper
 
-## Current Status: v1.5.0 ✅
+## Current Status: v1.5.1 ✅
 
 **All 4 sections working:**
 - ✅ Notifications
 - ✅ Messages (10 found)
-- ✅ Payment Info
+- ⚠️ Payment Info (scraper works but BC gov redesigned the page - shows redirect message)
 - ✅ Service Requests (1 active: "Shelter Update" from Jan 08)
 
 ---
 
-- illegible
-- figure out css
-- dark mode toggle top right corner
-- git commit and push 
+## Known Issues
+
+### Payment Info Section Not Loading Properly
+**Issue:** BC government redesigned MySelfServe and the Payment Info page now shows:
+> "We have recently redesigned My Self Serve and the page you are trying to access has moved. You will be re-directed to the updated MySelfServe home page in 10 seconds or click here to proceed immediately."
+
+**Impact:** Can't scrape payment info until we find the new page URL
+
+**Fix Options:**
+1. Find new Payment Info URL on redesigned site
+2. Update scraper to follow redirect and find payment section
+3. Wait for BC to fix their redirect (unlikely)
+
+--- 
 
 ## Next Features (Prioritized)
 
