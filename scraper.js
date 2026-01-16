@@ -53,10 +53,28 @@ async function attemptLogin(page, attempt = 1) {
       await new Promise(resolve => setTimeout(resolve, 3000));
     }
 
-    // Wait for login form
-    await page.waitForSelector('input[name="user"], input[id="user"]', {
-      timeout: 10000
-    });
+    // Wait for login form (longer timeout for rate limiting)
+    try {
+      await page.waitForSelector('input[name="user"], input[id="user"]', {
+        timeout: 20000
+      });
+    } catch (error) {
+      // Check if we're being rate limited or blocked
+      const currentUrl = page.url();
+      const bodyText = await page.evaluate(() => document.body.innerText).catch(() => '');
+
+      if (bodyText.toLowerCase().includes('too many') || bodyText.toLowerCase().includes('rate limit')) {
+        throw new Error('Rate limited by BC government site - wait longer between requests');
+      }
+
+      if (!currentUrl.includes('logon') && !currentUrl.includes('login')) {
+        // We might already be logged in
+        console.log('[*] Login form not found but not on login page - might already be authenticated');
+        return true;
+      }
+
+      throw new Error(`Login form not found: ${error.message}`);
+    }
 
     const usernameField = await page.$('input[name="user"], input[id="user"]');
     const passwordField = await page.$('input[name="password"], input[id="password"]');
@@ -270,20 +288,32 @@ async function checkAllSections(options = {}) {
 
       // Clear cookies and wait longer between sections to avoid rate limiting
       if (i < sections.length - 1) {
-        console.log('\n[*] Clearing session and waiting 15 seconds to avoid rate limiting...');
+        const waitTime = 20; // Increased to 20 seconds
+        console.log(`\n[*] Clearing session and waiting ${waitTime} seconds to avoid rate limiting...`);
 
         // Clear all cookies
         const cookies = await page.cookies();
-        await page.deleteCookie(...cookies);
+        if (cookies.length > 0) {
+          await page.deleteCookie(...cookies);
+        }
 
         // Clear localStorage and sessionStorage
         await page.evaluate(() => {
           localStorage.clear();
           sessionStorage.clear();
+        }).catch(() => {
+          // Ignore errors if storage is not available
         });
 
-        // Wait 15 seconds between sections
-        await new Promise(resolve => setTimeout(resolve, 15000));
+        // Navigate to a neutral page to fully clear session
+        await page.goto('about:blank').catch(() => {});
+
+        // Wait between sections (20 seconds to avoid aggressive rate limiting)
+        for (let countdown = waitTime; countdown > 0; countdown--) {
+          process.stdout.write(`\r[*] Waiting ${countdown}s... `);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        console.log('\n');
       }
     }
 

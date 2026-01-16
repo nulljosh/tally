@@ -1,11 +1,12 @@
 {
   "name": "selfserve",
-  "version": "0.5.0",
-  "description": "",
-  "main": "index.js",
+  "version": "1.0.0",
+  "description": "BC Self-Serve Portal Scraper - Automated scraping of notifications, messages, payment info, and service requests",
+  "main": "scraper.js",
   "scripts": {
     "check": "node scraper.js",
-    "test": "node scraper.js",
+    "test": "node test.js",
+    "test:scraper": "node scraper.js",
     "api": "node api.js",
     "dev": "node api.js",
     "start": "node api.js"
