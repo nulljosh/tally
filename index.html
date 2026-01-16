@@ -44,6 +44,9 @@
         <div id="messages-list" class="space-y-1.5">
           <!-- Messages will be loaded here -->
         </div>
+        <a href="https://myselfserve.gov.bc.ca/Auth/Messages" target="_blank" class="inline-block mt-3 text-sm text-blue-600 dark:text-blue-400 hover:underline">
+          View on BC Self-Serve →
+        </a>
       </div>
     </div>
 
@@ -62,6 +65,9 @@
         <div id="notifications-list" class="space-y-1.5">
           <!-- Notifications will be loaded here -->
         </div>
+        <a href="https://myselfserve.gov.bc.ca/Auth" target="_blank" class="inline-block mt-3 text-sm text-blue-600 dark:text-blue-400 hover:underline">
+          View on BC Self-Serve →
+        </a>
       </div>
     </div>
 
@@ -80,6 +86,9 @@
         <div id="payment-list" class="space-y-1.5">
           <!-- Payment info will be loaded here -->
         </div>
+        <a href="https://myselfserve.gov.bc.ca/Auth/ChequeInfo" target="_blank" class="inline-block mt-3 text-sm text-blue-600 dark:text-blue-400 hover:underline">
+          View on BC Self-Serve →
+        </a>
       </div>
     </div>
 
@@ -101,6 +110,9 @@
         <div id="requests-table" class="mt-2">
           <!-- Table data will be loaded here -->
         </div>
+        <a href="https://myselfserve.gov.bc.ca/Auth/ServiceRequests" target="_blank" class="inline-block mt-3 text-sm text-blue-600 dark:text-blue-400 hover:underline">
+          View on BC Self-Serve →
+        </a>
       </div>
     </div>
 
@@ -198,25 +210,50 @@
         }
 
         // Load Payment Info
-        if (data.sections['Payment Info'] && data.sections['Payment Info'].allText) {
-          const payment = data.sections['Payment Info'].allText.filter(msg =>
-            !msg.includes('Skip to') &&
-            !msg.includes('Accessibility') &&
-            !msg.includes('Terms of Use') &&
-            !msg.includes('logged out') &&
-            msg.trim().length > 0 &&
-            !msg.match(/^(Notifications|Service Requests|Monthly Reports|Payment Info|Employment Plans|Account Info)$/)
-          );
-
-          document.getElementById('payment-count').textContent = payment.length;
+        if (data.sections['Payment Info']) {
+          const paymentData = data.sections['Payment Info'];
           const paymentList = document.getElementById('payment-list');
 
-          if (payment.length === 0) {
-            paymentList.innerHTML = '<p class="text-gray-500 dark:text-gray-500">No payment information</p>';
+          // Check if we have table data (the actual payment amounts)
+          if (paymentData.tableData && paymentData.tableData.length > 0) {
+            const tableRows = paymentData.tableData;
+
+            // Find the total amount
+            const totalRow = tableRows.find(row => row.includes('Amount:'));
+            const total = totalRow ? totalRow.match(/\$[\d,]+\.\d{2}/)?.[0] : null;
+
+            document.getElementById('payment-count').textContent = total ? '1 payment' : tableRows.length + ' items';
+
+            // Display payment details
+            const paymentHTML = tableRows.map(row => {
+              // Highlight dollar amounts
+              const hasDollar = row.includes('$');
+              const isTotal = row.includes('Amount:');
+
+              return `<div class="p-3 bg-gray-100 dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100 ${isTotal ? 'font-bold text-lg' : ''} ${hasDollar ? 'text-green-700 dark:text-green-400' : ''}">${row}</div>`;
+            }).join('');
+
+            paymentList.innerHTML = paymentHTML;
           } else {
-            paymentList.innerHTML = payment.map(msg =>
-              `<div class="p-3 bg-gray-100 dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100">${msg}</div>`
-            ).join('');
+            // Fallback to allText if no tableData
+            const payment = (paymentData.allText || []).filter(msg =>
+              !msg.includes('Skip to') &&
+              !msg.includes('Accessibility') &&
+              !msg.includes('Terms of Use') &&
+              !msg.includes('logged out') &&
+              msg.trim().length > 0 &&
+              !msg.match(/^(Notifications|Service Requests|Monthly Reports|Payment Info|Employment Plans|Account Info)$/)
+            );
+
+            document.getElementById('payment-count').textContent = payment.length + ' items';
+
+            if (payment.length === 0) {
+              paymentList.innerHTML = '<p class="text-gray-500 dark:text-gray-500">No payment information</p>';
+            } else {
+              paymentList.innerHTML = payment.map(msg =>
+                `<div class="p-3 bg-gray-100 dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100">${msg}</div>`
+              ).join('');
+            }
           }
         }
 
