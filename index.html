@@ -224,14 +224,44 @@
 
             document.getElementById('payment-count').textContent = total ? '1 payment' : tableRows.length + ' items';
 
-            // Display payment details
-            const paymentHTML = tableRows.map(row => {
-              // Highlight dollar amounts
-              const hasDollar = row.includes('$');
-              const isTotal = row.includes('Amount:');
+            // Clean and format payment details
+            const paymentHTML = tableRows
+              .filter(row => {
+                // Skip header row
+                if (row.trim() === 'Assistance') return false;
+                // Skip rows with empty values (e.g., "Name of Bank:" with no value)
+                if (row.match(/:\s*\|?\s*$/)) return false;
+                return true;
+              })
+              .map(row => {
+                // Clean up the row
+                let cleaned = row
+                  .replace(/\|\s*$/g, '')  // Remove trailing pipes
+                  .replace(/\s*\|\s*/g, ' • ')  // Replace pipes with bullets
+                  .replace(/\s+/g, ' ')  // Normalize whitespace
+                  .trim();
 
-              return `<div class="p-3 bg-gray-100 dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100 ${isTotal ? 'font-bold text-lg' : ''} ${hasDollar ? 'text-green-700 dark:text-green-400' : ''}">${row}</div>`;
-            }).join('');
+                // Highlight dollar amounts
+                const hasDollar = cleaned.includes('$');
+                const isTotal = cleaned.includes('Amount:');
+
+                // Format the row with proper styling
+                if (isTotal) {
+                  // Total amount - make it prominent
+                  const amount = cleaned.match(/\$[\d,]+\.\d{2}/)?.[0];
+                  return `<div class="p-4 bg-green-100 dark:bg-green-950 rounded border-2 border-green-500 dark:border-green-600 text-gray-900 dark:text-gray-100">
+                    <div class="text-sm text-gray-600 dark:text-gray-400">Total Payment</div>
+                    <div class="text-2xl font-bold text-green-700 dark:text-green-400">${amount}</div>
+                  </div>`;
+                } else if (hasDollar) {
+                  // Payment breakdown items
+                  return `<div class="p-3 bg-gray-100 dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-800 text-green-700 dark:text-green-400 font-medium">${cleaned}</div>`;
+                } else {
+                  // Other info
+                  return `<div class="p-3 bg-gray-100 dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100">${cleaned}</div>`;
+                }
+              })
+              .join('');
 
             paymentList.innerHTML = paymentHTML;
           } else {
