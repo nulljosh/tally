@@ -153,6 +153,58 @@ async function scrapeSection(page, sectionName, sectionUrl) {
       return { error: 'Login failed after 3 attempts' };
     }
 
+    // Special handling for Payment Info since BC redesigned their site
+    if (sectionName === 'Payment Info') {
+      console.log('[*] Trying to find Payment Info link on home page...');
+
+      // Go to authenticated home page first
+      await page.goto('https://myselfserve.gov.bc.ca/Auth', {
+        waitUntil: 'networkidle2',
+        timeout: 30000
+      });
+
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Try to find and click the Payment Info link
+      const paymentLink = await page.evaluate(() => {
+        const links = Array.from(document.querySelectorAll('a'));
+        for (const link of links) {
+          const text = link.innerText?.trim() || '';
+          if (text.toLowerCase().includes('payment info') || text.toLowerCase().includes('payment information')) {
+            return link.href;
+          }
+        }
+        return null;
+      });
+
+      if (paymentLink) {
+        console.log(`[*] Found Payment Info link: ${paymentLink}`);
+        sectionUrl = paymentLink;
+      } else {
+        console.log('[!] Could not find Payment Info link, trying alternative URLs...');
+        // Try common alternatives
+        const alternatives = [
+          'https://myselfserve.gov.bc.ca/Auth/Payment',
+          'https://myselfserve.gov.bc.ca/Auth/Payments',
+          'https://myselfserve.gov.bc.ca/Payment',
+          'https://myselfserve.gov.bc.ca/PaymentInfo'
+        ];
+
+        for (const altUrl of alternatives) {
+          console.log(`[*] Trying ${altUrl}...`);
+          await page.goto(altUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
+          const url = page.url();
+          if (!url.includes('PageNotFound') && !url.includes('404')) {
+            console.log(`[+] Found working URL: ${url}`);
+            sectionUrl = url;
+            break;
+          }
+        }
+      }
+    }
+
     // After successful login, immediately navigate to the section
     // Don't give the site time to auto-logout
     console.log(`[*] Navigating to ${sectionUrl}...`);
@@ -274,7 +326,7 @@ async function checkAllSections(options = {}) {
     const sections = [
       { name: 'Notifications', url: 'https://myselfserve.gov.bc.ca/Auth' },
       { name: 'Messages', url: 'https://myselfserve.gov.bc.ca/Auth/Messages' },
-      { name: 'Payment Info', url: 'https://myselfserve.gov.bc.ca/Auth/PaymentInfo' },
+      { name: 'Payment Info', url: 'https://myselfserve.gov.bc.ca/Auth/ChequeInfo' }, // Updated after BC redesign
       { name: 'Service Requests', url: 'https://myselfserve.gov.bc.ca/Auth/ServiceRequests' }
     ];
 
