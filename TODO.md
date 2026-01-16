@@ -1,5 +1,23 @@
 # TODO - BC Self-Serve Scraper
 
+## KEY DISCOVERY - Jan 16, 2026 (Network Analysis)
+
+**FOUND THE BUG!** Network traffic analysis revealed the exact issue:
+
+1. ✅ Login to BCeID succeeds properly
+2. ✅ BCeID redirects back to myselfserve.gov.bc.ca
+3. ❌ **Site IMMEDIATELY calls these endpoints:**
+   - `GET /Auth/SessionTimeout`
+   - `GET /Auth/SessionTimeout/ShowError`
+   - `GET /Auth/Signout`
+4. ❌ **Session cookie gets cleared:** `ASP.NET_SessionId=; path=/; secure`
+5. ❌ All subsequent requests get `?SMSESSION=NO` parameter
+6. ❌ Everything redirects (302) back to login
+
+**Root Cause:** The site has an automatic session timeout/signout bug that fires immediately after successful login. This is a legacy ASP.NET session management issue with their SiteMinder (SM) configuration.
+
+**Solution:** Re-login before scraping each section, or stay on the landing page after login without navigation.
+
 ## Progress Checklist (71% Complete)
 
 ### ✅ What's Working (40%)
