@@ -1,27 +1,37 @@
 # TODO - BC Self-Serve Scraper
 
-## Current Status: v1.5.1 ✅
+## Current Status: v1.7.0 ✅
 
 **All 4 sections working:**
 - ✅ Notifications
 - ✅ Messages (10 found)
-- ⚠️ Payment Info (scraper works but BC gov redesigned the page - shows redirect message)
+- ✅ Payment Info (FIXED - new URL: `/Auth/ChequeInfo`, shows $1,060 total)
 - ✅ Service Requests (1 active: "Shelter Update" from Jan 08)
+
+**Dashboard:**
+- ✅ Password protected (hunter2)
+- ✅ Dark/light mode toggle
+- ✅ Deployed to Vercel: https://selfserve-c2cldmw48-nulljosh-9577s-projects.vercel.app
+- ✅ Mobile-first responsive design
+- ✅ Clickable links to BC Self-Serve
 
 ---
 
-## Known Issues
+## Vercel Deployment Notes
 
-### Payment Info Section Not Loading Properly
-**Issue:** BC government redesigned MySelfServe and the Payment Info page now shows:
-> "We have recently redesigned My Self Serve and the page you are trying to access has moved. You will be re-directed to the updated MySelfServe home page in 10 seconds or click here to proceed immediately."
+**URL:** https://selfserve-c2cldmw48-nulljosh-9577s-projects.vercel.app
+**Password:** hunter2
 
-**Impact:** Can't scrape payment info until we find the new page URL
+**Important:** Data on Vercel is static (from Jan 16, 2026). To update:
+1. Run scraper locally: `npm run check`
+2. Force-add latest results: `git add -f results-2026-01-16T*.json`
+3. Commit and push: `git commit -m "Update data" && git push`
+4. Vercel auto-deploys in ~30s
 
-**Fix Options:**
-1. Find new Payment Info URL on redesigned site
-2. Update scraper to follow redirect and find payment section
-3. Wait for BC to fix their redirect (unlikely)
+**Next Steps:**
+- [ ] Test Vercel deployment from phone (wait for auto-deploy to finish)
+- [ ] If Vercel auth still blocking, add bypass token or deploy to production domain
+- [ ] Set up automated data updates (see "Future: Serverless Scraping" below)
 
 --- 
 
