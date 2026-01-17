@@ -93,25 +93,54 @@ app.get('/api/health', (req, res) => {
 });
 
 app.get('/api/latest', requireAuth, (req, res) => {
-  try {
-    // Try to require the JSON directly (works better on Vercel serverless)
-    const latestFile = 'results-2026-01-16T23-06-39-292Z.json';
-    let data;
+  const errors = [];
 
-    try {
-      // Method 1: Try require (best for Vercel)
-      data = require('./' + latestFile);
-    } catch (e) {
-      // Method 2: Fallback to readFileSync (works locally)
-      data = JSON.parse(fs.readFileSync(path.join(__dirname, latestFile), 'utf8'));
+  try {
+    // Try multiple methods to load data (Vercel serverless is picky about file paths)
+    const filenames = ['sample-data.json', 'results-2026-01-16T23-06-39-292Z.json'];
+    let data = null;
+
+    for (const filename of filenames) {
+      // Method 1: Try require()
+      try {
+        data = require('./' + filename);
+        return res.json({ file: filename, data: data, method: 'require' });
+      } catch (e) {
+        errors.push(`require(./${filename}): ${e.message}`);
+      }
+
+      // Method 2: Try readFileSync with __dirname
+      try {
+        data = JSON.parse(fs.readFileSync(path.join(__dirname, filename), 'utf8'));
+        return res.json({ file: filename, data: data, method: '__dirname' });
+      } catch (e) {
+        errors.push(`readFileSync(__dirname/${filename}): ${e.message}`);
+      }
+
+      // Method 3: Try process.cwd()
+      try {
+        data = JSON.parse(fs.readFileSync(path.join(process.cwd(), filename), 'utf8'));
+        return res.json({ file: filename, data: data, method: 'cwd' });
+      } catch (e) {
+        errors.push(`readFileSync(cwd/${filename}): ${e.message}`);
+      }
     }
 
-    res.json({
-      file: latestFile,
-      data: data
+    // If all methods failed, return debug info
+    return res.status(500).json({
+      error: 'Could not load data file',
+      attempts: errors,
+      __dirname: __dirname,
+      cwd: process.cwd(),
+      files: fs.readdirSync(__dirname).filter(f => f.includes('json'))
     });
+
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message,
+      stack: error.stack,
+      attempts: errors
+    });
   }
 });
 
