@@ -94,9 +94,17 @@ app.get('/api/health', (req, res) => {
 
 app.get('/api/latest', requireAuth, (req, res) => {
   try {
-    // Use committed results file for Vercel (serverless doesn't support fs.readdirSync well)
+    // Try to require the JSON directly (works better on Vercel serverless)
     const latestFile = 'results-2026-01-16T23-06-39-292Z.json';
-    const data = JSON.parse(fs.readFileSync(path.join(__dirname, latestFile), 'utf8'));
+    let data;
+
+    try {
+      // Method 1: Try require (best for Vercel)
+      data = require('./' + latestFile);
+    } catch (e) {
+      // Method 2: Fallback to readFileSync (works locally)
+      data = JSON.parse(fs.readFileSync(path.join(__dirname, latestFile), 'utf8'));
+    }
 
     res.json({
       file: latestFile,
