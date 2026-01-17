@@ -28,10 +28,21 @@
 3. Commit and push: `git commit -m "Update data" && git push`
 4. Vercel auto-deploys in ~30s
 
-**Next Steps:**
-- [ ] Test Vercel deployment from phone (wait for auto-deploy to finish)
-- [ ] If Vercel auth still blocking, add bypass token or deploy to production domain
-- [ ] Set up automated data updates (see "Future: Serverless Scraping" below)
+**Vercel Deployment Limitations:**
+- ⚠️ **Sessions don't work on serverless** - Each request hits different server instance
+- Password protection works on localhost but NOT on Vercel
+- Options to fix Vercel:
+  1. Use JWT tokens instead of sessions (complex)
+  2. Use Redis/database for session storage (costs money)
+  3. Remove password protection (insecure - anyone can see your data)
+  4. **Recommended: Use localhost only**
+
+**Why Localhost is Fine:**
+- Password protected (`hunter2`)
+- All data loads correctly
+- Auto-refresh every 30 seconds
+- Dark/light mode toggle
+- Only you can access it (not exposed to internet)
 
 --- 
 
