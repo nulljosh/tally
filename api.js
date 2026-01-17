@@ -48,20 +48,10 @@ app.post('/api/logout', (req, res) => {
   res.json({ success: true });
 });
 
-// Serve static files (dashboard, results, screenshots) - protected
-app.use(express.static(__dirname, {
-  setHeaders: (res, filePath) => {
-    // Allow login.html to be accessed without auth
-    if (filePath.endsWith('login.html')) {
-      return;
-    }
-  }
-}));
-
 let lastCheckResult = null;
 let isChecking = false;
 
-// Serve dashboard or login page
+// Serve dashboard or login page (BEFORE static middleware)
 app.get('/', (req, res) => {
   if (req.session.authenticated) {
     res.sendFile(path.join(__dirname, 'index.html'));
@@ -69,6 +59,17 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'login.html'));
   }
 });
+
+// Serve static files AFTER route handlers (prevents index.html from bypassing auth)
+app.use(express.static(__dirname, {
+  index: false, // Don't serve index.html as default
+  setHeaders: (res, filePath) => {
+    // Allow specific files through
+    if (filePath.endsWith('login.html')) {
+      return;
+    }
+  }
+}));
 
 app.get('/api', requireAuth, (req, res) => {
   res.json({
