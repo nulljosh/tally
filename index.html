@@ -341,7 +341,16 @@
 
       } catch (error) {
         console.error('Error loading data:', error);
-        alert('Error loading data. Make sure you have run the scraper first.');
+        document.body.innerHTML = `
+          <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #dc2626; color: white; padding: 20px; font-family: system-ui;">
+            <div style="max-width: 500px; text-align: center;">
+              <h1 style="font-size: 48px; margin-bottom: 16px;">⚠️</h1>
+              <h2 style="font-size: 24px; margin-bottom: 12px;">Error Loading Data</h2>
+              <p style="margin-bottom: 20px;">Could not fetch dashboard data. Make sure you have run the scraper first.</p>
+              <button onclick="location.reload()" style="background: white; color: #dc2626; padding: 12px 24px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Retry</button>
+            </div>
+          </div>
+        `;
       }
     }
 

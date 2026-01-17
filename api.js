@@ -93,54 +93,29 @@ app.get('/api/health', (req, res) => {
 });
 
 app.get('/api/latest', requireAuth, (req, res) => {
-  const errors = [];
-
   try {
-    // Try multiple methods to load data (Vercel serverless is picky about file paths)
-    const filenames = ['sample-data.json', 'results-2026-01-16T23-06-39-292Z.json'];
-    let data = null;
+    // Find latest results file
+    const files = fs.readdirSync(__dirname)
+      .filter(f => f.startsWith('results-') && f.endsWith('.json'))
+      .map(f => ({
+        name: f,
+        time: fs.statSync(path.join(__dirname, f)).mtime.getTime()
+      }))
+      .sort((a, b) => b.time - a.time);
 
-    for (const filename of filenames) {
-      // Method 1: Try require()
-      try {
-        data = require('./' + filename);
-        return res.json({ file: filename, data: data, method: 'require' });
-      } catch (e) {
-        errors.push(`require(./${filename}): ${e.message}`);
-      }
-
-      // Method 2: Try readFileSync with __dirname
-      try {
-        data = JSON.parse(fs.readFileSync(path.join(__dirname, filename), 'utf8'));
-        return res.json({ file: filename, data: data, method: '__dirname' });
-      } catch (e) {
-        errors.push(`readFileSync(__dirname/${filename}): ${e.message}`);
-      }
-
-      // Method 3: Try process.cwd()
-      try {
-        data = JSON.parse(fs.readFileSync(path.join(process.cwd(), filename), 'utf8'));
-        return res.json({ file: filename, data: data, method: 'cwd' });
-      } catch (e) {
-        errors.push(`readFileSync(cwd/${filename}): ${e.message}`);
-      }
+    if (files.length === 0) {
+      return res.status(404).json({ error: 'No results files found. Run the scraper first.' });
     }
 
-    // If all methods failed, return debug info
-    return res.status(500).json({
-      error: 'Could not load data file',
-      attempts: errors,
-      __dirname: __dirname,
-      cwd: process.cwd(),
-      files: fs.readdirSync(__dirname).filter(f => f.includes('json'))
-    });
+    const latestFile = files[0].name;
+    const data = JSON.parse(fs.readFileSync(path.join(__dirname, latestFile), 'utf8'));
 
-  } catch (error) {
-    res.status(500).json({
-      error: error.message,
-      stack: error.stack,
-      attempts: errors
+    res.json({
+      file: latestFile,
+      data: data
     });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
