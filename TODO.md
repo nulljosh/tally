@@ -416,3 +416,423 @@ npm link
 ---
 
 **Next Session:** Implement message parsing improvements and/or CLI tool
+
+---
+---
+
+# Security Research & Pentesting Education
+
+> **Scope:** Educational only. White/grey hat methodology. Legal, authorized testing only.
+
+---
+
+## Pentesting 101 (ELI5)
+
+**What is Pentesting?**
+You're hired to break into a system (legally) to find vulnerabilities before bad guys do.
+
+**How It Works:**
+1. **Get permission** (signed contract, scope document)
+2. **Reconnaissance** - Learn about the target (public info only)
+3. **Scanning** - Find open doors (ports, services)
+4. **Exploitation** - Try to break in (controlled, documented)
+5. **Report** - Tell the company what you found and how to fix it
+6. **Get paid** - Companies pay $50-300/hr for this
+
+**White Hat vs Grey Hat:**
+- **White Hat:** 100% legal, authorized, contracted
+- **Grey Hat:** Finds bugs without permission, reports them responsibly (legally risky)
+- **Black Hat:** Criminal hacking (illegal, we don't do this)
+
+---
+
+## How to Get Into White Hat Hacking
+
+### 1. Learn the Fundamentals
+**Skills Needed:**
+- Networking (TCP/IP, DNS, HTTP)
+- Web technologies (HTML, JS, APIs)
+- Linux command line
+- Programming (Python, JavaScript, Bash)
+- Databases (SQL, NoSQL)
+
+**Free Learning Resources:**
+- **TryHackMe** - Beginner-friendly, guided labs
+- **HackTheBox** - Harder challenges, real-world scenarios
+- **PortSwigger Web Security Academy** - Web vulnerabilities (free, excellent)
+- **OWASP Top 10** - Most common web vulnerabilities
+
+### 2. Practice Legally
+**Legal Practice Platforms:**
+- **TryHackMe** - Learn by doing, 100% legal
+- **HackTheBox** - CTF challenges, penetration testing practice
+- **PentesterLab** - Web penetration testing exercises
+- **VulnHub** - Download vulnerable VMs, test locally
+- **DVWA** (Damn Vulnerable Web Application) - Intentionally insecure app
+
+**Your Own Projects:**
+- Build vulnerable apps yourself
+- Test your own code
+- Set up local labs with Docker
+
+### 3. Get Certifications
+**Entry Level:**
+- **eJPT** (eLearnSecurity Junior Penetration Tester) - $200, beginner-friendly
+- **CompTIA Security+** - Good foundation, recognized
+
+**Professional:**
+- **OSCP** (Offensive Security Certified Professional) - Gold standard, hard, $1,649
+- **CEH** (Certified Ethical Hacker) - Industry recognized, $1,199
+
+### 4. Bug Bounties
+**What is a Bug Bounty?**
+Companies pay you to find bugs in their systems (legally authorized).
+
+**Platforms:**
+- **HackerOne** - Biggest platform, Netflix/Twitter/Uber use it
+- **Bugcrowd** - Similar, lots of programs
+- **Intigriti** - European focus
+- **YesWeHack** - Growing platform
+
+**Payouts:**
+- Small bugs: $50-500
+- Medium bugs: $500-5,000
+- Critical bugs: $5,000-100,000+
+- Top hackers make $100k-1M+/year
+
+### 5. Get a Job
+**Entry Roles:**
+- Security Analyst ($60-90k/yr)
+- Junior Pentester ($70-100k/yr)
+- Security Consultant ($80-120k/yr)
+
+**Senior Roles:**
+- Senior Pentester ($120-180k/yr)
+- Red Team Lead ($150-250k/yr)
+- Security Architect ($180-300k/yr)
+
+---
+
+## Pentesting Methodology (High-Level)
+
+### Phase 1: Reconnaissance
+**Goal:** Gather information about the target
+
+**What You Do:**
+- Public info (Google, LinkedIn, job postings)
+- DNS records (subdomains, mail servers)
+- SSL certificates (find other domains)
+- Technology stack (what frameworks they use)
+
+**Legal:** Only public information, no intrusion
+
+### Phase 2: Scanning
+**Goal:** Find open services and potential entry points
+
+**What You Do:**
+- Port scanning (what services are running?)
+- Service enumeration (what versions?)
+- Vulnerability scanning (known CVEs?)
+- Web application mapping (site structure)
+
+**Legal:** Only on authorized systems in your scope
+
+### Phase 3: Exploitation
+**Goal:** Prove vulnerabilities are real by exploiting them (safely)
+
+**What You Do:**
+- Try to bypass authentication
+- Test for SQL injection
+- Check for XSS (cross-site scripting)
+- Look for insecure file uploads
+- Test API authentication
+
+**Legal:** Only in controlled environments, document everything
+
+### Phase 4: Post-Exploitation
+**Goal:** See what an attacker could do with access
+
+**What You Do:**
+- Privilege escalation (can you become admin?)
+- Lateral movement (can you access other systems?)
+- Data exfiltration (what data could be stolen?)
+
+**Legal:** Stop here, document findings, don't cause damage
+
+### Phase 5: Reporting
+**Goal:** Help the company fix vulnerabilities
+
+**What You Provide:**
+- Executive summary (non-technical)
+- Detailed findings (technical)
+- Proof of concept (screenshots/videos)
+- Remediation steps (how to fix)
+- Risk ratings (critical/high/medium/low)
+
+---
+
+## Common Vulnerabilities (OWASP Top 10)
+
+### 1. Broken Access Control
+**What:** Users can access things they shouldn't
+**Example:** Change URL from `/user/123` to `/user/124` and see someone else's data
+**Fix:** Check permissions server-side, never trust client
+
+### 2. Cryptographic Failures
+**What:** Sensitive data not encrypted properly
+**Example:** Passwords stored in plain text, HTTP instead of HTTPS
+**Fix:** Use strong encryption (AES-256), HTTPS everywhere, hash passwords (bcrypt)
+
+### 3. Injection (SQL Injection, XSS)
+**What:** Untrusted data sent to interpreter
+**Example:** Username field: `admin' OR '1'='1` bypasses login
+**Fix:** Use parameterized queries, input validation, output encoding
+
+### 4. Insecure Design
+**What:** Fundamental security flaw in architecture
+**Example:** No rate limiting on login (can brute force passwords)
+**Fix:** Threat modeling, security requirements from start
+
+### 5. Security Misconfiguration
+**What:** Default settings, unnecessary features enabled
+**Example:** Default admin password, debug mode in production
+**Fix:** Hardening guides, disable unused features, change defaults
+
+### 6. Vulnerable Components
+**What:** Using outdated libraries with known vulnerabilities
+**Example:** Old jQuery version with XSS vulnerability
+**Fix:** Keep dependencies updated, use tools like Dependabot
+
+### 7. Authentication Failures
+**What:** Weak login mechanisms
+**Example:** No password complexity, session tokens don't expire
+**Fix:** MFA, strong password policy, session timeout, rate limiting
+
+### 8. Software & Data Integrity Failures
+**What:** Code/data modified maliciously
+**Example:** No integrity checks on updates/plugins
+**Fix:** Code signing, checksum verification, trusted sources only
+
+### 9. Security Logging Failures
+**What:** Not logging security events or monitoring them
+**Example:** Attacker tries 10,000 passwords, no one notices
+**Fix:** Log authentication, monitor for anomalies, alerting
+
+### 10. Server-Side Request Forgery (SSRF)
+**What:** Attacker tricks server into making requests
+**Example:** URL parameter: `fetch?url=http://internal-admin-panel`
+**Fix:** Whitelist allowed URLs, validate/sanitize inputs
+
+---
+
+## Tools of the Trade (Educational)
+
+### Reconnaissance
+- **Shodan** - Search engine for internet-connected devices
+- **theHarvester** - OSINT gathering (emails, names, subdomains)
+- **Google Dorking** - Advanced Google search for info leaks
+- **Recon-ng** - Reconnaissance framework
+
+### Scanning
+- **Nmap** - Port scanner, service detection
+- **Masscan** - Fast port scanner
+- **Nikto** - Web server vulnerability scanner
+- **Burp Suite** - Web proxy, vulnerability scanner (industry standard)
+
+### Exploitation
+- **Metasploit** - Exploitation framework (automated exploits)
+- **SQLmap** - Automated SQL injection tool
+- **XSSer** - XSS vulnerability scanner
+- **Hydra** - Brute force tool (for authorized testing only)
+
+### Post-Exploitation
+- **Mimikatz** - Extract passwords from Windows
+- **BloodHound** - Active Directory attack paths
+- **Empire** - Post-exploitation framework
+
+### Reporting
+- **Dradis** - Collaboration and reporting platform
+- **Faraday** - Pentesting management
+- **Markdown** - Simple reporting format
+
+---
+
+## Frameworks & Methodologies
+
+### Atomic Red Team
+**What:** Open-source library of adversary techniques
+**Purpose:** Test your defenses by simulating attacks
+**Use Case:** Blue team (defenders) test if their security tools work
+**Legal:** 100% defensive, test your own systems
+**Example:** "Can our antivirus detect this malware?"
+
+**Breadcrumbs:**
+- GitHub: `redcanaryco/atomic-red-team`
+- Based on MITRE ATT&CK framework
+- Small, atomic tests (one technique at a time)
+- Focused on detection, not exploitation
+
+### MITRE ATT&CK
+**What:** Knowledge base of adversary tactics
+**Purpose:** Understand how attackers operate
+**Use Case:** Map your security controls to known attack techniques
+**Example:** "Attackers use PowerShell for execution, do we monitor that?"
+
+### PTES (Penetration Testing Execution Standard)
+**What:** Standard methodology for pentesting
+**Phases:**
+1. Pre-engagement (scope, rules)
+2. Intelligence gathering
+3. Threat modeling
+4. Vulnerability analysis
+5. Exploitation
+6. Post-exploitation
+7. Reporting
+
+### OWASP Testing Guide
+**What:** Web application security testing methodology
+**Focus:** Web apps, APIs, mobile apps
+**Use Case:** Testing web applications systematically
+
+---
+
+## Quantum Computing & Cryptography (Educational)
+
+### What Quantum Computing Threatens
+
+**Vulnerable:**
+- **RSA encryption** (used for HTTPS, SSH, VPNs)
+- **Elliptic Curve Cryptography** (ECC)
+- **Diffie-Hellman key exchange**
+
+**Why:** Quantum computers can factor large numbers exponentially faster (Shor's algorithm)
+
+**Safe (for now):**
+- **AES-256** (symmetric encryption) - Still strong
+- **SHA-256/SHA-3** (hashing) - Still strong
+- **Quantum-resistant algorithms** (post-quantum crypto)
+
+### ETA for Breaking Current Crypto
+
+**Conservative Estimate:**
+- **10-15 years** before quantum computers can break RSA-2048
+- **20-30 years** for widespread quantum computing
+
+**What's Happening Now:**
+- NIST standardizing post-quantum algorithms (2024)
+- Companies migrating to quantum-resistant crypto
+- "Harvest now, decrypt later" threat (collect encrypted data now, decrypt later with quantum)
+
+### Post-Quantum Cryptography
+
+**NIST Selected Algorithms (2024):**
+- **CRYSTALS-Kyber** - Encryption
+- **CRYSTALS-Dilithium** - Digital signatures
+- **FALCON** - Digital signatures
+- **SPHINCS+** - Stateless signatures
+
+**When to Worry:**
+- Migrate critical systems now (sensitive long-term data)
+- Most consumer apps: 5-10 years is fine
+- Cryptocurrency: Varies (Bitcoin vulnerable, some alts already quantum-resistant)
+
+---
+
+## Legal & Ethical Boundaries
+
+### ✅ Legal (Do This)
+- Pentest systems you own
+- Pentest with signed contracts/authorization
+- Bug bounties (within program rules)
+- Practice on legal platforms (TryHackMe, HackTheBox)
+- Responsible disclosure (find bug → report it → wait for fix)
+
+### ❌ Illegal (Don't Do This)
+- Pentest without authorization
+- "Grey hat" unauthorized testing (legally risky)
+- Brute forcing third-party logins
+- Accessing data you're not authorized to see
+- Selling exploits to criminals
+
+### Responsible Disclosure Process
+1. Find vulnerability in Product X
+2. Report to company (security@company.com, HackerOne)
+3. Give them 90 days to fix
+4. If they don't respond, consider public disclosure (with redacted details)
+5. Never disclose actively exploited vulnerabilities publicly
+
+---
+
+## Career Path Example
+
+**Year 1-2: Learn Fundamentals**
+- CompTIA Security+ certification
+- TryHackMe/HackTheBox practice
+- Build vulnerable apps, break them
+
+**Year 3-4: Entry Role**
+- Junior Pentester or Security Analyst
+- $60-90k salary
+- Work under senior pentesters
+- Start bug bounties on weekends
+
+**Year 5-7: Professional**
+- OSCP certification
+- Senior Pentester role
+- $120-180k salary
+- Lead pentests, manage junior staff
+
+**Year 8+: Expert**
+- Bug bounties ($50k-500k/yr)
+- Red Team Lead
+- $200k+ salary
+- Conference speaker, publish research
+
+---
+
+## Next Steps for You
+
+**Immediate (This Week):**
+1. Sign up for TryHackMe (free tier)
+2. Complete "Complete Beginner" path
+3. Read OWASP Top 10
+
+**Short Term (This Month):**
+1. Build a vulnerable web app (DVWA or custom)
+2. Practice finding vulnerabilities
+3. Write up findings like a real report
+
+**Medium Term (3-6 Months):**
+1. Join a bug bounty platform (start with easy targets)
+2. Study for CompTIA Security+ or eJPT
+3. Network with other security folks (Twitter, Discord, local meetups)
+
+**Long Term (1-2 Years):**
+1. Get first security job or bounty payout
+2. Work toward OSCP certification
+3. Build portfolio of public writeups
+
+---
+
+## Resources
+
+**Learning:**
+- TryHackMe: https://tryhackme.com
+- HackTheBox: https://hackthebox.com
+- PortSwigger Academy: https://portswigger.net/web-security
+- OWASP: https://owasp.org
+
+**Community:**
+- r/netsec (Reddit)
+- r/AskNetsec (Reddit)
+- InfoSec Twitter (#infosec)
+- Security conferences (DEF CON, Black Hat)
+
+**Tools:**
+- Kali Linux (pentesting distro)
+- Burp Suite Community (free web proxy)
+- OWASP ZAP (free alternative to Burp)
+
+---
+
+**Remember:** With great power comes great responsibility. Only test systems you have explicit permission to test. One illegal action can end your career before it starts.

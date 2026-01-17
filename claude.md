@@ -3,6 +3,38 @@
 ## Project Overview
 Web scraper for BC government self-serve portal (myselfserve.gov.bc.ca) to check notifications, messages, payment info, and service requests. Built with Node.js + Puppeteer for fully automated headless scraping.
 
+**Security Research Project:** Also includes educational pentesting materials, security test suites, and white hat hacking resources.
+
+## Security Ethics & Scope
+
+### What We Do ✅
+- **Defensive Security:** Test OUR OWN systems (selfserve dashboard)
+- **Education:** Learn white hat pentesting concepts, methodologies, frameworks
+- **Legal Practice:** TryHackMe, HackTheBox, bug bounties with authorization
+- **Research:** Study vulnerabilities, attack patterns, mitigation strategies
+
+### What We Don't Do ❌
+- **NO unauthorized testing** of third-party systems (including BC gov site)
+- **NO exploit development** for malicious purposes
+- **NO anonymity/evasion guidance** for illegal activities
+- **NO "grey hat" testing** without explicit written authorization
+
+### Authorization Requirements
+Before testing ANY system (except our own):
+- Written contract or bug bounty agreement
+- Defined scope (what's in/out of bounds)
+- Point of contact
+- Rules of engagement
+- Safe harbor clause
+
+**Rule:** Authorization = Legal. No authorization = Illegal (10+ years prison).
+
+### Project Files
+- `hack.md` - Pentesting education, career path, legal practice platforms
+- `legal.md` - When pentesting is legal vs illegal, case studies, laws
+- `test-security.js` - Automated security tests for OUR dashboard
+- NEVER use these for unauthorized testing
+
 ## Critical Breadcrumbs
 
 ### Login Flow (WORKING)
