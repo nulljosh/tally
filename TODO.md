@@ -44,7 +44,158 @@
 - Dark/light mode toggle
 - Only you can access it (not exposed to internet)
 
---- 
+---
+
+## How to Actually Fix Vercel (If You Want To)
+
+### Option 1: Remove Password Protection (Easiest but Insecure)
+
+**What:** Just make it public, no auth
+**Risk:** Anyone with the URL can see your BC Self-Serve data
+**Steps:**
+```bash
+# Remove auth middleware from api.js
+# Comment out requireAuth in routes
+# Deploy
+```
+
+**Verdict:** ❌ Bad idea unless you're OK with data being public
+
+---
+
+### Option 2: Use Vercel Password Protection (Costs Money)
+
+**What:** Vercel Pro feature ($20/month)
+**How:**
+1. Upgrade to Vercel Pro
+2. Add password protection in Vercel dashboard
+3. Anyone accessing the site must enter password first
+
+**Verdict:** ⚠️ Works but $240/year is expensive for a side project
+
+---
+
+### Option 3: JWT Token Auth (Best Technical Solution)
+
+**What:** Replace express-session with JWT tokens stored in cookies
+**Why it works:** Serverless-compatible, no server-side session needed
+
+**Implementation:**
+```bash
+npm install jsonwebtoken cookie-parser
+```
+
+Update `api.js`:
+```javascript
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
+
+app.use(cookieParser());
+
+app.post('/api/login', (req, res) => {
+  if (req.body.password === DASHBOARD_PASSWORD) {
+    const token = jwt.sign(
+      { authenticated: true },
+      process.env.SESSION_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.cookie('auth', token, {
+      httpOnly: true,
+      secure: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    res.json({ success: true });
+  } else {
+    res.status(401).json({ error: 'Invalid password' });
+  }
+});
+
+const requireAuth = (req, res, next) => {
+  const token = req.cookies.auth;
+
+  if (!token) {
+    return res.status(401).sendFile(path.join(__dirname, 'login.html'));
+  }
+
+  try {
+    jwt.verify(token, process.env.SESSION_SECRET);
+    next();
+  } catch (err) {
+    res.status(401).sendFile(path.join(__dirname, 'login.html'));
+  }
+};
+```
+
+**Verdict:** ✅ Best option - works on Vercel, secure, free
+
+---
+
+### Option 4: Use Vercel KV (Redis) for Sessions (Costs Money)
+
+**What:** Store sessions in Vercel's managed Redis
+**Cost:** $0.25/100K requests (likely <$1/month for personal use)
+
+**Implementation:**
+```bash
+npm install @vercel/kv connect-redis
+```
+
+Update `api.js`:
+```javascript
+const { kv } = require('@vercel/kv');
+const RedisStore = require('connect-redis').default;
+
+const redisClient = kv;
+
+app.use(session({
+  store: new RedisStore({ client: redisClient }),
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false
+}));
+```
+
+**Verdict:** ⚠️ Works but costs money, more complex than JWT
+
+---
+
+### Option 5: Use Environment Variable Check (Hacky but Free)
+
+**What:** Require a secret query param or header
+**Example:** `https://yourapp.vercel.app?secret=hunter2`
+
+**Implementation:**
+```javascript
+const requireAuth = (req, res, next) => {
+  if (req.query.secret === DASHBOARD_PASSWORD ||
+      req.headers['x-auth'] === DASHBOARD_PASSWORD) {
+    next();
+  } else {
+    res.status(401).send('Unauthorized');
+  }
+};
+```
+
+**Verdict:** ⚠️ Works but URL contains password (visible in browser history)
+
+---
+
+### Recommendation: JWT (Option 3)
+
+**Why:**
+- ✅ Free
+- ✅ Serverless-compatible
+- ✅ Actually secure
+- ✅ Works on Vercel
+- ✅ Only ~20 lines of code
+
+**Time to implement:** 30 minutes
+
+**Let me know if you want me to implement this!**
+
+---
 
 ## Next Features (Prioritized)
 
