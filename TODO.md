@@ -201,6 +201,30 @@ const requireAuth = (req, res, next) => {
 
 ### P1 - High Priority
 
+#### 0. Fix Vercel Auth with JWT ⏰ Tomorrow
+**Goal:** Make password protection work on Vercel (currently broken due to serverless)
+**Time:** 30 minutes
+**Status:** Ready to implement
+
+**Steps:**
+1. Install dependencies: `npm install jsonwebtoken cookie-parser`
+2. Replace express-session with JWT in `api.js`
+3. Update login endpoint to issue JWT tokens
+4. Update auth middleware to verify JWT
+5. Test locally first
+6. Deploy to Vercel
+7. Verify login works on production
+
+**Why JWT:**
+- ✅ Serverless-compatible (no server-side session storage needed)
+- ✅ Free (no Redis/database required)
+- ✅ Secure (httpOnly cookies, signed tokens)
+- ✅ Works on Vercel immediately
+
+**Code already written** in "How to Actually Fix Vercel" section above.
+
+---
+
 #### 1. Make Dashboard Interactive
 **Current:** Messages/items are just text, not clickable
 **Want:** Click messages to expand full content, click service requests for details
