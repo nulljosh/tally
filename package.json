@@ -1,6 +1,6 @@
 {
   "name": "selfserve",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "BC Self-Serve Portal Scraper - Automated scraping of notifications, messages, payment info, and service requests",
   "main": "src/scraper.js",
   "scripts": {
@@ -9,6 +9,7 @@
     "test:scraper": "node src/scraper.js",
     "api": "node src/api.js",
     "dev": "nodemon src/api.js",
+    "watch": "concurrently \"nodemon src/api.js\" \"browser-sync start --proxy localhost:3000 --files 'web/**/*.html' --no-open\"",
     "start": "node src/api.js",
     "brute": "nodemon brute/tools/brute-force-web.js",
     "mock-server": "nodemon brute/mock-targets/mock-server.js"
@@ -25,6 +26,8 @@
     "puppeteer": "^24.35.0"
   },
   "devDependencies": {
+    "browser-sync": "^3.0.4",
+    "concurrently": "^9.2.1",
     "live-server": "^1.2.2",
     "nodemon": "^3.1.11"
   }
