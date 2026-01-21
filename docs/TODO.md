@@ -296,17 +296,26 @@ npm link
 #### 3. Monthly Report Submission from App
 **Goal:** Submit monthly reports directly from the dashboard (no need to log into BC Self-Serve)
 
+**Form Details:**
+- 5 sections with Yes/No questions (radio buttons)
+- Section 1: Eligibility (5 questions)
+- Typical answers: "Yes" to "still need assistance", "No" to everything else
+- Submitting gets you $1,060/month deposited
+
 **Implementation:**
-- Add "Submit Monthly Report" form in dashboard
-- Scrape the monthly report form fields
-- Fill and submit via Puppeteer
+- Add "Submit Monthly Report" button in dashboard
+- Navigate to monthly report page via Puppeteer
+- Auto-fill all 5 sections with default answers
+- Click through each section (Next/Continue buttons)
+- Submit final form
 - Show confirmation/success message
-- Track submission status
+- Track submission date/status
 
 **Benefits:**
 - Never need to log into BC Self-Serve manually
-- Automate monthly reporting
+- One-click monthly reporting (~30 seconds vs 5 minutes)
 - Set reminders for report deadlines
+- Never miss a month (automated submission)
 
 ---
 
