@@ -1,0 +1,21 @@
+{
+  "config": {
+    "target": "http://localhost:8080/login",
+    "username": "ralph.wiggum",
+    "wordlist": "brute-force/wordlists/test-passwords.txt"
+  },
+  "stats": {
+    "startTime": 1769030220844,
+    "attempted": 2,
+    "failed": 1,
+    "rateLimited": 0,
+    "errors": 0,
+    "found": {
+      "username": "ralph.wiggum",
+      "password": "ilovecats"
+    },
+    "totalPasswords": 10,
+    "duration": 513,
+    "attemptsPerSecond": 3.898635477582846
+  }
+}

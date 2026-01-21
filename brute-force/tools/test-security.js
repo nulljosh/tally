@@ -17,23 +17,23 @@ async function test(name, fn) {
 }
 
 async function runTests() {
-  console.log('\n🔒 Security Test Suite\n');
+  console.log('\n Security Test Suite\n');
   console.log('='.repeat(50));
 
   for (const { name, fn } of tests) {
     try {
       await fn();
       passed++;
-      console.log(`✅ ${name}`);
+      console.log(`[OK] ${name}`);
     } catch (error) {
       failed++;
-      console.log(`❌ ${name}`);
+      console.log(`[FAIL] ${name}`);
       console.log(`   ${error.message}\n`);
     }
   }
 
   console.log('='.repeat(50));
-  console.log(`\n📊 Results: ${passed} passed, ${failed} failed\n`);
+  console.log(`\n[STATS] Results: ${passed} passed, ${failed} failed\n`);
   process.exit(failed > 0 ? 1 : 0);
 }
 

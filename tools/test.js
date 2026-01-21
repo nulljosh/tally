@@ -17,13 +17,13 @@ async function runTests() {
     const result = await checkAllSections({ headless: true });
 
     if (!result) {
-      console.log('❌ FAIL: No result returned');
+      console.log('[FAIL] FAIL: No result returned');
       tests.failed++;
     } else if (result.success === false) {
-      console.log('⚠️  WARN: Scraper returned error:', result.error);
+      console.log('[WARNING]  WARN: Scraper returned error:', result.error);
       tests.warnings++;
     } else {
-      console.log('✅ PASS: Scraper executed');
+      console.log('[OK] PASS: Scraper executed');
       tests.passed++;
 
       // Test 2: Validate result structure
@@ -32,10 +32,10 @@ async function runTests() {
       const missingFields = requiredFields.filter(field => !(field in result));
 
       if (missingFields.length > 0) {
-        console.log(`❌ FAIL: Missing fields: ${missingFields.join(', ')}`);
+        console.log(`[FAIL] FAIL: Missing fields: ${missingFields.join(', ')}`);
         tests.failed++;
       } else {
-        console.log('✅ PASS: Result structure valid');
+        console.log('[OK] PASS: Result structure valid');
         tests.passed++;
       }
 
@@ -46,11 +46,11 @@ async function runTests() {
       const sectionNames = Object.keys(sections);
 
       if (expectedSections.every(s => sectionNames.includes(s))) {
-        console.log('✅ PASS: All expected sections present');
+        console.log('[OK] PASS: All expected sections present');
         tests.passed++;
       } else {
         const missing = expectedSections.filter(s => !sectionNames.includes(s));
-        console.log(`⚠️  WARN: Missing sections: ${missing.join(', ')}`);
+        console.log(`[WARNING]  WARN: Missing sections: ${missing.join(', ')}`);
         tests.warnings++;
       }
 
@@ -61,25 +61,25 @@ async function runTests() {
 
       for (const [name, data] of Object.entries(sections)) {
         if (data.error) {
-          console.log(`  ⚠️  ${name}: Error - ${data.error}`);
+          console.log(`  [WARNING]  ${name}: Error - ${data.error}`);
           errorSections++;
         } else if (data.success) {
           const itemCount = data.allText?.length || 0;
-          console.log(`  ✅ ${name}: ${itemCount} items extracted`);
+          console.log(`  [OK] ${name}: ${itemCount} items extracted`);
           successfulSections++;
         }
       }
 
       if (successfulSections > 0) {
-        console.log(`✅ PASS: ${successfulSections}/${expectedSections.length} sections extracted data`);
+        console.log(`[OK] PASS: ${successfulSections}/${expectedSections.length} sections extracted data`);
         tests.passed++;
       } else {
-        console.log('❌ FAIL: No sections extracted data');
+        console.log('[FAIL] FAIL: No sections extracted data');
         tests.failed++;
       }
 
       if (errorSections > 0) {
-        console.log(`⚠️  WARN: ${errorSections} sections had errors`);
+        console.log(`[WARNING]  WARN: ${errorSections} sections had errors`);
         tests.warnings++;
       }
 
@@ -96,16 +96,16 @@ async function runTests() {
         }
 
         if (screenshotsFound > 0) {
-          console.log(`✅ PASS: ${screenshotsFound} screenshot(s) saved`);
+          console.log(`[OK] PASS: ${screenshotsFound} screenshot(s) saved`);
           tests.passed++;
         } else {
-          console.log('⚠️  WARN: No screenshots found');
+          console.log('[WARNING]  WARN: No screenshots found');
           tests.warnings++;
         }
       }
     }
   } catch (error) {
-    console.log(`❌ FAIL: Scraper threw error: ${error.message}`);
+    console.log(`[FAIL] FAIL: Scraper threw error: ${error.message}`);
     tests.failed++;
   }
 
@@ -113,9 +113,9 @@ async function runTests() {
   console.log('\n═══════════════════════════════════════');
   console.log('          TEST RESULTS SUMMARY         ');
   console.log('═══════════════════════════════════════');
-  console.log(`✅ Passed:   ${tests.passed}`);
-  console.log(`❌ Failed:   ${tests.failed}`);
-  console.log(`⚠️  Warnings: ${tests.warnings}`);
+  console.log(`[OK] Passed:   ${tests.passed}`);
+  console.log(`[FAIL] Failed:   ${tests.failed}`);
+  console.log(`[WARNING]  Warnings: ${tests.warnings}`);
   console.log('═══════════════════════════════════════\n');
 
   // Grade
@@ -126,11 +126,11 @@ async function runTests() {
   if (score >= 80) {
     console.log(`🌟 EXCELLENT: ${score.toFixed(1)}%`);
   } else if (score >= 60) {
-    console.log(`✅ GOOD: ${score.toFixed(1)}%`);
+    console.log(`[OK] GOOD: ${score.toFixed(1)}%`);
   } else if (score >= 40) {
-    console.log(`⚠️  NEEDS WORK: ${score.toFixed(1)}%`);
+    console.log(`[WARNING]  NEEDS WORK: ${score.toFixed(1)}%`);
   } else {
-    console.log(`❌ FAILING: ${score.toFixed(1)}%`);
+    console.log(`[FAIL] FAILING: ${score.toFixed(1)}%`);
   }
 
   console.log('\nRECOMMENDATIONS:');

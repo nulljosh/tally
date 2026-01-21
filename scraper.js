@@ -218,11 +218,11 @@ async function scrapeSection(page, sectionName, sectionUrl) {
     // Check if we got kicked back to login
     const currentUrl = page.url();
     if (currentUrl.includes('logon') || currentUrl.includes('Login')) {
-      console.log('[!] ❌ Got kicked back to login');
+      console.log('[!] [FAIL] Got kicked back to login');
       return { error: 'Session expired - redirected to login' };
     }
 
-    console.log('[+] ✅ Page loaded successfully!');
+    console.log('[+] [OK] Page loaded successfully!');
 
     // Scrape data from the page
     const sectionData = await page.evaluate(() => {

@@ -7,13 +7,13 @@ Web scraper for BC government self-serve portal (myselfserve.gov.bc.ca) to check
 
 ## Security Ethics & Scope
 
-### What We Do ✅
+### What We Do [DONE]
 - **Defensive Security:** Test OUR OWN systems (selfserve dashboard)
 - **Education:** Learn white hat pentesting concepts, methodologies, frameworks
 - **Legal Practice:** TryHackMe, HackTheBox, bug bounties with authorization
 - **Research:** Study vulnerabilities, attack patterns, mitigation strategies
 
-### What We Don't Do ❌
+### What We Don't Do [SKIP]
 - **NO unauthorized testing** of third-party systems (including BC gov site)
 - **NO exploit development** for malicious purposes
 - **NO anonymity/evasion guidance** for illegal activities

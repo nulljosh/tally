@@ -7,7 +7,7 @@
 
 ---
 
-## When Pentesting is LEGAL ✅
+## When Pentesting is LEGAL [DONE]
 
 ### 1. You Own the System
 - Your own website, server, or application
@@ -47,7 +47,7 @@ Example: Company hires you with contract specifying:
 
 ---
 
-## When Pentesting is ILLEGAL ❌
+## When Pentesting is ILLEGAL [SKIP]
 
 ### 1. No Authorization (Criminal)
 **Illegal:** Testing ANY system without explicit permission

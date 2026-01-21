@@ -1,19 +1,19 @@
 # TODO - BC Self-Serve Scraper
 
-## Current Status: v1.7.0 ✅
+## Current Status: v1.7.0 [DONE]
 
 **All 4 sections working:**
-- ✅ Notifications
-- ✅ Messages (10 found)
-- ✅ Payment Info (FIXED - new URL: `/Auth/ChequeInfo`, shows $1,060 total)
-- ✅ Service Requests (1 active: "Shelter Update" from Jan 08)
+- [DONE] Notifications
+- [DONE] Messages (10 found)
+- [DONE] Payment Info (FIXED - new URL: `/Auth/ChequeInfo`, shows $1,060 total)
+- [DONE] Service Requests (1 active: "Shelter Update" from Jan 08)
 
 **Dashboard:**
-- ✅ Password protected (hunter2)
-- ✅ Dark/light mode toggle
-- ✅ Deployed to Vercel: https://selfserve-c2cldmw48-nulljosh-9577s-projects.vercel.app
-- ✅ Mobile-first responsive design
-- ✅ Clickable links to BC Self-Serve
+- [DONE] Password protected (hunter2)
+- [DONE] Dark/light mode toggle
+- [DONE] Deployed to Vercel: https://selfserve-c2cldmw48-nulljosh-9577s-projects.vercel.app
+- [DONE] Mobile-first responsive design
+- [DONE] Clickable links to BC Self-Serve
 
 ---
 
@@ -29,7 +29,7 @@
 4. Vercel auto-deploys in ~30s
 
 **Vercel Deployment Limitations:**
-- ⚠️ **Sessions don't work on serverless** - Each request hits different server instance
+- [WARNING] **Sessions don't work on serverless** - Each request hits different server instance
 - Password protection works on localhost but NOT on Vercel
 - Options to fix Vercel:
   1. Use JWT tokens instead of sessions (complex)
@@ -59,7 +59,7 @@
 # Deploy
 ```
 
-**Verdict:** ❌ Bad idea unless you're OK with data being public
+**Verdict:** [SKIP] Bad idea unless you're OK with data being public
 
 ---
 
@@ -71,7 +71,7 @@
 2. Add password protection in Vercel dashboard
 3. Anyone accessing the site must enter password first
 
-**Verdict:** ⚠️ Works but $240/year is expensive for a side project
+**Verdict:** [WARNING] Works but $240/year is expensive for a side project
 
 ---
 
@@ -128,7 +128,7 @@ const requireAuth = (req, res, next) => {
 };
 ```
 
-**Verdict:** ✅ Best option - works on Vercel, secure, free
+**Verdict:** [DONE] Best option - works on Vercel, secure, free
 
 ---
 
@@ -157,7 +157,7 @@ app.use(session({
 }));
 ```
 
-**Verdict:** ⚠️ Works but costs money, more complex than JWT
+**Verdict:** [WARNING] Works but costs money, more complex than JWT
 
 ---
 
@@ -178,18 +178,18 @@ const requireAuth = (req, res, next) => {
 };
 ```
 
-**Verdict:** ⚠️ Works but URL contains password (visible in browser history)
+**Verdict:** [WARNING] Works but URL contains password (visible in browser history)
 
 ---
 
 ### Recommendation: JWT (Option 3)
 
 **Why:**
-- ✅ Free
-- ✅ Serverless-compatible
-- ✅ Actually secure
-- ✅ Works on Vercel
-- ✅ Only ~20 lines of code
+- [DONE] Free
+- [DONE] Serverless-compatible
+- [DONE] Actually secure
+- [DONE] Works on Vercel
+- [DONE] Only ~20 lines of code
 
 **Time to implement:** 30 minutes
 
@@ -216,10 +216,10 @@ const requireAuth = (req, res, next) => {
 7. Verify login works on production
 
 **Why JWT:**
-- ✅ Serverless-compatible (no server-side session storage needed)
-- ✅ Free (no Redis/database required)
-- ✅ Secure (httpOnly cookies, signed tokens)
-- ✅ Works on Vercel immediately
+- [DONE] Serverless-compatible (no server-side session storage needed)
+- [DONE] Free (no Redis/database required)
+- [DONE] Secure (httpOnly cookies, signed tokens)
+- [DONE] Works on Vercel immediately
 
 **Code already written** in "How to Actually Fix Vercel" section above.
 
@@ -364,15 +364,15 @@ npm link
 
 **FOUND THE BUG!** Network traffic analysis revealed the exact issue:
 
-1. ✅ Login to BCeID succeeds properly
-2. ✅ BCeID redirects back to myselfserve.gov.bc.ca
-3. ❌ **Site IMMEDIATELY calls these endpoints:**
+1. [DONE] Login to BCeID succeeds properly
+2. [DONE] BCeID redirects back to myselfserve.gov.bc.ca
+3. [SKIP] **Site IMMEDIATELY calls these endpoints:**
    - `GET /Auth/SessionTimeout`
    - `GET /Auth/SessionTimeout/ShowError`
    - `GET /Auth/Signout`
-4. ❌ **Session cookie gets cleared:** `ASP.NET_SessionId=; path=/; secure`
-5. ❌ All subsequent requests get `?SMSESSION=NO` parameter
-6. ❌ Everything redirects (302) back to login
+4. [SKIP] **Session cookie gets cleared:** `ASP.NET_SessionId=; path=/; secure`
+5. [SKIP] All subsequent requests get `?SMSESSION=NO` parameter
+6. [SKIP] Everything redirects (302) back to login
 
 **Root Cause:** The site has an automatic session timeout/signout bug that fires immediately after successful login. This is a legacy ASP.NET session management issue with their SiteMinder (SM) configuration (circa 2005-2008, ~18 years old).
 
@@ -740,14 +740,14 @@ Companies pay you to find bugs in their systems (legally authorized).
 
 ## Legal & Ethical Boundaries
 
-### ✅ Legal (Do This)
+### [DONE] Legal (Do This)
 - Pentest systems you own
 - Pentest with signed contracts/authorization
 - Bug bounties (within program rules)
 - Practice on legal platforms (TryHackMe, HackTheBox)
 - Responsible disclosure (find bug → report it → wait for fix)
 
-### ❌ Illegal (Don't Do This)
+### [SKIP] Illegal (Don't Do This)
 - Pentest without authorization
 - "Grey hat" unauthorized testing (legally risky)
 - Brute forcing third-party logins

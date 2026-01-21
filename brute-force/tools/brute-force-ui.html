@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brute Force Tool - Educational</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Consolas', 'Monaco', monospace;
+      background: #0a0e27;
+      color: #e0e0e0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: #1a1f3a;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #00ff41;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .warning {
+      background: #3d1f1f;
+      border-left: 4px solid #ff4444;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+
+    .config-panel {
+      background: #1a1f3a;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #00ff41;
+      font-weight: bold;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      background: #0a0e27;
+      border: 1px solid #2a3f5f;
+      color: #e0e0e0;
+      border-radius: 4px;
+      font-family: 'Consolas', monospace;
+    }
+
+    textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+
+    button {
+      background: #00ff41;
+      color: #0a0e27;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      margin-right: 10px;
+    }
+
+    button:hover {
+      background: #00dd36;
+    }
+
+    button:disabled {
+      background: #2a3f5f;
+      color: #666;
+      cursor: not-allowed;
+    }
+
+    .progress-panel {
+      background: #1a1f3a;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 30px;
+      background: #0a0e27;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00ff41, #00dd36);
+      width: 0%;
+      transition: width 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0a0e27;
+      font-weight: bold;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .stat-card {
+      background: #0a0e27;
+      padding: 15px;
+      border-radius: 4px;
+      border-left: 3px solid #00ff41;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 5px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #00ff41;
+    }
+
+    .result-panel {
+      background: #1f3d1f;
+      border-left: 4px solid #00ff41;
+      padding: 20px;
+      border-radius: 4px;
+      display: none;
+      margin-top: 20px;
+    }
+
+    .result-panel.error {
+      background: #3d1f1f;
+      border-left-color: #ff4444;
+    }
+
+    .log-panel {
+      background: #0a0e27;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-size: 12px;
+    }
+
+    .log-entry {
+      padding: 5px;
+      border-bottom: 1px solid #1a1f3a;
+    }
+
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+
+    code {
+      background: #0a0e27;
+      padding: 2px 6px;
+      border-radius: 3px;
+      color: #00ff41;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Brute Force Tool (Educational)</h1>
+      <p>For authorized security testing only - Educational purposes</p>
+    </header>
+
+    <div class="warning">
+      <strong>WARNING:</strong> This tool is for educational purposes and authorized security testing only.
+      Unauthorized access to computer systems is illegal under the Computer Fraud and Abuse Act (18 USC 1030)
+      and similar laws worldwide. Penalties include up to 10 years imprisonment and substantial fines.
+      <br><br>
+      <strong>Only test systems you own or have written authorization to test.</strong>
+    </div>
+
+    <div class="config-panel">
+      <h2>Configuration</h2>
+
+      <div class="form-group">
+        <label>Target URL</label>
+        <input type="text" id="target" value="http://localhost:8080/login" placeholder="http://localhost:8080/login">
+        <small style="color: #888;">Default: Mock server for safe testing</small>
+      </div>
+
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="username" value="ralph.wiggum" placeholder="username">
+      </div>
+
+      <div class="form-group">
+        <label>Password List (one per line)</label>
+        <textarea id="passwords" placeholder="password123&#10;admin&#10;letmein"></textarea>
+        <div style="margin-top: 10px;">
+          <button onclick="loadWordlist('test-passwords.txt')">Load Test List</button>
+          <button onclick="loadWordlist('common-passwords.txt')">Load Common Passwords</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Delay Between Attempts (ms)</label>
+        <input type="number" id="delay" value="500" min="100" max="10000">
+        <small style="color: #888;">Recommended: 500-1000ms to avoid rate limiting</small>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <button id="startBtn" onclick="startAttack()">Start Attack</button>
+        <button id="stopBtn" onclick="stopAttack()" disabled>Stop Attack</button>
+      </div>
+    </div>
+
+    <div class="progress-panel" id="progressPanel">
+      <h2>Progress</h2>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressBar">0%</div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Current Password</div>
+          <div class="stat-value" id="currentPassword" style="font-size: 16px;">-</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">Attempted</div>
+          <div class="stat-value" id="attempted">0</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">Failed</div>
+          <div class="stat-value" id="failed">0</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">Rate Limited</div>
+          <div class="stat-value" id="rateLimited">0</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">Errors</div>
+          <div class="stat-value" id="errors">0</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">Speed</div>
+          <div class="stat-value" id="speed">0/s</div>
+        </div>
+      </div>
+
+      <div class="log-panel" id="logPanel"></div>
+    </div>
+
+    <div class="result-panel" id="resultPanel">
+      <h2>Results</h2>
+      <div id="resultContent"></div>
+    </div>
+  </div>
+
+  <script>
+    let attackId = null;
+    let statusInterval = null;
+
+    async function loadWordlist(filename) {
+      try {
+        const response = await fetch(`/api/wordlist/${filename}`);
+        const content = await response.text();
+        document.getElementById('passwords').value = content;
+        log(`Loaded wordlist: ${filename}`);
+      } catch (err) {
+        log(`Error loading wordlist: ${err.message}`, 'error');
+      }
+    }
+
+    async function startAttack() {
+      const target = document.getElementById('target').value;
+      const username = document.getElementById('username').value;
+      const passwords = document.getElementById('passwords').value;
+      const delay = document.getElementById('delay').value;
+
+      if (!target || !username || !passwords) {
+        alert('Please fill in all fields');
+        return;
+      }
+
+      // Start attack
+      try {
+        const response = await fetch('/api/attack/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ target, username, passwords, delay })
+        });
+
+        const data = await response.json();
+        attackId = data.attackId;
+
+        document.getElementById('startBtn').disabled = true;
+        document.getElementById('stopBtn').disabled = false;
+        document.getElementById('progressPanel').style.display = 'block';
+        document.getElementById('resultPanel').style.display = 'none';
+
+        log(`Attack started: ${data.totalPasswords} passwords to test`);
+
+        // Poll for status updates
+        statusInterval = setInterval(updateStatus, 500);
+      } catch (err) {
+        log(`Error starting attack: ${err.message}`, 'error');
+      }
+    }
+
+    async function stopAttack() {
+      if (!attackId) return;
+
+      try {
+        await fetch(`/api/attack/${attackId}/stop`, { method: 'POST' });
+        clearInterval(statusInterval);
+        document.getElementById('startBtn').disabled = false;
+        document.getElementById('stopBtn').disabled = true;
+        log('Attack stopped by user');
+      } catch (err) {
+        log(`Error stopping attack: ${err.message}`, 'error');
+      }
+    }
+
+    async function updateStatus() {
+      if (!attackId) return;
+
+      try {
+        const response = await fetch(`/api/attack/${attackId}/status`);
+        const stats = await response.json();
+
+        // Update progress bar
+        const percent = (stats.attempted / stats.totalPasswords * 100).toFixed(1);
+        document.getElementById('progressBar').style.width = percent + '%';
+        document.getElementById('progressBar').textContent = percent + '%';
+
+        // Update stats
+        document.getElementById('currentPassword').textContent = stats.currentPassword || '-';
+        document.getElementById('attempted').textContent = stats.attempted;
+        document.getElementById('failed').textContent = stats.failed;
+        document.getElementById('rateLimited').textContent = stats.rateLimited;
+        document.getElementById('errors').textContent = stats.errors;
+
+        const elapsed = (Date.now() - stats.startTime) / 1000;
+        const speed = (stats.attempted / elapsed).toFixed(1);
+        document.getElementById('speed').textContent = speed + '/s';
+
+        // Check if completed
+        if (stats.status === 'success') {
+          clearInterval(statusInterval);
+          showResult(true, stats.found);
+          document.getElementById('startBtn').disabled = false;
+          document.getElementById('stopBtn').disabled = true;
+        } else if (stats.status === 'completed') {
+          clearInterval(statusInterval);
+          showResult(false, null);
+          document.getElementById('startBtn').disabled = false;
+          document.getElementById('stopBtn').disabled = true;
+        }
+      } catch (err) {
+        console.error('Error updating status:', err);
+      }
+    }
+
+    function showResult(success, credentials) {
+      const panel = document.getElementById('resultPanel');
+      const content = document.getElementById('resultContent');
+
+      panel.style.display = 'block';
+
+      if (success) {
+        panel.className = 'result-panel';
+        content.innerHTML = `
+          <strong>SUCCESS!</strong> Valid credentials found:<br><br>
+          Username: <code>${credentials.username}</code><br>
+          Password: <code>${credentials.password}</code>
+        `;
+        log(`SUCCESS: Found credentials ${credentials.username}:${credentials.password}`);
+      } else {
+        panel.className = 'result-panel error';
+        content.innerHTML = `<strong>Attack completed.</strong> No valid credentials found.`;
+        log('Attack completed: No valid credentials found');
+      }
+    }
+
+    function log(message, type = 'info') {
+      const panel = document.getElementById('logPanel');
+      const timestamp = new Date().toISOString().substr(11, 8);
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.textContent = `[${timestamp}] ${message}`;
+      panel.appendChild(entry);
+      panel.scrollTop = panel.scrollHeight;
+    }
+
+    // Auto-load test wordlist on page load
+    window.addEventListener('load', () => {
+      loadWordlist('test-passwords.txt');
+    });
+  </script>
+</body>
+</html>

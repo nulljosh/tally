@@ -299,9 +299,9 @@ async function debugNetworkTraffic() {
 
       currentUrl = page.url();
       if (currentUrl.includes('logon') || currentUrl.includes('login')) {
-        console.log('[!] ❌ Got kicked back to login!');
+        console.log('[!] [FAIL] Got kicked back to login!');
       } else {
-        console.log('[+] ✅ Page loaded successfully!');
+        console.log('[+] [OK] Page loaded successfully!');
 
         // Check what's on the page
         const pageInfo = await page.evaluate(() => {

