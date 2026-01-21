@@ -216,17 +216,6 @@ RUN apt-get update && apt-get install -y chromium
 CMD ["node", "api.js"]
 ```
 
-## Future Enhancements
-
-- [ ] Push notifications (Twilio SMS, Pushover)
-- [ ] Email alerts via SendGrid/Mailgun
-- [ ] Webhook support
-- [ ] Historical data tracking (SQLite/PostgreSQL)
-- [ ] Status change detection (only notify on changes)
-- [ ] Multiple account support
-- [ ] Web UI dashboard
-- [ ] Scheduled cron in production
-
 ## Technical Notes
 
 ### Session Management

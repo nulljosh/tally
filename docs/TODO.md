@@ -340,13 +340,16 @@ npm link
 
 ### P3 - Nice to Have
 
-- [ ] Search functionality across all sections
-- [ ] Export to CSV/PDF
-- [ ] Historical tracking (store all past scrapes)
-- [ ] Email digest (daily/weekly summary)
-- [ ] Mobile-friendly dashboard
-- [ ] Dark mode for dashboard
-- [ ] Desktop app (Electron wrapper)
+- [ ] !!! Push notifications (Twilio SMS, Pushover)
+- [ ] !!! Status change detection (only notify on changes)
+- [ ] !! Email alerts via SendGrid/Mailgun
+- [ ] !! Webhook support (Discord, Slack, custom)
+- [ ] !! Scheduled cron in production
+- [ ] !! Search functionality across all sections
+- [ ] ! Historical data tracking (SQLite/PostgreSQL)
+- [ ] ! Export to CSV/PDF
+- [ ] ! Multiple account support
+- [ ] ! Desktop app (Electron wrapper)
 
 ---
 
