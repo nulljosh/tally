@@ -26,7 +26,7 @@ const requireAuth = (req, res, next) => {
   if (req.session.authenticated) {
     next();
   } else {
-    res.status(401).sendFile(path.join(__dirname, 'login.html'));
+    res.status(401).sendFile(path.join(__dirname, '../web/login.html'));
   }
 };
 
@@ -54,14 +54,15 @@ let isChecking = false;
 // Serve dashboard or login page (BEFORE static middleware)
 app.get('/', (req, res) => {
   if (req.session.authenticated) {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, '../web/unified.html'));
   } else {
-    res.sendFile(path.join(__dirname, 'login.html'));
+    res.sendFile(path.join(__dirname, '../web/login.html'));
   }
 });
 
 // Serve static files AFTER route handlers (prevents index.html from bypassing auth)
-app.use(express.static(__dirname, {
+app.use('/data', express.static(path.join(__dirname, '../data')));
+app.use(express.static(path.join(__dirname, '../web'), {
   index: false, // Don't serve index.html as default
   setHeaders: (res, filePath) => {
     // Allow specific files through
@@ -96,11 +97,12 @@ app.get('/api/health', (req, res) => {
 app.get('/api/latest', requireAuth, (req, res) => {
   try {
     // Find latest results file
-    const files = fs.readdirSync(__dirname)
+    const dataDir = path.join(__dirname, '../data');
+    const files = fs.readdirSync(dataDir)
       .filter(f => f.startsWith('results-') && f.endsWith('.json'))
       .map(f => ({
         name: f,
-        time: fs.statSync(path.join(__dirname, f)).mtime.getTime()
+        time: fs.statSync(path.join(dataDir, f)).mtime.getTime()
       }))
       .sort((a, b) => b.time - a.time);
 
@@ -109,7 +111,7 @@ app.get('/api/latest', requireAuth, (req, res) => {
     }
 
     const latestFile = files[0].name;
-    const data = JSON.parse(fs.readFileSync(path.join(__dirname, latestFile), 'utf8'));
+    const data = JSON.parse(fs.readFileSync(path.join(dataDir, latestFile), 'utf8'));
 
     res.json({
       file: latestFile,

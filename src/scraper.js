@@ -3,7 +3,7 @@ const fs = require('fs').promises;
 const path = require('path');
 require('dotenv').config();
 
-const COOKIES_PATH = path.join(__dirname, 'cookies.json');
+const COOKIES_PATH = path.join(__dirname, '../data/cookies.json');
 
 async function saveCookies(page) {
   try {
@@ -292,7 +292,7 @@ async function scrapeSection(page, sectionName, sectionUrl) {
 
     // Take a screenshot of this section
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const screenshotPath = `${sectionName.toLowerCase().replace(/\s+/g, '-')}-${timestamp}.png`;
+    const screenshotPath = path.join(__dirname, `../data/screenshots/${sectionName.toLowerCase().replace(/\s+/g, '-')}-${timestamp}.png`);
     await page.screenshot({ path: screenshotPath, fullPage: true });
     console.log(`[*] Screenshot saved: ${screenshotPath}`);
 
@@ -414,7 +414,7 @@ async function checkAllSections(options = {}) {
       sections: allResults
     };
 
-    const jsonPath = `results-${timestamp}.json`;
+    const jsonPath = path.join(__dirname, `../data/results-${timestamp}.json`);
     await fs.writeFile(jsonPath, JSON.stringify(result, null, 2));
     console.log(`\n[*] Results saved to ${jsonPath}`);
 
@@ -430,7 +430,7 @@ async function checkAllSections(options = {}) {
       try {
         const page = (await browser.pages())[0];
         if (page) {
-          await page.screenshot({ path: 'error-screenshot.png' });
+          await page.screenshot({ path: path.join(__dirname, '../data/screenshots/error-screenshot.png') });
           console.log('[*] Error screenshot saved');
         }
         await browser.close();

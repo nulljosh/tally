@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control Panel</title>
+  <style>
+    :root {
+      --glass-bg: rgba(255, 255, 255, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.18);
+      --shadow: rgba(0, 0, 0, 0.1);
+      --text-primary: #1d1d1f;
+      --text-secondary: #6e6e73;
+      --accent: #007aff;
+      --success: #34c759;
+      --warning: #ff9500;
+      --error: #ff3b30;
+      --bg-primary: #f5f5f7;
+      --card-bg: rgba(255, 255, 255, 0.8);
+    }
+
+    [data-theme="dark"] {
+      --glass-bg: rgba(28, 28, 30, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --shadow: rgba(0, 0, 0, 0.3);
+      --text-primary: #f5f5f7;
+      --text-secondary: #8e8e93;
+      --accent: #0a84ff;
+      --success: #30d158;
+      --warning: #ff9f0a;
+      --error: #ff453a;
+      --bg-primary: #000000;
+      --card-bg: rgba(28, 28, 30, 0.8);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      min-height: 100vh;
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: var(--glass-bg);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    nav .logo {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+    }
+
+    nav .tabs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .tab {
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .tab:hover {
+      background: var(--glass-border);
+    }
+
+    .tab.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .theme-toggle {
+      width: 44px;
+      height: 26px;
+      background: var(--card-bg);
+      border-radius: 13px;
+      border: 1px solid var(--glass-border);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s;
+    }
+
+    .theme-toggle::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 50%;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    [data-theme="dark"] .theme-toggle::before {
+      transform: translateX(18px);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 76px 24px 24px;
+    }
+
+    /* Tab content */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Glass cards */
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-radius: 16px;
+      border: 1px solid var(--glass-border);
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 24px var(--shadow);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px var(--shadow);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+
+    .badge {
+      padding: 4px 12px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--accent);
+      color: white;
+    }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      background: var(--glass-bg);
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    /* Form elements */
+    input, textarea, select {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg-primary);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    /* Buttons */
+    .btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-block;
+    }
+
+    .btn:hover {
+      opacity: 0.85;
+      transform: scale(1.02);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-secondary {
+      background: var(--glass-border);
+      color: var(--text-primary);
+    }
+
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    /* Progress bar */
+    .progress-bar {
+      width: 100%;
+      height: 24px;
+      background: var(--bg-primary);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 12px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--success));
+      width: 0%;
+      transition: width 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: white;
+    }
+
+    /* List items */
+    .list-item {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .list-item:last-child {
+      border-bottom: none;
+    }
+
+    .list-item-title {
+      font-weight: 500;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .list-item-meta {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 30px;
+      color: var(--text-secondary);
+    }
+
+    .spinner {
+      border: 2px solid var(--glass-border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Status badges */
+    .status {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .status-success { background: var(--success); color: white; }
+    .status-error { background: var(--error); color: white; }
+    .status-warning { background: var(--warning); color: white; }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">Control Panel</div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('dashboard')">Dashboard</div>
+      <div class="tab" onclick="switchTab('bruteforce')">Security Testing</div>
+      <div class="tab" onclick="switchTab('tools')">Tools</div>
+    </div>
+    <div class="theme-toggle" onclick="toggleTheme()"></div>
+  </nav>
+
+  <div class="container">
+    <!-- Dashboard Tab -->
+    <div id="dashboard-tab" class="tab-content active">
+      <!-- Stats Overview -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Data Overview</div>
+          <div class="badge">Live</div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat">
+            <div class="stat-label">Notifications</div>
+            <div class="stat-value" id="notif-count">-</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Messages</div>
+            <div class="stat-value" id="msg-count">-</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Payment</div>
+            <div class="stat-value" id="payment-amount">$0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Requests</div>
+            <div class="stat-value" id="request-count">-</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid Layout -->
+      <div class="grid">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Messages</div>
+          </div>
+          <div id="messages-list" class="loading">
+            <div class="spinner"></div>
+            Loading...
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Notifications</div>
+          </div>
+          <div id="notifications-list" class="loading">
+            <div class="spinner"></div>
+            Loading...
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Payment Information</div>
+        </div>
+        <div id="payment-info" class="loading">
+          <div class="spinner"></div>
+          Loading...
+        </div>
+      </div>
+
+      <div style="text-align: center;">
+        <button class="btn" onclick="loadData()">Refresh Data</button>
+      </div>
+    </div>
+
+    <!-- Brute Force Tab -->
+    <div id="bruteforce-tab" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Brute Force Testing</div>
+          <span class="status status-warning">Educational Only</span>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
+          For authorized security testing only. Unauthorized access is illegal under 18 USC 1030 (CFAA).
+        </p>
+
+        <div class="form-group">
+          <label>Target URL</label>
+          <input type="text" id="bf-target" value="http://localhost:8080/login" placeholder="http://localhost:8080/login">
+        </div>
+
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="bf-username" value="ralph.wiggum" placeholder="username">
+        </div>
+
+        <div class="form-group">
+          <label>Password List (one per line)</label>
+          <textarea id="bf-passwords" placeholder="password123&#10;admin&#10;letmein"></textarea>
+          <div style="margin-top: 8px;">
+            <button class="btn btn-small" onclick="loadWordlist('test-passwords.txt')">Load Test List</button>
+            <button class="btn btn-small btn-secondary" onclick="loadWordlist('common-passwords.txt')">Load Common</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Delay (ms)</label>
+          <input type="number" id="bf-delay" value="500" min="100" max="10000">
+        </div>
+
+        <div style="margin-top: 16px;">
+          <button class="btn" id="bf-start-btn" onclick="startBruteForce()">Start Attack</button>
+          <button class="btn btn-secondary" id="bf-stop-btn" onclick="stopBruteForce()" disabled>Stop</button>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="card" id="bf-progress" style="display: none;">
+        <div class="card-header">
+          <div class="card-title">Progress</div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="bf-progress-bar">0%</div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat">
+            <div class="stat-label">Current</div>
+            <div class="stat-value" id="bf-current" style="font-size: 14px;">-</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Attempted</div>
+            <div class="stat-value" id="bf-attempted">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Failed</div>
+            <div class="stat-value" id="bf-failed">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Speed</div>
+            <div class="stat-value" id="bf-speed">0/s</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="card" id="bf-result" style="display: none;">
+        <div class="card-header">
+          <div class="card-title">Results</div>
+        </div>
+        <div id="bf-result-content"></div>
+      </div>
+    </div>
+
+    <!-- Tools Tab -->
+    <div id="tools-tab" class="tab-content">
+      <div class="grid">
+        <div class="card">
+          <div class="card-title" style="margin-bottom: 12px;">Quick Actions</div>
+          <button class="btn" style="width: 100%; margin-bottom: 8px;" onclick="window.open('http://localhost:8080/stats', '_blank')">Mock Server Stats</button>
+          <button class="btn btn-secondary" style="width: 100%;" onclick="clearData()">Clear Cache</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="margin-bottom: 12px;">Documentation</div>
+          <a href="../docs/README.md" target="_blank" style="display: block; padding: 8px 0; color: var(--accent); text-decoration: none;">README</a>
+          <a href="../docs/TODO.md" target="_blank" style="display: block; padding: 8px 0; color: var(--accent); text-decoration: none;">TODO</a>
+          <a href="../brute-force/README.md" target="_blank" style="display: block; padding: 8px 0; color: var(--accent); text-decoration: none;">Brute Force Docs</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let attackId = null;
+    let statusInterval = null;
+
+    // Theme toggle
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const newTheme = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    }
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
+    // Tab switching
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+      event.target.classList.add('active');
+      document.getElementById(tab + '-tab').classList.add('active');
+    }
+
+    // Load dashboard data
+    async function loadData() {
+      try {
+        const response = await fetch('../data/results-2026-01-17T18-01-07.json');
+        const data = await response.json();
+
+        document.getElementById('notif-count').textContent = data.sections.Notifications.allText.length;
+        document.getElementById('msg-count').textContent = data.sections.Messages.allText.length;
+        document.getElementById('payment-amount').textContent = '$' + (data.sections['Payment Info'].allText.find(t => t.includes('$')) || '0');
+        document.getElementById('request-count').textContent = data.sections['Service Requests'].allText.length;
+
+        const messagesList = document.getElementById('messages-list');
+        messagesList.innerHTML = data.sections.Messages.allText.slice(0, 5).map(msg => `
+          <div class="list-item">
+            <div class="list-item-title">${msg}</div>
+          </div>
+        `).join('') || '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No messages</div>';
+
+        const notifList = document.getElementById('notifications-list');
+        notifList.innerHTML = data.sections.Notifications.allText.slice(0, 5).map(notif => `
+          <div class="list-item">
+            <div class="list-item-title">${notif}</div>
+          </div>
+        `).join('') || '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No notifications</div>';
+
+        const paymentInfo = document.getElementById('payment-info');
+        paymentInfo.innerHTML = data.sections['Payment Info'].allText.map(info => `
+          <div class="list-item"><div class="list-item-title">${info}</div></div>
+        `).join('');
+
+      } catch (err) {
+        console.error('Error loading data:', err);
+      }
+    }
+
+    // Brute force functions
+    async function loadWordlist(filename) {
+      try {
+        const response = await fetch(`http://localhost:3001/api/wordlist/${filename}`);
+        const content = await response.text();
+        document.getElementById('bf-passwords').value = content;
+      } catch (err) {
+        console.error('Error loading wordlist:', err);
+      }
+    }
+
+    async function startBruteForce() {
+      const target = document.getElementById('bf-target').value;
+      const username = document.getElementById('bf-username').value;
+      const passwords = document.getElementById('bf-passwords').value;
+      const delay = document.getElementById('bf-delay').value;
+
+      if (!target || !username || !passwords) {
+        alert('Please fill in all fields');
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:3001/api/attack/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ target, username, passwords, delay })
+        });
+
+        const data = await response.json();
+        attackId = data.attackId;
+
+        document.getElementById('bf-start-btn').disabled = true;
+        document.getElementById('bf-stop-btn').disabled = false;
+        document.getElementById('bf-progress').style.display = 'block';
+        document.getElementById('bf-result').style.display = 'none';
+
+        statusInterval = setInterval(updateBruteForceStatus, 500);
+      } catch (err) {
+        alert('Error: Make sure brute force server is running (npm run brute-force)');
+      }
+    }
+
+    async function stopBruteForce() {
+      if (!attackId) return;
+      await fetch(`http://localhost:3001/api/attack/${attackId}/stop`, { method: 'POST' });
+      clearInterval(statusInterval);
+      document.getElementById('bf-start-btn').disabled = false;
+      document.getElementById('bf-stop-btn').disabled = true;
+    }
+
+    async function updateBruteForceStatus() {
+      if (!attackId) return;
+
+      try {
+        const response = await fetch(`http://localhost:3001/api/attack/${attackId}/status`);
+        const stats = await response.json();
+
+        const percent = (stats.attempted / stats.totalPasswords * 100).toFixed(1);
+        document.getElementById('bf-progress-bar').style.width = percent + '%';
+        document.getElementById('bf-progress-bar').textContent = percent + '%';
+
+        document.getElementById('bf-current').textContent = stats.currentPassword || '-';
+        document.getElementById('bf-attempted').textContent = stats.attempted;
+        document.getElementById('bf-failed').textContent = stats.failed;
+
+        const elapsed = (Date.now() - stats.startTime) / 1000;
+        const speed = (stats.attempted / elapsed).toFixed(1);
+        document.getElementById('bf-speed').textContent = speed + '/s';
+
+        if (stats.status === 'success') {
+          clearInterval(statusInterval);
+          showBruteForceResult(true, stats.found);
+          document.getElementById('bf-start-btn').disabled = false;
+          document.getElementById('bf-stop-btn').disabled = true;
+        } else if (stats.status === 'completed') {
+          clearInterval(statusInterval);
+          showBruteForceResult(false, null);
+          document.getElementById('bf-start-btn').disabled = false;
+          document.getElementById('bf-stop-btn').disabled = true;
+        }
+      } catch (err) {
+        console.error('Error updating status:', err);
+      }
+    }
+
+    function showBruteForceResult(success, credentials) {
+      const panel = document.getElementById('bf-result');
+      const content = document.getElementById('bf-result-content');
+
+      panel.style.display = 'block';
+
+      if (success) {
+        content.innerHTML = `
+          <span class="status status-success">SUCCESS</span>
+          <div style="margin-top: 12px; padding: 16px; background: var(--glass-bg); border-radius: 8px;">
+            <div style="margin-bottom: 8px;"><strong>Username:</strong> ${credentials.username}</div>
+            <div><strong>Password:</strong> ${credentials.password}</div>
+          </div>
+        `;
+      } else {
+        content.innerHTML = `<span class="status status-error">No credentials found</span>`;
+      }
+    }
+
+    function clearData() {
+      localStorage.clear();
+      location.reload();
+    }
+
+    // Auto-load on page load
+    loadData();
+    setInterval(loadData, 30000); // Auto-refresh every 30s
+  </script>
+</body>
+</html>
