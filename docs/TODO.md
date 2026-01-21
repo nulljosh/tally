@@ -293,7 +293,24 @@ npm link
 
 ### P2 - Medium Priority
 
-#### 3. Deploy to Vercel with Security
+#### 3. Monthly Report Submission from App
+**Goal:** Submit monthly reports directly from the dashboard (no need to log into BC Self-Serve)
+
+**Implementation:**
+- Add "Submit Monthly Report" form in dashboard
+- Scrape the monthly report form fields
+- Fill and submit via Puppeteer
+- Show confirmation/success message
+- Track submission status
+
+**Benefits:**
+- Never need to log into BC Self-Serve manually
+- Automate monthly reporting
+- Set reminders for report deadlines
+
+---
+
+#### 4. Deploy to Vercel with Security
 **Goal:** Public dashboard but only you can access
 
 **Security Options:**
