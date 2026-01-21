@@ -6,15 +6,15 @@ Automated scraper for BC government self-serve portal (myselfserve.gov.bc.ca). S
 
 ## Features
 
-- [DONE] Automated BCeID login with retry logic
-- [DONE] Scrapes 4 sections: Notifications, Messages, Payment Info, Service Requests
-- [DONE] Handles BC gov's broken session management (re-login strategy)
-- [DONE] Rate limiting protection (20s delays between sections)
-- [DONE] Screenshots of each section
-- [DONE] JSON output with structured data
-- [DONE] Express API for on-demand checks
-- [DONE] Comprehensive test suite
-- [DONE] Cookie persistence between runs
+- ✓ Automated BCeID login with retry logic
+- ✓ Scrapes 4 sections: Notifications, Messages, Payment Info, Service Requests
+- ✓ Handles BC gov's broken session management (re-login strategy)
+- ✓ Rate limiting protection (20s delays between sections)
+- ✓ Screenshots of each section
+- ✓ JSON output with structured data
+- ✓ Express API for on-demand checks
+- ✓ Comprehensive test suite
+- ✓ Cookie persistence between runs
 
 ## Quick Start
 
