@@ -55,11 +55,42 @@ Before testing ANY system (except our own):
 ### Sections to Scrape
 1. **Notifications**: `https://myselfserve.gov.bc.ca/Auth`
 2. **Messages**: `https://myselfserve.gov.bc.ca/Auth/Messages`
-3. **Payment Info**: `https://myselfserve.gov.bc.ca/Auth/PaymentInfo`
+3. **Payment Info**: `https://myselfserve.gov.bc.ca/Auth/PaymentInfo` (redirects to `/Auth/ChequeInfo`)
 4. **Service Requests**: `https://myselfserve.gov.bc.ca/Auth/ServiceRequests`
-5. Monthly Reports: `https://myselfserve.gov.bc.ca/Auth/MonthlyReports` (not implemented)
+5. **Monthly Reports**: `https://myselfserve.gov.bc.ca/Auth/MonthlyReports` (view status, not yet scraped)
 6. Employment Plans: `https://myselfserve.gov.bc.ca/Auth/EmploymentPlans` (not implemented)
 7. Account Info: `https://myselfserve.gov.bc.ca/Auth/AccountInfo` (not implemented)
+
+### Monthly Report Submission (Future Feature)
+
+**What it does:** Submit monthly eligibility reports to receive $1,060/month in assistance
+
+**Form Structure:**
+- Multi-step form with 5 sections
+- Section 1: Eligibility (5 questions: still need assistance, assets, shelter costs, dependants, employment)
+- Sections 2-5: Additional questions (similar Yes/No format)
+- All questions are radio buttons (Yes/No)
+- Typical answers: "Yes" to "still need assistance", "No" to most others
+
+**Submission Workflow:**
+1. Navigate to Monthly Reports page
+2. Click "Submit New Report" or similar
+3. Fill Section 1 (Eligibility) with default answers
+4. Click "Next" to Section 2
+5. Repeat for all 5 sections
+6. Submit final form
+7. **Confirmation:** Page shows "View Report" button
+8. **Verification:** Click "View Report" to check status
+   - Look for status: "Processed" (means approved)
+   - Check month (should be current or next month)
+   - Can verify submission was successful
+
+**Automation Goals:**
+- One-click submission from dashboard
+- Auto-fill with saved default answers
+- Verify submission succeeded (check for "Processed" status)
+- Track last submission date (prevent double-submission)
+- Reminder system (notify when monthly report is due)
 
 ## Key Information
 
