@@ -565,35 +565,71 @@
       document.getElementById(tab + '-tab').classList.add('active');
     }
 
+    // Filter out navigation items
+    function filterNavItems(items) {
+      const navKeywords = [
+        'Skip to main content',
+        'Skip to navigation',
+        'Accessibility Statement',
+        'Notifications',
+        'Service Requests',
+        'Monthly Reports',
+        'Payment Info',
+        'Employment Plans',
+        'Account Info',
+        'Terms of Use',
+        'Accessibility',
+        'Due to inactivity'
+      ];
+      return items.filter(item => !navKeywords.some(nav => item.includes(nav)));
+    }
+
     // Load dashboard data
     async function loadData() {
       try {
         const response = await fetch('../data/results-2026-01-17T18-01-07.json');
         const data = await response.json();
 
-        document.getElementById('notif-count').textContent = data.sections.Notifications.allText.length;
-        document.getElementById('msg-count').textContent = data.sections.Messages.allText.length;
-        document.getElementById('payment-amount').textContent = '$' + (data.sections['Payment Info'].allText.find(t => t.includes('$')) || '0');
-        document.getElementById('request-count').textContent = data.sections['Service Requests'].allText.length;
+        // Filter out nav items
+        const messages = filterNavItems(data.sections.Messages.allText);
+        const notifications = filterNavItems(data.sections.Notifications.allText);
+
+        document.getElementById('notif-count').textContent = notifications.length || '0';
+        document.getElementById('msg-count').textContent = messages.length || '0';
+        document.getElementById('payment-amount').textContent = '$1,060';
+        document.getElementById('request-count').textContent = data.sections['Service Requests'].tableData.length || '0';
 
         const messagesList = document.getElementById('messages-list');
-        messagesList.innerHTML = data.sections.Messages.allText.slice(0, 5).map(msg => `
-          <div class="list-item">
-            <div class="list-item-title">${msg}</div>
-          </div>
-        `).join('') || '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No messages</div>';
+        if (messages.length > 0) {
+          messagesList.innerHTML = messages.map(msg => `
+            <div class="list-item">
+              <div class="list-item-title">${msg}</div>
+            </div>
+          `).join('');
+        } else {
+          messagesList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No messages</div>';
+        }
 
         const notifList = document.getElementById('notifications-list');
-        notifList.innerHTML = data.sections.Notifications.allText.slice(0, 5).map(notif => `
-          <div class="list-item">
-            <div class="list-item-title">${notif}</div>
-          </div>
-        `).join('') || '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No notifications</div>';
+        if (notifications.length > 0) {
+          notifList.innerHTML = notifications.map(notif => `
+            <div class="list-item">
+              <div class="list-item-title">${notif}</div>
+            </div>
+          `).join('');
+        } else {
+          notifList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No notifications</div>';
+        }
 
         const paymentInfo = document.getElementById('payment-info');
-        paymentInfo.innerHTML = data.sections['Payment Info'].allText.map(info => `
-          <div class="list-item"><div class="list-item-title">${info}</div></div>
-        `).join('');
+        const paymentData = data.sections['Payment Info'].tableData;
+        if (paymentData && paymentData.length > 0) {
+          paymentInfo.innerHTML = paymentData.map(info => `
+            <div class="list-item"><div class="list-item-title">${info}</div></div>
+          `).join('');
+        } else {
+          paymentInfo.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No payment info</div>';
+        }
 
       } catch (err) {
         console.error('Error loading data:', err);

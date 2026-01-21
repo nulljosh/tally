@@ -10,8 +10,8 @@
     "api": "node src/api.js",
     "dev": "nodemon src/api.js",
     "start": "node src/api.js",
-    "brute-force": "nodemon brute-force/tools/brute-force-web.js",
-    "mock-server": "nodemon brute-force/mock-targets/mock-server.js"
+    "brute": "nodemon brute/tools/brute-force-web.js",
+    "mock-server": "nodemon brute/mock-targets/mock-server.js"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +25,7 @@
     "puppeteer": "^24.35.0"
   },
   "devDependencies": {
+    "live-server": "^1.2.2",
     "nodemon": "^3.1.11"
   }
 }
