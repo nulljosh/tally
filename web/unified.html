@@ -772,18 +772,8 @@
         const response = await fetch('/api/latest');
 
         if (!response.ok) {
-          // No data yet — check if credentials exist
-          const credCheck = await fetch('/api/default-credentials');
-          const creds = await credCheck.json();
-          if (creds.username && creds.username !== 'your_username_here') {
-            showWaitingForData();
-            // Poll every 5s until auto-scrape finishes
-            if (!dataLoaded && !pollTimer) {
-              pollTimer = setInterval(() => loadData(), 5000);
-            }
-          } else {
-            showBCeIDLogin();
-          }
+          // No data yet — show prompt to check
+          showNoData();
           isLoadingData = false;
           return;
         }
@@ -970,6 +960,16 @@
         const el = document.getElementById(id);
         if (el) {
           el.innerHTML = '<div class="loading"><div class="spinner"></div>Scraping BC Self-Serve... This takes ~30-60 seconds</div>';
+        }
+      });
+    }
+
+    function showNoData() {
+      const lists = ['messages-list', 'notifications-list', 'payment-info'];
+      lists.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No data yet. Click <strong>Check Now</strong> to scrape.</div>';
         }
       });
     }
