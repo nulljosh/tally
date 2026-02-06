@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BC Self Serve Dashboard</title>
+  <style>
+    :root {
+      --glass-bg: rgba(255, 255, 255, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.18);
+      --shadow: rgba(0, 0, 0, 0.1);
+      --text-primary: #1d1d1f;
+      --text-secondary: #6e6e73;
+      --accent: #007aff;
+      --success: #34c759;
+      --warning: #ff9500;
+      --error: #ff3b30;
+      --bg-primary: #f5f5f7;
+      --card-bg: rgba(255, 255, 255, 0.8);
+    }
+
+    [data-theme="dark"] {
+      --glass-bg: rgba(28, 28, 30, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --shadow: rgba(0, 0, 0, 0.3);
+      --text-primary: #f5f5f7;
+      --text-secondary: #8e8e93;
+      --accent: #0a84ff;
+      --success: #30d158;
+      --warning: #ff9f0a;
+      --error: #ff453a;
+      --bg-primary: #000000;
+      --card-bg: rgba(28, 28, 30, 0.8);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      min-height: 100vh;
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: var(--glass-bg);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        padding: 12px 16px;
+        gap: 12px;
+      }
+    }
+
+    nav .logo {
+      font-size: 19px;
+      font-weight: 600;
+      letter-spacing: -0.6px;
+      flex-shrink: 0;
+    }
+
+    nav .tabs {
+      display: flex;
+      gap: 6px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    @media (max-width: 768px) {
+      nav .tabs {
+        gap: 4px;
+      }
+    }
+
+    .tab {
+      padding: 8px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 768px) {
+      .tab {
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+    }
+
+    .tab:hover {
+      background: var(--glass-border);
+    }
+
+    .tab.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .theme-toggle {
+      width: 44px;
+      height: 26px;
+      background: var(--card-bg);
+      border-radius: 13px;
+      border: 1px solid var(--glass-border);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s;
+      flex-shrink: 0;
+    }
+
+    .theme-toggle::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 50%;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    [data-theme="dark"] .theme-toggle::before {
+      transform: translateX(18px);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 68px 32px 32px;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 68px 16px 24px;
+      }
+    }
+
+    /* Tab content */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Glass cards */
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 12px var(--shadow);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card:hover {
+      box-shadow: 0 4px 20px var(--shadow);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.4px;
+    }
+
+    .badge {
+      padding: 4px 12px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--accent);
+      color: white;
+    }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .stat-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .stat {
+      background: var(--glass-bg);
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    /* Form elements */
+    input, textarea, select {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg-primary);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    /* Buttons */
+    .btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-block;
+    }
+
+    .btn:hover {
+      opacity: 0.85;
+      transform: scale(1.02);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-secondary {
+      background: var(--glass-border);
+      color: var(--text-primary);
+    }
+
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    /* Progress bar */
+    .progress-bar {
+      width: 100%;
+      height: 24px;
+      background: var(--bg-primary);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 12px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--success));
+      width: 0%;
+      transition: width 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: white;
+    }
+
+    /* List items */
+    .list-item {
+      padding: 16px 0;
+      border-bottom: 1px solid var(--glass-border);
+      transition: background 0.2s;
+    }
+
+    .list-item:first-child {
+      padding-top: 0;
+    }
+
+    .list-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .list-item-title {
+      font-weight: 500;
+      margin-bottom: 4px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .list-item-meta {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 30px;
+      color: var(--text-secondary);
+    }
+
+    .spinner {
+      border: 2px solid var(--glass-border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Status badges */
+    .status {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .status-success { background: var(--success); color: white; }
+    .status-error { background: var(--error); color: white; }
+    .status-warning { background: var(--warning); color: white; }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">Control Panel</div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('dashboard')">Dashboard</div>
+      <div class="tab" onclick="switchTab('dtc')">DTC Navigator</div>
+      <div class="tab" onclick="switchTab('bruteforce')">Security Testing</div>
+      <div class="tab" onclick="switchTab('tools')">Tools</div>
+    </div>
+    <div class="theme-toggle" onclick="toggleTheme()"></div>
+  </nav>
+
+  <div class="container">
+    <!-- Dashboard Tab -->
+    <div id="dashboard-tab" class="tab-content active">
+      <!-- Stats Overview -->
+      <div class="stat-grid" style="margin-bottom: 24px;">
+        <div class="stat">
+          <div class="stat-label">Payment</div>
+          <div class="stat-value" id="payment-amount">$0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Messages</div>
+          <div class="stat-value" id="msg-count">-</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Notifications</div>
+          <div class="stat-value" id="notif-count">-</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Requests</div>
+          <div class="stat-value" id="request-count">-</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Payment Information</div>
+        </div>
+        <div id="payment-info" class="loading">
+          <div class="spinner"></div>
+          Loading...
+        </div>
+      </div>
+
+      <!-- Grid Layout -->
+      <div class="grid">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Messages</div>
+          </div>
+          <div id="messages-list" class="loading">
+            <div class="spinner"></div>
+            Loading...
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Notifications</div>
+          </div>
+          <div id="notifications-list" class="loading">
+            <div class="spinner"></div>
+            Loading...
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 32px;">
+        <button class="btn" onclick="runCheck()" id="check-btn">Check Now</button>
+        <button class="btn btn-secondary" onclick="loadData()">Refresh Display</button>
+      </div>
+
+      <!-- BCeID Login Prompt (shown when no data and no env credentials) -->
+      <div id="bceid-login-prompt" style="display: none;">
+        <div class="card" style="max-width: 480px; margin: 40px auto;">
+          <div class="card-header">
+            <div class="card-title">Connect BC Self-Serve</div>
+          </div>
+          <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
+            Enter your BCeID credentials to scrape live data from myselfserve.gov.bc.ca. Credentials are stored locally in your browser only.
+          </p>
+          <div class="form-group">
+            <label>BCeID Username</label>
+            <input type="text" id="bceid-user" placeholder="Your BCeID username" autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label>BCeID Password</label>
+            <input type="password" id="bceid-pass" placeholder="Your BCeID password" autocomplete="current-password">
+          </div>
+          <div id="bceid-error" style="display: none; color: var(--error); font-size: 13px; margin-bottom: 12px;"></div>
+          <button class="btn" onclick="saveBCeIDAndScrape()" id="bceid-login-btn" style="width: 100%;">Connect & Scrape</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DTC Navigator Tab -->
+    <div id="dtc-tab" class="tab-content">
+      <!-- Screener Intro -->
+      <div id="dtc-intro" class="card">
+        <div class="card-header">
+          <div class="card-title">Disability Tax Credit Eligibility Screener</div>
+          <span class="status status-success">Free</span>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 16px;">
+          Answer a few questions to find out if you likely qualify for the <strong>Disability Tax Credit (DTC)</strong>,
+          <strong>BC PWD designation</strong>, and other disability benefits. This could mean <strong>$5,000-$25,000+</strong> in retroactive tax refunds.
+        </p>
+        <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 20px;">
+          This is not legal or financial advice. Results are estimates based on CRA eligibility criteria.
+        </p>
+        <button class="btn" onclick="startScreener()">Start Eligibility Check</button>
+      </div>
+
+      <!-- Screener Questions -->
+      <div id="dtc-screener" style="display: none;">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title" id="dtc-section-title">Basic Information</div>
+            <span class="badge" id="dtc-progress-badge">1 / 12</span>
+          </div>
+          <div class="progress-bar" style="margin-bottom: 20px;">
+            <div class="progress-fill" id="dtc-progress-bar" style="width: 8%;">8%</div>
+          </div>
+
+          <div id="dtc-question-container">
+            <!-- Questions rendered dynamically -->
+          </div>
+
+          <div style="display: flex; gap: 12px; margin-top: 24px;">
+            <button class="btn btn-secondary" id="dtc-back-btn" onclick="prevQuestion()" style="display: none;">Back</button>
+            <button class="btn" id="dtc-next-btn" onclick="nextQuestion()">Next</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="dtc-results" style="display: none;">
+        <div class="stat-grid" style="margin-bottom: 24px;">
+          <div class="stat">
+            <div class="stat-label">DTC Eligible</div>
+            <div class="stat-value" id="dtc-eligible-badge" style="font-size: 18px;">--</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Est. Refund</div>
+            <div class="stat-value" id="dtc-refund-est">$0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">PWD Eligible</div>
+            <div class="stat-value" id="pwd-eligible-badge" style="font-size: 18px;">--</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Programs</div>
+            <div class="stat-value" id="dtc-programs-count">0</div>
+          </div>
+        </div>
+
+        <div class="card" id="dtc-results-detail">
+          <div class="card-header">
+            <div class="card-title">Your Results</div>
+          </div>
+          <div id="dtc-results-content"></div>
+        </div>
+
+        <div class="card" id="dtc-next-steps">
+          <div class="card-header">
+            <div class="card-title">Next Steps</div>
+          </div>
+          <div id="dtc-steps-content"></div>
+        </div>
+
+        <div style="text-align: center; margin-top: 24px;">
+          <button class="btn" onclick="resetScreener()">Start Over</button>
+          <button class="btn btn-secondary" onclick="copyResults()">Copy Results</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Brute Force Tab -->
+    <div id="bruteforce-tab" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Brute Force Testing</div>
+          <span class="status status-warning">Educational Only</span>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
+          For authorized security testing only. Unauthorized access is illegal under 18 USC 1030 (CFAA).
+        </p>
+
+        <div class="form-group">
+          <label>Target URL</label>
+          <input type="text" id="bf-target" value="http://localhost:8080/login" placeholder="http://localhost:8080/login">
+        </div>
+
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="bf-username" value="ralph.wiggum" placeholder="username">
+        </div>
+
+        <div class="form-group">
+          <label>Password List (one per line)</label>
+          <textarea id="bf-passwords" placeholder="password123&#10;admin&#10;letmein"></textarea>
+          <div style="margin-top: 8px;">
+            <button class="btn btn-small" onclick="loadWordlist('test-passwords.txt')">Load Test List</button>
+            <button class="btn btn-small btn-secondary" onclick="loadWordlist('common-passwords.txt')">Load Common</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Delay (ms)</label>
+          <input type="number" id="bf-delay" value="500" min="100" max="10000">
+        </div>
+
+        <div style="margin-top: 16px;">
+          <button class="btn" id="bf-start-btn" onclick="startBruteForce()">Start Attack</button>
+          <button class="btn btn-secondary" id="bf-stop-btn" onclick="stopBruteForce()" disabled>Stop</button>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="card" id="bf-progress" style="display: none;">
+        <div class="card-header">
+          <div class="card-title">Progress</div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="bf-progress-bar">0%</div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat">
+            <div class="stat-label">Current</div>
+            <div class="stat-value" id="bf-current" style="font-size: 14px;">-</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Attempted</div>
+            <div class="stat-value" id="bf-attempted">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Failed</div>
+            <div class="stat-value" id="bf-failed">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Speed</div>
+            <div class="stat-value" id="bf-speed">0/s</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="card" id="bf-result" style="display: none;">
+        <div class="card-header">
+          <div class="card-title">Results</div>
+        </div>
+        <div id="bf-result-content"></div>
+      </div>
+    </div>
+
+    <!-- Tools Tab -->
+    <div id="tools-tab" class="tab-content">
+      <div class="grid">
+        <div class="card">
+          <div class="card-title" style="margin-bottom: 12px;">Quick Actions</div>
+          <button class="btn" style="width: 100%; margin-bottom: 8px;" onclick="window.open('http://localhost:8080/stats', '_blank')">Mock Server Stats</button>
+          <button class="btn btn-secondary" style="width: 100%;" onclick="clearData()">Clear Cache</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="margin-bottom: 12px;">Documentation</div>
+          <a href="../docs/README.md" target="_blank" style="display: block; padding: 8px 0; color: var(--accent); text-decoration: none;">README</a>
+          <a href="../docs/TODO.md" target="_blank" style="display: block; padding: 8px 0; color: var(--accent); text-decoration: none;">TODO</a>
+          <a href="../brute-force/README.md" target="_blank" style="display: block; padding: 8px 0; color: var(--accent); text-decoration: none;">Brute Force Docs</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let attackId = null;
+    let statusInterval = null;
+
+    // Theme toggle
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const newTheme = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    }
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
+    // Tab switching
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+      event.target.classList.add('active');
+      document.getElementById(tab + '-tab').classList.add('active');
+    }
+
+    // Filter out navigation items
+    function filterNavItems(items) {
+      const navKeywords = [
+        'Skip to main content',
+        'Skip to navigation',
+        'Accessibility Statement',
+        'Notifications',
+        'Service Requests',
+        'Monthly Reports',
+        'Payment Info',
+        'Employment Plans',
+        'Account Info',
+        'Terms of Use',
+        'Accessibility',
+        'Due to inactivity'
+      ];
+      return items.filter(item => !navKeywords.some(nav => item.includes(nav)));
+    }
+
+    // Parse payment amounts from scraped table/keyword data
+    function parsePaymentTotal(paymentSection) {
+      if (!paymentSection || paymentSection.error) return 0;
+
+      // Combine all text sources to find dollar amounts
+      const allText = [
+        ...(paymentSection.tableData || []),
+        ...(paymentSection.keywords || []),
+        ...(paymentSection.allText || [])
+      ].join(' ');
+
+      // Find all dollar amounts in the text
+      const amounts = [];
+      const regex = /\$\s*([\d,]+(?:\.\d{2})?)/g;
+      let match;
+      while ((match = regex.exec(allText)) !== null) {
+        const val = parseFloat(match[1].replace(/,/g, ''));
+        if (val > 0) amounts.push(val);
+      }
+
+      // Return the largest amount (total payment), or sum if context suggests components
+      if (amounts.length === 0) return 0;
+      return Math.max(...amounts);
+    }
+
+    let isLoadingData = false;
+    let dataLoaded = false;
+    let pollTimer = null;
+
+    // Load dashboard data
+    async function loadData() {
+      if (isLoadingData) return;
+      isLoadingData = true;
+
+      try {
+        const response = await fetch('/api/latest');
+
+        if (!response.ok) {
+          // No data yet — check if credentials exist
+          const credCheck = await fetch('/api/default-credentials');
+          const creds = await credCheck.json();
+          if (creds.username && creds.username !== 'your_username_here') {
+            showWaitingForData();
+            // Poll every 5s until auto-scrape finishes
+            if (!dataLoaded && !pollTimer) {
+              pollTimer = setInterval(() => loadData(), 5000);
+            }
+          } else {
+            showBCeIDLogin();
+          }
+          isLoadingData = false;
+          return;
+        }
+
+        const result = await response.json();
+        const data = result.data;
+
+        if (!data || !data.sections) {
+          showWaitingForData();
+          isLoadingData = false;
+          return;
+        }
+
+        // Data loaded — stop aggressive polling
+        dataLoaded = true;
+        if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+
+        // Hide login prompt if showing
+        document.getElementById('bceid-login-prompt').style.display = 'none';
+        isLoadingData = false;
+
+        const sections = data.sections;
+
+        // Safely extract data with null checks
+        const messages = filterNavItems((sections.Messages && sections.Messages.allText) || []);
+        const notifications = filterNavItems((sections.Notifications && sections.Notifications.allText) || []);
+        const requests = (sections['Service Requests'] && sections['Service Requests'].tableData) || [];
+
+        document.getElementById('notif-count').textContent = notifications.length || '0';
+        document.getElementById('msg-count').textContent = messages.length || '0';
+        document.getElementById('request-count').textContent = requests.length || '0';
+
+        // Parse payment total from table data
+        const paymentTotal = parsePaymentTotal(sections['Payment Info']);
+        document.getElementById('payment-amount').textContent = paymentTotal ? `$${paymentTotal.toLocaleString()}` : '$0';
+
+        const messagesList = document.getElementById('messages-list');
+        if (messages.length > 0) {
+          messagesList.innerHTML = messages.map(msg => `
+            <div class="list-item">
+              <div class="list-item-title">${msg}</div>
+            </div>
+          `).join('');
+        } else {
+          messagesList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No messages</div>';
+        }
+
+        const notifList = document.getElementById('notifications-list');
+        if (notifications.length > 0) {
+          notifList.innerHTML = notifications.map(notif => `
+            <div class="list-item">
+              <div class="list-item-title">${notif}</div>
+            </div>
+          `).join('');
+        } else {
+          notifList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No notifications</div>';
+        }
+
+        const paymentInfo = document.getElementById('payment-info');
+        const paymentData = (sections['Payment Info'] && sections['Payment Info'].tableData) || [];
+        if (paymentData.length > 0) {
+          paymentInfo.innerHTML = paymentData.map(info => `
+            <div class="list-item"><div class="list-item-title">${info}</div></div>
+          `).join('');
+        } else {
+          paymentInfo.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No payment info</div>';
+        }
+
+      } catch (err) {
+        console.error('Error loading data:', err);
+        showWaitingForData();
+        isLoadingData = false;
+      }
+    }
+
+    // Brute force functions
+    async function loadWordlist(filename) {
+      try {
+        const response = await fetch(`http://localhost:3001/api/wordlist/${filename}`);
+        const content = await response.text();
+        document.getElementById('bf-passwords').value = content;
+      } catch (err) {
+        console.error('Error loading wordlist:', err);
+      }
+    }
+
+    async function startBruteForce() {
+      const target = document.getElementById('bf-target').value;
+      const username = document.getElementById('bf-username').value;
+      const passwords = document.getElementById('bf-passwords').value;
+      const delay = document.getElementById('bf-delay').value;
+
+      if (!target || !username || !passwords) {
+        alert('Please fill in all fields');
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:3001/api/attack/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ target, username, passwords, delay })
+        });
+
+        const data = await response.json();
+        attackId = data.attackId;
+
+        document.getElementById('bf-start-btn').disabled = true;
+        document.getElementById('bf-stop-btn').disabled = false;
+        document.getElementById('bf-progress').style.display = 'block';
+        document.getElementById('bf-result').style.display = 'none';
+
+        statusInterval = setInterval(updateBruteForceStatus, 500);
+      } catch (err) {
+        alert('Error: Make sure brute force server is running (npm run brute-force)');
+      }
+    }
+
+    async function stopBruteForce() {
+      if (!attackId) return;
+      await fetch(`http://localhost:3001/api/attack/${attackId}/stop`, { method: 'POST' });
+      clearInterval(statusInterval);
+      document.getElementById('bf-start-btn').disabled = false;
+      document.getElementById('bf-stop-btn').disabled = true;
+    }
+
+    async function updateBruteForceStatus() {
+      if (!attackId) return;
+
+      try {
+        const response = await fetch(`http://localhost:3001/api/attack/${attackId}/status`);
+        const stats = await response.json();
+
+        const percent = (stats.attempted / stats.totalPasswords * 100).toFixed(1);
+        document.getElementById('bf-progress-bar').style.width = percent + '%';
+        document.getElementById('bf-progress-bar').textContent = percent + '%';
+
+        document.getElementById('bf-current').textContent = stats.currentPassword || '-';
+        document.getElementById('bf-attempted').textContent = stats.attempted;
+        document.getElementById('bf-failed').textContent = stats.failed;
+
+        const elapsed = (Date.now() - stats.startTime) / 1000;
+        const speed = (stats.attempted / elapsed).toFixed(1);
+        document.getElementById('bf-speed').textContent = speed + '/s';
+
+        if (stats.status === 'success') {
+          clearInterval(statusInterval);
+          showBruteForceResult(true, stats.found);
+          document.getElementById('bf-start-btn').disabled = false;
+          document.getElementById('bf-stop-btn').disabled = true;
+        } else if (stats.status === 'completed') {
+          clearInterval(statusInterval);
+          showBruteForceResult(false, null);
+          document.getElementById('bf-start-btn').disabled = false;
+          document.getElementById('bf-stop-btn').disabled = true;
+        }
+      } catch (err) {
+        console.error('Error updating status:', err);
+      }
+    }
+
+    function showBruteForceResult(success, credentials) {
+      const panel = document.getElementById('bf-result');
+      const content = document.getElementById('bf-result-content');
+
+      panel.style.display = 'block';
+
+      if (success) {
+        content.innerHTML = `
+          <span class="status status-success">SUCCESS</span>
+          <div style="margin-top: 12px; padding: 16px; background: var(--glass-bg); border-radius: 8px;">
+            <div style="margin-bottom: 8px;"><strong>Username:</strong> ${credentials.username}</div>
+            <div><strong>Password:</strong> ${credentials.password}</div>
+          </div>
+        `;
+      } else {
+        content.innerHTML = `<span class="status status-error">No credentials found</span>`;
+      }
+    }
+
+    function showWaitingForData() {
+      const lists = ['messages-list', 'notifications-list', 'payment-info'];
+      lists.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.innerHTML = '<div class="loading"><div class="spinner"></div>Scraping BC Self-Serve... This takes ~30-60 seconds</div>';
+        }
+      });
+    }
+
+    async function runCheck() {
+      const btn = document.getElementById('check-btn');
+      btn.disabled = true;
+      btn.textContent = 'Checking...';
+
+      try {
+        const response = await fetch('/api/check');
+        const result = await response.json();
+
+        if (response.ok) {
+          // Success - reload the data
+          await loadData();
+          btn.textContent = 'Check Complete!';
+          setTimeout(() => {
+            btn.textContent = 'Check Now';
+            btn.disabled = false;
+          }, 2000);
+        } else {
+          throw new Error(result.error || 'Check failed');
+        }
+      } catch (err) {
+        console.error('Error running check:', err);
+        btn.textContent = 'Error - Try Again';
+        setTimeout(() => {
+          btn.textContent = 'Check Now';
+          btn.disabled = false;
+        }, 2000);
+      }
+    }
+
+    function clearData() {
+      localStorage.clear();
+      location.reload();
+    }
+
+    function showBCeIDLogin() {
+      const lists = ['messages-list', 'notifications-list', 'payment-info'];
+      lists.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '';
+      });
+      document.getElementById('bceid-login-prompt').style.display = 'block';
+
+      // Pre-fill from localStorage if saved
+      const savedUser = localStorage.getItem('bceid_user');
+      if (savedUser) document.getElementById('bceid-user').value = savedUser;
+    }
+
+    async function saveBCeIDAndScrape() {
+      const user = document.getElementById('bceid-user').value.trim();
+      const pass = document.getElementById('bceid-pass').value;
+      const errorEl = document.getElementById('bceid-error');
+      const btn = document.getElementById('bceid-login-btn');
+
+      if (!user || !pass) {
+        errorEl.textContent = 'Both fields are required';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      errorEl.style.display = 'none';
+      btn.textContent = 'Connecting...';
+      btn.disabled = true;
+
+      // Save username to localStorage (not password — only in session)
+      localStorage.setItem('bceid_user', user);
+
+      // Save credentials to server session
+      try {
+        const loginResp = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ password: 'hunter2', bceid_username: user, bceid_password: pass })
+        });
+
+        // Trigger a scrape with these credentials
+        document.getElementById('bceid-login-prompt').style.display = 'none';
+        showWaitingForData();
+
+        const checkResp = await fetch('/api/check');
+        if (checkResp.ok) {
+          await loadData();
+        } else {
+          errorEl.textContent = 'Scrape failed — check credentials or try again';
+          errorEl.style.display = 'block';
+          document.getElementById('bceid-login-prompt').style.display = 'block';
+        }
+      } catch (err) {
+        errorEl.textContent = 'Connection failed: ' + err.message;
+        errorEl.style.display = 'block';
+      }
+
+      btn.textContent = 'Connect & Scrape';
+      btn.disabled = false;
+    }
+
+    // Auto-load on page load
+    loadData();
+    setInterval(loadData, 30000); // Auto-refresh every 30s
+
+    // ==========================================
+    // DTC NAVIGATOR - Eligibility Screener
+    // ==========================================
+
+    let dtcQuestions = [];
+    let currentQuestionIndex = 0;
+    let dtcAnswers = {};
+
+    const sectionTitles = {
+      basics: 'Basic Information',
+      impact: 'Impact on Daily Living',
+      taxes: 'Tax History',
+      existing: 'Existing Benefits'
+    };
+
+    // Load questions from knowledge base
+    async function loadDTCQuestions() {
+      try {
+        const response = await fetch('/data/dtc-knowledge.json');
+        const data = await response.json();
+        dtcQuestions = data.screenerQuestions;
+      } catch (err) {
+        console.error('Error loading DTC questions:', err);
+        // Fallback: hardcoded minimal questions
+        dtcQuestions = [
+          { id: 'q1', section: 'basics', question: 'Do you have a diagnosed medical condition or disability?', type: 'yesno', required: true, helpText: 'This includes physical disabilities, mental health conditions, neurodevelopmental conditions (autism, ADHD), chronic illnesses, etc.' },
+          { id: 'q3', section: 'basics', question: 'Has your condition lasted (or is expected to last) at least 12 months?', type: 'yesno', required: true },
+          { id: 'q5', section: 'impact', question: 'Does your condition significantly affect your ability to perform daily activities?', type: 'yesno', required: true }
+        ];
+      }
+    }
+
+    function startScreener() {
+      document.getElementById('dtc-intro').style.display = 'none';
+      document.getElementById('dtc-screener').style.display = 'block';
+      document.getElementById('dtc-results').style.display = 'none';
+      currentQuestionIndex = 0;
+      dtcAnswers = {};
+      renderQuestion();
+    }
+
+    function resetScreener() {
+      document.getElementById('dtc-intro').style.display = 'block';
+      document.getElementById('dtc-screener').style.display = 'none';
+      document.getElementById('dtc-results').style.display = 'none';
+      currentQuestionIndex = 0;
+      dtcAnswers = {};
+    }
+
+    function renderQuestion() {
+      const q = dtcQuestions[currentQuestionIndex];
+      const container = document.getElementById('dtc-question-container');
+      const progress = ((currentQuestionIndex + 1) / dtcQuestions.length * 100).toFixed(0);
+
+      document.getElementById('dtc-section-title').textContent = sectionTitles[q.section] || q.section;
+      document.getElementById('dtc-progress-badge').textContent = `${currentQuestionIndex + 1} / ${dtcQuestions.length}`;
+      document.getElementById('dtc-progress-bar').style.width = progress + '%';
+      document.getElementById('dtc-progress-bar').textContent = progress + '%';
+
+      // Show/hide back button
+      document.getElementById('dtc-back-btn').style.display = currentQuestionIndex > 0 ? 'inline-block' : 'none';
+
+      // Update next button text
+      const nextBtn = document.getElementById('dtc-next-btn');
+      nextBtn.textContent = currentQuestionIndex === dtcQuestions.length - 1 ? 'Get Results' : 'Next';
+
+      let html = `<div style="margin-bottom: 16px;">
+        <p style="font-size: 16px; font-weight: 500; margin-bottom: 8px; line-height: 1.5;">${q.question}</p>
+        ${q.helpText ? `<p style="font-size: 12px; color: var(--text-secondary); line-height: 1.4;">${q.helpText}</p>` : ''}
+      </div>`;
+
+      const savedAnswer = dtcAnswers[q.id];
+
+      if (q.type === 'yesno') {
+        html += `<div style="display: flex; gap: 12px;">
+          <button class="btn ${savedAnswer === 'yes' ? '' : 'btn-secondary'}" onclick="selectAnswer('${q.id}', 'yes')" style="flex: 1; padding: 16px;" id="opt-yes">Yes</button>
+          <button class="btn ${savedAnswer === 'no' ? '' : 'btn-secondary'}" onclick="selectAnswer('${q.id}', 'no')" style="flex: 1; padding: 16px;" id="opt-no">No</button>
+        </div>`;
+      } else if (q.type === 'select') {
+        html += `<select onchange="selectAnswer('${q.id}', this.value)" style="padding: 14px;">
+          <option value="">Select one...</option>
+          ${q.options.map(opt => `<option value="${opt.value}" ${savedAnswer === opt.value ? 'selected' : ''}>${opt.label}</option>`).join('')}
+        </select>`;
+      } else if (q.type === 'multiselect') {
+        const savedArr = Array.isArray(savedAnswer) ? savedAnswer : [];
+        html += `<div style="display: flex; flex-direction: column; gap: 8px;">
+          ${q.options.map(opt => `
+            <label style="display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--glass-bg); border-radius: 8px; border: 1px solid var(--glass-border); cursor: pointer; font-size: 14px; margin-bottom: 0;">
+              <input type="checkbox" value="${opt.value}" ${savedArr.includes(opt.value) ? 'checked' : ''} onchange="updateMultiSelect('${q.id}')" style="width: auto; margin: 0;">
+              ${opt.label}
+            </label>
+          `).join('')}
+        </div>`;
+      }
+
+      container.innerHTML = html;
+    }
+
+    function selectAnswer(questionId, value) {
+      dtcAnswers[questionId] = value;
+      // Visual feedback for yes/no buttons
+      const q = dtcQuestions[currentQuestionIndex];
+      if (q.type === 'yesno') {
+        const yesBtn = document.getElementById('opt-yes');
+        const noBtn = document.getElementById('opt-no');
+        if (value === 'yes') {
+          yesBtn.className = 'btn';
+          noBtn.className = 'btn btn-secondary';
+        } else {
+          yesBtn.className = 'btn btn-secondary';
+          noBtn.className = 'btn';
+        }
+      }
+    }
+
+    function updateMultiSelect(questionId) {
+      const checkboxes = document.querySelectorAll(`#dtc-question-container input[type="checkbox"]`);
+      const selected = [];
+      checkboxes.forEach(cb => { if (cb.checked) selected.push(cb.value); });
+      dtcAnswers[questionId] = selected;
+    }
+
+    function nextQuestion() {
+      const q = dtcQuestions[currentQuestionIndex];
+      const answer = dtcAnswers[q.id];
+
+      // Validate required
+      if (q.required) {
+        if (answer === undefined || answer === '' || (Array.isArray(answer) && answer.length === 0)) {
+          // Flash the question
+          const container = document.getElementById('dtc-question-container');
+          container.style.outline = '2px solid var(--error)';
+          container.style.borderRadius = '8px';
+          setTimeout(() => { container.style.outline = 'none'; }, 1000);
+          return;
+        }
+      }
+
+      if (currentQuestionIndex < dtcQuestions.length - 1) {
+        currentQuestionIndex++;
+        renderQuestion();
+      } else {
+        submitScreener();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        renderQuestion();
+      }
+    }
+
+    async function submitScreener() {
+      document.getElementById('dtc-screener').style.display = 'none';
+
+      try {
+        const response = await fetch('/api/dtc/screen', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ answers: dtcAnswers })
+        });
+
+        const results = await response.json();
+        displayResults(results);
+      } catch (err) {
+        console.error('Error submitting screener:', err);
+        // Fallback: calculate client-side
+        const results = calculateEligibility(dtcAnswers);
+        displayResults(results);
+      }
+    }
+
+    // Client-side eligibility calculation (fallback + instant feedback)
+    function calculateEligibility(answers) {
+      let dtcScore = 0;
+      let pwdScore = 0;
+      let flags = [];
+      let programs = [];
+
+      // Q1: Has diagnosis
+      if (answers.q1 === 'yes') {
+        dtcScore += 20;
+        pwdScore += 20;
+      } else {
+        flags.push({ type: 'warning', text: 'A formal diagnosis is typically required. Consider getting assessed by a qualified professional.' });
+      }
+
+      // Q2: Condition type
+      const conditions = answers.q2 || [];
+      if (conditions.includes('autism')) {
+        dtcScore += 15;
+        pwdScore += 15;
+        flags.push({ type: 'info', text: 'Autism is one of the most commonly approved conditions for DTC under "Mental Functions." Late diagnosis does not affect eligibility.' });
+      }
+      if (conditions.includes('adhd')) {
+        dtcScore += 10;
+        flags.push({ type: 'info', text: 'ADHD can qualify for DTC, especially when combined with other conditions or when it significantly impacts daily functioning.' });
+      }
+      if (conditions.includes('physical') || conditions.includes('vision') || conditions.includes('hearing')) {
+        dtcScore += 15;
+        pwdScore += 15;
+      }
+
+      // Q3: Duration
+      if (answers.q3 === 'yes') {
+        dtcScore += 15;
+        pwdScore += 15;
+      } else {
+        dtcScore -= 30;
+        pwdScore -= 30;
+        flags.push({ type: 'warning', text: 'The DTC requires your impairment to have lasted at least 12 continuous months.' });
+      }
+
+      // Q4: Province
+      if (answers.q4 === 'BC') {
+        pwdScore += 10;
+        programs.push({
+          name: 'BC PWD Designation',
+          description: 'Higher monthly assistance ($1,358.50/mo), extended health benefits, bus pass program.',
+          eligible: pwdScore > 30
+        });
+      }
+
+      // Q5: Impact on daily activities
+      if (answers.q5 === 'yes') {
+        dtcScore += 15;
+        pwdScore += 15;
+      } else {
+        dtcScore -= 20;
+      }
+
+      // Q6: Specific activities affected
+      const activities = answers.q6 || [];
+      if (activities.length >= 4) {
+        dtcScore += 15;
+        pwdScore += 10;
+        flags.push({ type: 'success', text: `You identified ${activities.length} affected daily activities. Multiple areas of impact strengthen your application.` });
+      } else if (activities.length >= 2) {
+        dtcScore += 10;
+        pwdScore += 5;
+      }
+
+      // Check for cumulative effect eligibility
+      if (activities.length >= 2 && dtcScore > 40) {
+        flags.push({ type: 'info', text: 'You may qualify under "Cumulative Effect of Significant Restrictions" — having 2+ areas affected that together equal a marked restriction.' });
+      }
+
+      // Q7: Time taken
+      if (answers.q7 === 'always') {
+        dtcScore += 15;
+      } else if (answers.q7 === 'usually') {
+        dtcScore += 10;
+      } else if (answers.q7 === 'sometimes') {
+        dtcScore += 5;
+      }
+
+      // Q8: Need for help
+      if (answers.q8 === 'always') {
+        dtcScore += 15;
+        pwdScore += 10;
+      } else if (answers.q8 === 'frequently') {
+        dtcScore += 10;
+        pwdScore += 5;
+      } else if (answers.q8 === 'occasionally') {
+        dtcScore += 5;
+      }
+
+      // Q9: Filed taxes
+      if (answers.q9 === 'no') {
+        flags.push({ type: 'warning', text: 'You need to file tax returns to receive a DTC refund. You can still file late returns for previous years.' });
+      }
+
+      // Q11: Diagnosis timing
+      let retroYears = 0;
+      if (answers.q11 === 'childhood') retroYears = 10;
+      else if (answers.q11 === '10+') retroYears = 10;
+      else if (answers.q11 === '5-10') retroYears = 7;
+      else if (answers.q11 === '3-5') retroYears = 4;
+      else if (answers.q11 === '1-3') retroYears = 2;
+      else if (answers.q11 === 'recent') retroYears = 1;
+      else if (answers.q11 === 'not_yet') {
+        flags.push({ type: 'warning', text: 'Getting a formal diagnosis is the first step. Consider a psychologist or psychiatrist assessment.' });
+      }
+
+      // Q12: Existing benefits
+      const existing = answers.q12 || [];
+      if (existing.includes('dtc')) {
+        flags.push({ type: 'info', text: 'You already have the DTC. Make sure you are also claiming: RDSP, Child Disability Benefit (if applicable), and provincial credits.' });
+      }
+      if (!existing.includes('rdsp') && dtcScore > 50) {
+        programs.push({
+          name: 'RDSP (Registered Disability Savings Plan)',
+          description: 'Government matches your savings up to $3,500/year. Up to $90,000 in lifetime grants. Requires DTC approval first.',
+          eligible: true
+        });
+      }
+
+      // Always add DTC as a program
+      programs.unshift({
+        name: 'Disability Tax Credit (T2201)',
+        description: 'Federal non-refundable tax credit. Can be claimed retroactively up to 10 years.',
+        eligible: dtcScore > 50
+      });
+
+      // Calculate estimated refund
+      let minRefund = 0;
+      let maxRefund = 0;
+      if (dtcScore > 50 && answers.q10 === 'yes') {
+        minRefund = Math.min(retroYears, 10) * 1500;
+        maxRefund = Math.min(retroYears, 10) * 2500;
+        if (answers.q11 === 'childhood' || answers.q11 === '10+') {
+          maxRefund = 25000;
+        }
+      }
+
+      // Clamp scores
+      dtcScore = Math.max(0, Math.min(100, dtcScore));
+      pwdScore = Math.max(0, Math.min(100, pwdScore));
+
+      let dtcEligibility, pwdEligibility;
+      if (dtcScore >= 70) dtcEligibility = 'Likely';
+      else if (dtcScore >= 50) dtcEligibility = 'Possible';
+      else if (dtcScore >= 30) dtcEligibility = 'Unlikely';
+      else dtcEligibility = 'No';
+
+      if (pwdScore >= 60) pwdEligibility = 'Likely';
+      else if (pwdScore >= 40) pwdEligibility = 'Possible';
+      else pwdEligibility = 'Unlikely';
+
+      return {
+        dtc: {
+          score: dtcScore,
+          eligibility: dtcEligibility,
+          estimatedRefund: { min: minRefund, max: maxRefund },
+          retroYears: retroYears
+        },
+        pwd: {
+          score: pwdScore,
+          eligibility: answers.q4 === 'BC' ? pwdEligibility : 'N/A (BC only)',
+          monthlyIncrease: answers.q4 === 'BC' ? '$423.50/mo' : 'N/A'
+        },
+        programs: programs,
+        flags: flags,
+        nextSteps: generateNextSteps(dtcScore, pwdScore, answers, existing)
+      };
+    }
+
+    function generateNextSteps(dtcScore, pwdScore, answers, existing) {
+      const steps = [];
+
+      if (answers.q11 === 'not_yet') {
+        steps.push({
+          priority: 1,
+          title: 'Get a Formal Diagnosis',
+          description: 'Book an assessment with a psychologist or psychiatrist. This is the foundation for all disability benefit applications.',
+          action: 'Search for diagnostic assessments in your area'
+        });
+      }
+
+      if (dtcScore > 40 && !(existing || []).includes('dtc')) {
+        steps.push({
+          priority: 2,
+          title: 'Apply for the Disability Tax Credit',
+          description: 'Download Form T2201 from the CRA website. Have your diagnosing doctor complete Part B.',
+          action: 'Download T2201 form'
+        });
+      }
+
+      if (answers.q4 === 'BC' && pwdScore > 30 && !(existing || []).includes('pwd')) {
+        steps.push({
+          priority: 3,
+          title: 'Apply for BC PWD Designation',
+          description: 'Contact your Employment and Assistance Worker to request the PWD application package.',
+          action: 'Call BC Employment and Assistance: 1-866-866-0800'
+        });
+      }
+
+      if (dtcScore > 50 && !(existing || []).includes('rdsp')) {
+        steps.push({
+          priority: 4,
+          title: 'Open an RDSP',
+          description: 'Once your DTC is approved, open a Registered Disability Savings Plan. The government contributes up to $3,500/year in matching grants.',
+          action: 'Contact your bank about RDSP'
+        });
+      }
+
+      if (answers.q9 === 'no') {
+        steps.push({
+          priority: 1,
+          title: 'File Your Tax Returns',
+          description: 'You need filed tax returns to receive DTC refunds. You can file returns for the last 10 years.',
+          action: 'File taxes through CRA My Account or a tax professional'
+        });
+      }
+
+      steps.push({
+        priority: 5,
+        title: 'Document Your Daily Limitations',
+        description: 'Write down specific examples of how your condition affects daily activities. This helps your doctor complete the T2201 accurately.',
+        action: 'Start a daily impact journal'
+      });
+
+      return steps.sort((a, b) => a.priority - b.priority);
+    }
+
+    function displayResults(results) {
+      document.getElementById('dtc-results').style.display = 'block';
+
+      // Stats
+      const dtcColor = results.dtc.eligibility === 'Likely' ? 'var(--success)' :
+                        results.dtc.eligibility === 'Possible' ? 'var(--warning)' : 'var(--error)';
+      const pwdColor = results.pwd.eligibility === 'Likely' ? 'var(--success)' :
+                        results.pwd.eligibility === 'Possible' ? 'var(--warning)' :
+                        results.pwd.eligibility === 'N/A (BC only)' ? 'var(--text-secondary)' : 'var(--error)';
+
+      document.getElementById('dtc-eligible-badge').innerHTML = `<span style="color: ${dtcColor}">${results.dtc.eligibility}</span>`;
+      document.getElementById('pwd-eligible-badge').innerHTML = `<span style="color: ${pwdColor}">${results.pwd.eligibility}</span>`;
+
+      if (results.dtc.estimatedRefund.max > 0) {
+        document.getElementById('dtc-refund-est').textContent =
+          `$${results.dtc.estimatedRefund.min.toLocaleString()}-$${results.dtc.estimatedRefund.max.toLocaleString()}`;
+      } else {
+        document.getElementById('dtc-refund-est').textContent = '$0';
+      }
+
+      document.getElementById('dtc-programs-count').textContent = results.programs.filter(p => p.eligible).length;
+
+      // Detailed results
+      let html = '';
+
+      // Flags
+      if (results.flags && results.flags.length > 0) {
+        html += '<div style="margin-bottom: 20px;">';
+        results.flags.forEach(flag => {
+          const bgColor = flag.type === 'success' ? 'rgba(52, 199, 89, 0.1)' :
+                          flag.type === 'warning' ? 'rgba(255, 149, 0, 0.1)' :
+                          'rgba(0, 122, 255, 0.1)';
+          const borderColor = flag.type === 'success' ? 'var(--success)' :
+                              flag.type === 'warning' ? 'var(--warning)' : 'var(--accent)';
+          html += `<div style="padding: 12px 16px; background: ${bgColor}; border-left: 3px solid ${borderColor}; border-radius: 0 8px 8px 0; margin-bottom: 8px; font-size: 13px; line-height: 1.5; color: var(--text-primary);">
+            ${flag.text}
+          </div>`;
+        });
+        html += '</div>';
+      }
+
+      // Programs
+      html += '<h3 style="font-size: 15px; font-weight: 600; margin-bottom: 12px;">Programs You May Qualify For</h3>';
+      results.programs.forEach(prog => {
+        const statusColor = prog.eligible ? 'var(--success)' : 'var(--text-secondary)';
+        const statusText = prog.eligible ? 'Likely Eligible' : 'May Not Qualify';
+        html += `<div class="list-item">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="list-item-title">${prog.name}</div>
+            <span class="status" style="background: ${statusColor}; color: white;">${statusText}</span>
+          </div>
+          <div class="list-item-meta">${prog.description}</div>
+        </div>`;
+      });
+
+      document.getElementById('dtc-results-content').innerHTML = html;
+
+      // Next steps
+      let stepsHtml = '';
+      if (results.nextSteps && results.nextSteps.length > 0) {
+        results.nextSteps.forEach((step, i) => {
+          stepsHtml += `<div class="list-item">
+            <div style="display: flex; gap: 12px; align-items: flex-start;">
+              <div style="min-width: 28px; height: 28px; background: var(--accent); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">${i + 1}</div>
+              <div>
+                <div class="list-item-title" style="font-weight: 600;">${step.title}</div>
+                <div class="list-item-meta" style="margin-top: 4px;">${step.description}</div>
+                ${step.action ? `<div style="margin-top: 8px; font-size: 12px; color: var(--accent); font-weight: 500;">${step.action}</div>` : ''}
+              </div>
+            </div>
+          </div>`;
+        });
+      }
+
+      document.getElementById('dtc-steps-content').innerHTML = stepsHtml;
+
+      // Scroll to results
+      document.getElementById('dtc-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function copyResults() {
+      const resultsEl = document.getElementById('dtc-results');
+      const text = resultsEl.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = event.target;
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy Results'; }, 2000);
+      });
+    }
+
+    // Load DTC questions on page load
+    loadDTCQuestions();
+  </script>
+</body>
+</html>

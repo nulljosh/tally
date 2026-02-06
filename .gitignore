@@ -1,0 +1,14 @@
+node_modules/
+.env
+cookies.json
+chrome-data/
+chrome-data-v2/
+*.png
+error-screenshot.png
+payment-status*.png
+results-*.json
+network-log-*.json
+api-calls-*.json
+*.log
+.api.pid
+.vercel
