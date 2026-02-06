@@ -1,9 +1,11 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 const fs = require('fs').promises;
 const path = require('path');
 require('dotenv').config();
 
-const COOKIES_PATH = path.join(__dirname, '../data/cookies.json');
+const IS_VERCEL = !!process.env.VERCEL;
+const DATA_DIR = IS_VERCEL ? '/tmp' : path.join(__dirname, '../data');
+const COOKIES_PATH = path.join(DATA_DIR, 'cookies.json');
 
 async function saveCookies(page) {
   try {
@@ -276,7 +278,7 @@ async function scrapeSection(page, sectionName, sectionUrl) {
 
     // Take a screenshot of this section
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const screenshotDir = path.join(__dirname, '../data/screenshots');
+    const screenshotDir = path.join(DATA_DIR, 'screenshots');
     let screenshotPath = null;
     try {
       await fs.mkdir(screenshotDir, { recursive: true });
@@ -305,12 +307,25 @@ async function checkAllSections(options = {}) {
   let browser;
 
   try {
-    browser = await puppeteer.launch({
-      headless: headless,
-      defaultViewport: headless ? { width: 1920, height: 1080 } : null,
-      args: headless ? [] : ['--start-maximized'],
-      userDataDir: './chrome-data'
-    });
+    let launchOptions;
+    if (IS_VERCEL) {
+      const chromium = require('@sparticuz/chromium');
+      launchOptions = {
+        args: chromium.args,
+        defaultViewport: { width: 1920, height: 1080 },
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless
+      };
+    } else {
+      launchOptions = {
+        headless: headless,
+        defaultViewport: headless ? { width: 1920, height: 1080 } : null,
+        args: headless ? [] : ['--start-maximized'],
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+        userDataDir: './chrome-data'
+      };
+    }
+    browser = await puppeteer.launch(launchOptions);
 
     const page = await browser.newPage();
     page.setDefaultNavigationTimeout(30000);
@@ -399,7 +414,7 @@ async function checkAllSections(options = {}) {
       sections: allResults
     };
 
-    const jsonPath = path.join(__dirname, `../data/results-${timestamp}.json`);
+    const jsonPath = path.join(DATA_DIR, `results-${timestamp}.json`);
     await fs.writeFile(jsonPath, JSON.stringify(result, null, 2));
     console.log(`\n[*] Results saved to ${jsonPath}`);
 
@@ -415,7 +430,7 @@ async function checkAllSections(options = {}) {
       try {
         const page = (await browser.pages())[0];
         if (page) {
-          const errDir = path.join(__dirname, '../data/screenshots');
+          const errDir = path.join(DATA_DIR, 'screenshots');
           await fs.mkdir(errDir, { recursive: true }).catch(() => {});
           await page.screenshot({ path: path.join(errDir, 'error-screenshot.png') }).catch(() => {});
         }

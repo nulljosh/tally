@@ -11,6 +11,7 @@ const DASHBOARD_PASSWORD = process.env.DASHBOARD_PASSWORD || 'hunter2';
 
 app.use(cors());
 app.use(express.json());
+app.set('trust proxy', 1);
 app.use(session({
   secret: process.env.SESSION_SECRET || 'selfserve-secret-key-change-me',
   resave: false,
@@ -105,7 +106,15 @@ app.get('/api/latest', (req, res) => {
       return res.json({ file: 'in-memory', data: lastCheckResult });
     }
 
-    // Fall back to latest results file on disk
+    // On Vercel, no persistent disk — only in-memory results
+    if (process.env.VERCEL) {
+      if (lastCheckResult) {
+        return res.json({ file: 'in-memory', data: lastCheckResult });
+      }
+      return res.status(404).json({ error: 'No results yet. Click "Check Now" to scrape.' });
+    }
+
+    // Fall back to latest results file on disk (local dev only)
     const dataDir = path.join(__dirname, '../data');
     const files = fs.readdirSync(dataDir)
       .filter(f => f.startsWith('results-') && f.endsWith('.json'))
@@ -122,7 +131,7 @@ app.get('/api/latest', (req, res) => {
         const data = JSON.parse(fs.readFileSync(samplePath, 'utf8'));
         return res.json({ file: 'sample-data.json', data });
       }
-      return res.status(404).json({ error: 'No results files found. Scrape is starting automatically...' });
+      return res.status(404).json({ error: 'No results files found. Click "Check Now" to scrape.' });
     }
 
     const latestFile = files[0].name;
@@ -310,25 +319,31 @@ app.get('/api/check', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`[API] Server running on http://localhost:${PORT}`);
-  console.log(`[API] Endpoints:`);
-  console.log(`  GET /check  - Run payment check`);
-  console.log(`  GET /status - Get last results`);
-  console.log(`  GET /health - Health check`);
+// Vercel: export the Express app as a serverless function
+// Local: start the server with auto-scrape
+if (process.env.VERCEL) {
+  module.exports = app;
+} else {
+  app.listen(PORT, () => {
+    console.log(`[API] Server running on http://localhost:${PORT}`);
+    console.log(`[API] Endpoints:`);
+    console.log(`  GET /check  - Run payment check`);
+    console.log(`  GET /status - Get last results`);
+    console.log(`  GET /health - Health check`);
 
-  // Auto-scrape on startup so dashboard has data immediately
-  console.log('[API] Starting auto-scrape...');
-  isChecking = true;
-  checkAllSections({ headless: true })
-    .then(result => {
-      lastCheckResult = { ...result, checkedAt: new Date().toISOString() };
-      isChecking = false;
-      console.log('[API] Auto-scrape complete — dashboard data ready');
-    })
-    .catch(error => {
-      lastCheckResult = { success: false, error: error.message, checkedAt: new Date().toISOString() };
-      isChecking = false;
-      console.log('[API] Auto-scrape failed:', error.message);
-    });
-});
+    // Auto-scrape on startup so dashboard has data immediately
+    console.log('[API] Starting auto-scrape...');
+    isChecking = true;
+    checkAllSections({ headless: true })
+      .then(result => {
+        lastCheckResult = { ...result, checkedAt: new Date().toISOString() };
+        isChecking = false;
+        console.log('[API] Auto-scrape complete — dashboard data ready');
+      })
+      .catch(error => {
+        lastCheckResult = { success: false, error: error.message, checkedAt: new Date().toISOString() };
+        isChecking = false;
+        console.log('[API] Auto-scrape failed:', error.message);
+      });
+  });
+}

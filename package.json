@@ -23,7 +23,8 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-session": "^1.18.2",
-    "puppeteer": "^24.35.0"
+    "puppeteer-core": "^24.35.0",
+    "@sparticuz/chromium": "^131.0.1"
   },
   "devDependencies": {
     "browser-sync": "^3.0.4",
