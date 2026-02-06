@@ -17,7 +17,8 @@
   "routes": [
     { "src": "/api/(.*)", "dest": "/src/api.js" },
     { "src": "/data/(.*)", "dest": "/src/api.js" },
-    { "src": "/(.*\\.(html|css|js|png|jpg|svg|ico))", "dest": "/web/$1" },
-    { "src": "/(.*)", "dest": "/src/api.js" }
+    { "src": "^/$", "dest": "/web/unified.html" },
+    { "src": "/login", "dest": "/web/login.html" },
+    { "src": "/(.*\\.(html|css|js|png|jpg|svg|ico))", "dest": "/web/$1" }
   ]
 }
