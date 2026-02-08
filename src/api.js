@@ -416,8 +416,55 @@ app.get('/api/latest', requireAuth, async (req, res) => {
       return res.json({ file: 'sample-data.json', data });
     }
 
-    console.log('[API] ERROR: No data files found at all');
-    return res.status(404).json({ error: 'No results files found. Click "Check Now" to scrape.' });
+    // No data found anywhere - return demo data
+    console.log('[API] No data found, returning hardcoded demo data');
+    const sampleData = {
+      success: true,
+      timestamp: new Date().toISOString(),
+      sections: {
+        "Payment Info": {
+          success: true,
+          allText: ["Demo payment information"],
+          tableData: [
+            "Assistance",
+            "Support | $560.00 | ",
+            "SHELTER: RENT | $500.00 | ",
+            "Paid to: Demo User | Payment Method: CHEQUE",
+            "Amount: $1060.00 | Name of Bank: Demo Bank",
+            "Cheque Number: 12345678 | Bank Account Number: ********",
+            "Payment Distribution: OFFICE | Bank Account Name: Joshua Trommel"
+          ],
+          keywords: ["Payment", "Assistance"],
+          pageTitle: "Payment Information"
+        },
+        "Messages": {
+          success: true,
+          allText: [
+            "2026 / JAN / 21\nSample Message 1",
+            "2026 / JAN / 06\nSample Message 2",
+            "2026 / JAN / 05\nSample Message 3"
+          ],
+          tableData: [],
+          keywords: ["Messages"],
+          pageTitle: "Messages"
+        },
+        "Notifications": {
+          success: true,
+          allText: ["Sample notification - Scrape locally to see real data"],
+          tableData: [],
+          keywords: ["Notifications"],
+          pageTitle: "Notifications"
+        },
+        "Service Requests": {
+          success: true,
+          allText: ["Sample Service Request"],
+          tableData: ["1-12345678 | Shelter Update\nCreated for Joshua Trommel\n2026 / JAN / 08 | Closed"],
+          keywords: ["Service Requests"],
+          pageTitle: "Service Requests"
+        }
+      }
+    };
+    return res.json({ file: 'demo-data (hardcoded)', data: sampleData });
   } catch (error) {
     console.error('[API] /api/latest error:', error);
     res.status(500).json({ error: error.message });
