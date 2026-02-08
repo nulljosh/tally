@@ -12,3 +12,4 @@ api-calls-*.json
 *.log
 .api.pid
 .vercel
+.env*.local

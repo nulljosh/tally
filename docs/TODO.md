@@ -1,46 +1,84 @@
 # TODO - BC Self-Serve Scraper
 
-## 🔥 PRIORITY: Multi-User Login System (v2.3.0)
+## 🔥 PRIORITY: Fix Vercel — Dashboard loads with no data
+
+**Problem:** On Vercel, dashboard shows "Scraping BC Self-Serve... This takes ~30-60 seconds" forever. Locally it works because `auto-scrape` runs on startup and populates `lastCheckResult` in memory. On Vercel (serverless), there's no persistent memory between requests.
+
+**Fix:** Same pattern as bread (see `~/Documents/Code/bread/api/cron.js`):
+1. `npm install @vercel/blob` — persistent JSON storage between requests
+2. Run scraper locally (or via external cron), write results to Vercel Blob
+3. Update `/api/latest` to read from Blob first — instant data on page load
+4. Remove "Check Now" button / scrape-on-demand pattern from dashboard
+5. Cron can't run Puppeteer on Vercel (too heavy), so scrape locally + push to Blob
+
+**Why Puppeteer can't run on Vercel cron:**
+- @sparticuz/chromium cold start is ~10-15s
+- BC gov login + 4 section scrape takes 30-60s total
+- Vercel hobby plan: 60s max function duration, often times out
+- Solution: scrape from local machine on a schedule, upload results to Blob
+
+**Steps:**
+1. Add `@vercel/blob` dependency
+2. Create `api/upload.js` — endpoint to receive scrape results and write to Blob (secured with secret)
+3. Update `api/latest.js` — read from Blob instead of in-memory `lastCheckResult`
+4. Create local script: `npm run scrape-and-upload` — runs scraper, POSTs results to `/api/upload`
+5. Schedule locally with cron/launchd (weekly or on-demand)
+6. Set env vars on Vercel: `BLOB_READ_WRITE_TOKEN`, `UPLOAD_SECRET`
+
+---
+
+## ✅ COMPLETED: Multi-User Login System (v2.3.0)
 
 **Goal:** Replace simple password ("hunter2") with BC Self-Serve credentials. Each user logs in with their own username/password and sees their own data.
 
 ### Checklist
 
-#### Phase 1: Frontend Login (30 min)
-- [ ] Update `web/login.html`: Add username field
-- [ ] Update login form to send both username + password to `/api/login`
-- [ ] Test login UI works locally
+#### Phase 1: Frontend Login ✅
+- [x] Update `web/login.html`: Add username + password fields for BC Self-Serve
+- [x] Update login form to send both username + password to `/api/login`
+- [x] Allow blank fields to use .env defaults (admin convenience)
 
-#### Phase 2: Backend Auth (1 hr)
-- [ ] Update `/api/login` endpoint to accept username + password
-- [ ] Validate credentials by attempting BC Self-Serve login (test authentication)
-- [ ] Store credentials in session (encrypted or memory-only, NEVER plain text)
-- [ ] Add session timeout (auto-logout after 1 hour inactivity)
-- [ ] Test session persistence across page refreshes
+#### Phase 2: Backend Auth ✅
+- [x] Update `/api/login` endpoint to accept username + password
+- [x] Validate credentials by attempting BC Self-Serve login (attemptBCLogin())
+- [x] Store credentials in session with AES-256-CBC encryption
+- [x] Add session timeout (2 hour max age, 1 hour activity timeout)
+- [x] Secure cookies (httpOnly, sameSite strict, secure in production)
 
-#### Phase 3: Dynamic Scraping (1 hr)
-- [ ] Modify `checkAllSections()` to accept username/password parameters
-- [ ] Update `/api/check` to use session credentials instead of .env
-- [ ] Keep .env credentials as fallback for testing
-- [ ] Test scraping with session credentials
+#### Phase 3: Dynamic Scraping ✅
+- [x] Modify `checkAllSections()` to accept username/password parameters (already supported)
+- [x] Update `/api/check` to use session credentials with .env fallback
+- [x] Keep .env credentials as fallback for admin auto-login
+- [x] Scraper dynamically uses session or .env credentials
 
-#### Phase 4: Security & Polish (30 min)
-- [ ] Add rate limiting to `/api/login` (max 5 attempts per 15 min)
-- [ ] Add "Logout" button in dashboard
-- [ ] Clear session data on logout
-- [ ] Add loading state during login validation
-- [ ] Test edge cases (wrong password, session timeout, etc.)
+#### Phase 4: Security & Polish ✅
+- [x] Add rate limiting to `/api/login` (5 attempts per 15 min)
+- [x] Add "Logout" button in dashboard nav
+- [x] Destroy session on logout (POST /api/logout)
+- [x] Delete insecure `/api/default-credentials` endpoint
+- [x] Add auth to `/api/latest` endpoint
+- [x] .env excluded from git (.gitignore)
 
-#### Phase 5: Testing & Deploy
-- [ ] Test with multiple users/sessions
-- [ ] Verify credentials never logged or stored in plain text
-- [ ] Update README with new login flow
-- [ ] Tag v2.3.0
-- [ ] Deploy to Vercel (if JWT auth already implemented)
+#### Phase 5: Vercel Blob Integration ✅
+- [x] Install `@vercel/blob` dependency
+- [x] Create `api/upload.js` — secure upload endpoint (requires UPLOAD_SECRET)
+- [x] Update `/api/latest` — read from Blob on Vercel, fall back to files locally
+- [x] Create `scripts/upload-to-blob.js` — local upload script
+- [x] Add `npm run upload-blob` script to package.json
 
-**ETA:** 3-4 hours total
-**Status:** Not started
-**Next:** Start with Phase 1 (frontend login update)
+#### Remaining Work 🔧
+- [ ] Add `vercel.json` config with env var references
+- [ ] Test Vercel deployment end-to-end
+- [ ] Set Vercel env vars (UPLOAD_SECRET, SESSION_SECRET, BLOB_READ_WRITE_TOKEN)
+- [ ] Test login with BC credentials end-to-end
+- [ ] Test Blob upload/download workflow
+- [ ] Update README with new login flow (DONE)
+- [ ] Consolidate docs (9 markdown files → 4-6)
+- [ ] Rename project from "selfserve" to "claimcheck"
+
+**Status:** v2.3.0 implemented, pending testing & deployment
+**Security fixes:** All critical vulnerabilities resolved
+**Next:** Test locally, deploy to Vercel, configure env vars
 
 ---
 

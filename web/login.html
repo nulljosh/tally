@@ -13,19 +13,33 @@
 </head>
 <body class="min-h-screen bg-white dark:bg-black text-gray-900 dark:text-white flex items-center justify-center p-4" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, system-ui, sans-serif;">
   <div class="max-w-md w-full">
-    <h1 class="text-2xl font-medium mb-6 text-center tracking-tight">Dashboard Login</h1>
+    <h1 class="text-2xl font-medium mb-6 text-center tracking-tight">BC Self-Serve Login</h1>
 
     <form id="login-form" class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
       <div class="mb-4">
-        <label for="password" class="block text-sm font-medium mb-2">Password</label>
+        <label for="username" class="block text-sm font-medium mb-2">BCEID Username</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          class="w-full px-3 py-2 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Leave blank to use .env credentials"
+        >
+      </div>
+
+      <div class="mb-4">
+        <label for="password" class="block text-sm font-medium mb-2">BCEID Password</label>
         <input
           type="password"
           id="password"
           name="password"
           class="w-full px-3 py-2 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="hunter2"
-          required
+          placeholder="Leave blank to use .env credentials"
         >
+      </div>
+
+      <div class="mb-4 text-xs text-gray-600 dark:text-gray-400">
+        Enter your BC Self-Serve credentials, or leave blank to use .env file defaults
       </div>
 
       <div id="error" class="hidden mb-4 text-sm text-red-600 dark:text-red-400"></div>
@@ -47,6 +61,7 @@
       e.preventDefault();
       error.classList.add('hidden');
 
+      const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
 
       try {
@@ -54,13 +69,15 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'same-origin',
-          body: JSON.stringify({ password })
+          body: JSON.stringify({ username, password })
         });
+
+        const data = await response.json();
 
         if (response.ok) {
           window.location.href = '/';
         } else {
-          error.textContent = 'Invalid password';
+          error.textContent = data.error || 'Invalid credentials';
           error.classList.remove('hidden');
         }
       } catch (err) {

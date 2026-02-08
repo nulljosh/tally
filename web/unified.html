@@ -424,6 +424,7 @@
       <div class="tab" onclick="switchTab('bruteforce')">Security Testing</div>
       <div class="tab" onclick="switchTab('tools')">Tools</div>
     </div>
+    <button class="btn btn-secondary" onclick="logout()" style="font-size: 13px; padding: 6px 12px;">Logout</button>
     <div class="theme-toggle" onclick="toggleTheme()"></div>
   </nav>
 
@@ -693,6 +694,23 @@
   <script>
     let attackId = null;
     let statusInterval = null;
+
+    // Logout
+    async function logout() {
+      try {
+        const response = await fetch('/api/logout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin'
+        });
+
+        if (response.ok) {
+          window.location.href = '/login.html';
+        }
+      } catch (error) {
+        console.error('Logout failed:', error);
+      }
+    }
 
     // Theme toggle
     function toggleTheme() {

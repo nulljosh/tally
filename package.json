@@ -11,6 +11,7 @@
     "dev": "nodemon src/api.js",
     "watch": "concurrently \"nodemon src/api.js\" \"browser-sync start --proxy localhost:3000 --files 'web/**/*.html' --no-open\"",
     "start": "node src/api.js",
+    "upload-blob": "node scripts/upload-to-blob.js",
     "brute": "nodemon brute/tools/brute-force-web.js",
     "mock-server": "nodemon brute/mock-targets/mock-server.js"
   },
@@ -19,12 +20,14 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@sparticuz/chromium": "^131.0.1",
+    "@vercel/blob": "^2.2.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
     "express-session": "^1.18.2",
-    "puppeteer-core": "^24.35.0",
-    "@sparticuz/chromium": "^131.0.1"
+    "puppeteer-core": "^24.35.0"
   },
   "devDependencies": {
     "browser-sync": "^3.0.4",

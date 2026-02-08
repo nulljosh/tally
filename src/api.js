@@ -3,24 +3,152 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const session = require('express-session');
+const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
 const { checkAllSections } = require('./scraper');
+const puppeteer = require('puppeteer-core');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DASHBOARD_PASSWORD = process.env.DASHBOARD_PASSWORD || 'hunter2';
+const ENCRYPTION_KEY = process.env.SESSION_SECRET || 'selfserve-secret-key-change-me';
+
+// Encryption helpers for session credential storage
+function encrypt(text) {
+  if (!text) return '';
+  const algorithm = 'aes-256-cbc';
+  const key = crypto.scryptSync(ENCRYPTION_KEY, 'salt', 32);
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv(algorithm, key, iv);
+  let encrypted = cipher.update(text, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+  return iv.toString('hex') + ':' + encrypted;
+}
+
+function decrypt(encrypted) {
+  if (!encrypted) return '';
+  const algorithm = 'aes-256-cbc';
+  const key = crypto.scryptSync(ENCRYPTION_KEY, 'salt', 32);
+  const parts = encrypted.split(':');
+  const iv = Buffer.from(parts[0], 'hex');
+  const encryptedText = parts[1];
+  const decipher = crypto.createDecipheriv(algorithm, key, iv);
+  let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted;
+}
+
+// Validate BC Self-Serve credentials by attempting login
+async function attemptBCLogin(username, password) {
+  let browser;
+  try {
+    browser = await puppeteer.launch({
+      headless: true,
+      defaultViewport: { width: 1920, height: 1080 },
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+
+    const page = await browser.newPage();
+
+    // Navigate to BC Self-Serve
+    await page.goto('https://myselfserve.gov.bc.ca', {
+      waitUntil: 'networkidle2',
+      timeout: 15000
+    });
+
+    // Click sign in button
+    await page.evaluate(() => {
+      const buttons = Array.from(document.querySelectorAll('a, button'));
+      for (const btn of buttons) {
+        const text = btn.innerText?.toLowerCase() || '';
+        if (text.includes('sign in') || text.includes('log in')) {
+          btn.click();
+          return true;
+        }
+      }
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Wait for login form
+    await page.waitForSelector('input[name="user"], input[id="user"]', {
+      timeout: 10000
+    });
+
+    // Fill credentials
+    await page.evaluate((user, pass) => {
+      const userField = document.querySelector('input[name="user"], input[id="user"]');
+      const passField = document.querySelector('input[name="password"], input[id="password"]');
+      if (userField) userField.value = user;
+      if (passField) passField.value = pass;
+    }, username, password);
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Submit form
+    await page.evaluate(() => {
+      const submitBtn = document.querySelector('input[type="submit"], button[type="submit"]');
+      if (submitBtn) submitBtn.click();
+    });
+
+    // Wait for navigation
+    await page.waitForNavigation({ timeout: 10000 }).catch(() => {});
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Check if login succeeded (not on login page)
+    const currentUrl = page.url();
+    const success = !currentUrl.includes('logon') && !currentUrl.includes('Login');
+
+    await browser.close();
+    return { success };
+  } catch (error) {
+    if (browser) await browser.close().catch(() => {});
+    return { success: false, error: error.message };
+  }
+}
 
 app.use(cors());
 app.use(express.json());
 app.set('trust proxy', 1);
+
+// Rate limiting for login attempts
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 attempts per window
+  message: 'Too many login attempts, please try again in 15 minutes',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'selfserve-secret-key-change-me',
+  secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
   resave: false,
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    httpOnly: true,
+    sameSite: 'strict',
+    maxAge: 2 * 60 * 60 * 1000 // 2 hours
   }
 }));
+
+// Session timeout middleware
+app.use((req, res, next) => {
+  if (req.session && req.session.authenticated) {
+    const lastActivity = req.session.lastActivity || Date.now();
+    const now = Date.now();
+    const timeout = 60 * 60 * 1000; // 1 hour
+
+    if (now - lastActivity > timeout) {
+      req.session.destroy();
+      return res.status(401).json({ error: 'Session expired' });
+    }
+
+    req.session.lastActivity = now;
+  }
+  next();
+});
 
 // Auth middleware
 const requireAuth = (req, res, next) => {
@@ -31,15 +159,48 @@ const requireAuth = (req, res, next) => {
   }
 };
 
-// Login endpoint - simple password check
-app.post('/api/login', (req, res) => {
-  const { password } = req.body;
+// Login endpoint - validate BC Self-Serve credentials
+app.post('/api/login', loginLimiter, async (req, res) => {
+  let { username, password } = req.body;
 
-  if (password === DASHBOARD_PASSWORD) {
+  // Fall back to .env credentials if not provided
+  username = username || process.env.BCEID_USERNAME;
+  password = password || process.env.BCEID_PASSWORD;
+
+  if (!username || !password) {
+    return res.status(400).json({
+      success: false,
+      error: 'Username and password required (or configure .env file)'
+    });
+  }
+
+  try {
+    // Validate credentials by attempting actual BC Self-Serve login
+    console.log('[LOGIN] Validating credentials...');
+    const result = await attemptBCLogin(username, password);
+
+    if (!result.success) {
+      console.log('[LOGIN] Invalid credentials');
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid BC Self-Serve credentials'
+      });
+    }
+
+    // Store encrypted credentials in session
     req.session.authenticated = true;
+    req.session.bceidUsername = username;
+    req.session.bceidPassword = encrypt(password);
+    req.session.lastActivity = Date.now();
+
+    console.log('[LOGIN] Login successful');
     res.json({ success: true });
-  } else {
-    res.status(401).json({ success: false, error: 'Invalid password' });
+  } catch (error) {
+    console.error('[LOGIN] Error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Login validation failed'
+    });
   }
 });
 
@@ -91,60 +252,97 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
 });
 
-// Get default credentials from .env (for pre-filling login form)
-app.get('/api/default-credentials', (req, res) => {
-  res.json({
-    username: process.env.BCEID_USERNAME || '',
-    password: process.env.BCEID_PASSWORD || ''
-  });
-});
 
-app.get('/api/latest', (req, res) => {
+app.get('/api/latest', requireAuth, async (req, res) => {
   try {
-    // Return in-memory result first (from auto-scrape or manual check)
-    if (lastCheckResult && lastCheckResult.success) {
+    console.log('[API] /api/latest called');
+
+    // On Vercel: try to read from Blob first
+    if (process.env.VERCEL) {
+      try {
+        const { list } = require('@vercel/blob');
+        const { blobs } = await list({ prefix: 'claimcheck-cache/results.json' });
+
+        if (blobs && blobs.length > 0) {
+          const blobUrl = blobs[0].url;
+          const response = await fetch(blobUrl);
+          const data = await response.json();
+
+          console.log('[API] Returning data from Vercel Blob');
+          return res.json({ file: 'vercel-blob', data });
+        }
+      } catch (blobError) {
+        console.log('[API] Blob read failed, falling back:', blobError.message);
+      }
+    }
+
+    // Return in-memory result if it's good data
+    if (lastCheckResult && lastCheckResult.success && !hasErrors(lastCheckResult)) {
+      console.log('[API] Returning cached in-memory result');
       return res.json({ file: 'in-memory', data: lastCheckResult });
+    }
+
+    // If in-memory data has errors, log it
+    if (lastCheckResult && hasErrors(lastCheckResult)) {
+      console.log('[API] WARNING: In-memory result has errors, falling back to file');
     }
 
     // On Vercel, no persistent disk — only in-memory results
     if (process.env.VERCEL) {
-      if (lastCheckResult) {
+      if (lastCheckResult && !hasErrors(lastCheckResult)) {
         return res.json({ file: 'in-memory', data: lastCheckResult });
       }
       return res.status(404).json({ error: 'No results yet. Click "Check Now" to scrape.' });
     }
 
-    // Fall back to latest results file on disk (local dev only)
+    // Fall back to latest GOOD results file on disk (local dev only)
     const dataDir = path.join(__dirname, '../data');
     const files = fs.readdirSync(dataDir)
       .filter(f => f.startsWith('results-') && f.endsWith('.json'))
       .map(f => ({
         name: f,
+        path: path.join(dataDir, f),
         time: fs.statSync(path.join(dataDir, f)).mtime.getTime()
       }))
       .sort((a, b) => b.time - a.time);
 
-    if (files.length === 0) {
-      // Fall back to sample-data.json if no results files exist
-      const samplePath = path.join(dataDir, 'sample-data.json');
-      if (fs.existsSync(samplePath)) {
-        const data = JSON.parse(fs.readFileSync(samplePath, 'utf8'));
-        return res.json({ file: 'sample-data.json', data });
+    // Find first file without errors
+    for (const file of files) {
+      try {
+        const data = JSON.parse(fs.readFileSync(file.path, 'utf8'));
+        if (!hasErrors(data)) {
+          console.log(`[API] Returning good file: ${file.name}`);
+          return res.json({ file: file.name, data });
+        } else {
+          console.log(`[API] Skipping ${file.name} (has errors)`);
+        }
+      } catch (e) {
+        console.log(`[API] Failed to read ${file.name}:`, e.message);
       }
-      return res.status(404).json({ error: 'No results files found. Click "Check Now" to scrape.' });
     }
 
-    const latestFile = files[0].name;
-    const data = JSON.parse(fs.readFileSync(path.join(dataDir, latestFile), 'utf8'));
+    // No good files found, fall back to sample data
+    const samplePath = path.join(dataDir, 'sample-data.json');
+    if (fs.existsSync(samplePath)) {
+      const data = JSON.parse(fs.readFileSync(samplePath, 'utf8'));
+      console.log('[API] No good results, returning sample-data.json');
+      return res.json({ file: 'sample-data.json', data });
+    }
 
-    res.json({
-      file: latestFile,
-      data: data
-    });
+    console.log('[API] ERROR: No data files found at all');
+    return res.status(404).json({ error: 'No results files found. Click "Check Now" to scrape.' });
   } catch (error) {
+    console.error('[API] /api/latest error:', error);
     res.status(500).json({ error: error.message });
   }
 });
+
+// Helper to check if scraped data has errors
+function hasErrors(data) {
+  if (!data || !data.sections) return true;
+  const sections = Object.values(data.sections);
+  return sections.some(section => section && section.error);
+}
 
 app.get('/api/status', requireAuth, (req, res) => {
   if (!lastCheckResult) {
@@ -283,9 +481,14 @@ app.get('/api/check', async (req, res) => {
   try {
     console.log('[API] Starting check for all sections...');
 
-    // Use session credentials if available, otherwise fall back to .env
-    const username = req.session.username;
-    const password = req.session.password;
+    // Use session credentials if authenticated, otherwise fall back to .env
+    let username = process.env.BCEID_USERNAME;
+    let password = process.env.BCEID_PASSWORD;
+
+    if (req.session && req.session.authenticated) {
+      username = req.session.bceidUsername;
+      password = decrypt(req.session.bceidPassword);
+    }
 
     const result = await checkAllSections({
       headless: true,
@@ -320,30 +523,19 @@ app.get('/api/check', async (req, res) => {
 });
 
 // Vercel: export the Express app as a serverless function
-// Local: start the server with auto-scrape
+// Local: start the server
 if (process.env.VERCEL) {
   module.exports = app;
 } else {
   app.listen(PORT, () => {
     console.log(`[API] Server running on http://localhost:${PORT}`);
     console.log(`[API] Endpoints:`);
-    console.log(`  GET /check  - Run payment check`);
-    console.log(`  GET /status - Get last results`);
-    console.log(`  GET /health - Health check`);
-
-    // Auto-scrape on startup so dashboard has data immediately
-    console.log('[API] Starting auto-scrape...');
-    isChecking = true;
-    checkAllSections({ headless: true })
-      .then(result => {
-        lastCheckResult = { ...result, checkedAt: new Date().toISOString() };
-        isChecking = false;
-        console.log('[API] Auto-scrape complete — dashboard data ready');
-      })
-      .catch(error => {
-        lastCheckResult = { success: false, error: error.message, checkedAt: new Date().toISOString() };
-        isChecking = false;
-        console.log('[API] Auto-scrape failed:', error.message);
-      });
+    console.log(`  GET /                - Dashboard`);
+    console.log(`  POST /api/login      - Login`);
+    console.log(`  GET /api/check       - Run scraper`);
+    console.log(`  GET /api/latest      - Get latest data`);
+    console.log(`  GET /api/status      - Get scrape status`);
+    console.log(`  GET /api/health      - Health check`);
+    console.log(`[API] Dashboard will load data from latest good file`);
   });
 }
