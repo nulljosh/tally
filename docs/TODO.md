@@ -1,6 +1,13 @@
 # TODO - BC Self-Serve Scraper
 
-## 🔥 PRIORITY: Fix Vercel — Dashboard loads with no data
+## 🔥 PRIORITY: Verify Vercel Works + Update Domain
+
+- [ ] Test https://selfserve-rose.vercel.app in the morning (verify dashboard loads)
+- [ ] Update Vercel domain to chequecheck.vercel.app (Settings → Domains)
+- [ ] Test login with BC Self-Serve credentials
+- [ ] Set up Vercel Blob storage (optional - for real-time updates)
+
+## ✅ DONE: Fix Vercel — Dashboard loads with no data
 
 **Problem:** On Vercel, dashboard shows "Scraping BC Self-Serve... This takes ~30-60 seconds" forever. Locally it works because `auto-scrape` runs on startup and populates `lastCheckResult` in memory. On Vercel (serverless), there's no persistent memory between requests.
 
