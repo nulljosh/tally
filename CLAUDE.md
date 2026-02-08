@@ -12,6 +12,19 @@ Multi-user BC Self-Serve scraper with DTC Navigator. Each user logs in with thei
 - .env file for local admin convenience (NOT committed to git)
 
 ## Vercel Deployment
+
+### Why We Need Blob Storage (ELI5)
+**Problem:** Vercel = serverless (no hard drive, can't save files)
+- Puppeteer scraping takes 30-60 seconds
+- Vercel free tier times out after 60 seconds
+- Can't run scraper on Vercel → no data to show
+
+**Solution:** Blob = Cloud storage (like Dropbox for your app)
+1. **Local:** Run scraper → get results ($560 support, $500 shelter, etc.)
+2. **Upload:** Push results to Vercel Blob (cloud storage)
+3. **Vercel:** Read from Blob (instant, no scraping needed)
+
+### How It Works
 - Blob storage for cached data (instant load)
 - Scrape locally, upload to Blob via /api/upload
 - No Puppeteer on Vercel (timeout issues)
