@@ -1,0 +1,166 @@
+{
+  "success": true,
+  "timestamp": "2026-02-08T06:35:39.078Z",
+  "sections": {
+    "Notifications": {
+      "success": true,
+      "allText": [
+        "Skip to main content",
+        "Skip to navigation",
+        "Accessibility Statement",
+        "Notifications",
+        "Service Requests",
+        "Monthly Reports",
+        "Payment Info",
+        "Employment Plans",
+        "Account Info",
+        "Remember to declare any annual increases to your income on your Monthly Report",
+        "Terms of Use",
+        "Accessibility",
+        "Due to inactivity you will be logged out in  seconds."
+      ],
+      "tableData": [],
+      "keywords": [
+        "Payment Info",
+        "Notifications",
+        "Here are your notifications",
+        "Messages "
+      ],
+      "pageTitle": "My Self Serve - Notifications",
+      "url": "https://myselfserve.gov.bc.ca/Auth",
+      "bodyLength": 367,
+      "screenshot": "/Users/joshua/Documents/Code/selfserve/data/screenshots/notifications-2026-02-08T06-35-15-729Z.png"
+    },
+    "Messages": {
+      "success": true,
+      "allText": [
+        "Skip to main content",
+        "Skip to navigation",
+        "Accessibility Statement",
+        "Notifications",
+        "Service Requests",
+        "Monthly Reports",
+        "Payment Info",
+        "Employment Plans",
+        "Account Info",
+        "Terms of Use",
+        "Accessibility",
+        "2026 / JAN / 21\nMonthly Reporting Period Open",
+        "2026 / JAN / 06\nInformation Required",
+        "2026 / JAN / 05\nMonthly Report Reminder",
+        "2025 / DEC / 23\nInformation required for PWD adjudication",
+        "2025 / DEC / 17\nACTION REQUIRED: Oustanding Documents",
+        "2025 / DEC / 17\nIncome-qualified homes can order a free Energy Saving Kit",
+        "2025 / AUG / 19\nYWCA NextStep Program",
+        "2025 / AUG / 05\nMonthly Report Reminder",
+        "2024 / OCT / 30\nACTION REQUIRED: Submit Dcumentation",
+        "2024 / OCT / 18\nRe: more information required",
+        "Due to inactivity you will be logged out in  seconds."
+      ],
+      "tableData": [],
+      "keywords": [
+        "Payment Info",
+        "Notifications",
+        "Messages ",
+        "Show More Messages",
+        "Select a message to read"
+      ],
+      "pageTitle": "My Self Serve - Messages",
+      "url": "https://myselfserve.gov.bc.ca/Auth/Messages",
+      "bodyLength": 790,
+      "screenshot": "/Users/joshua/Documents/Code/selfserve/data/screenshots/messages-2026-02-08T06-35-20-823Z.png"
+    },
+    "Payment Info": {
+      "success": true,
+      "allText": [
+        "Skip to main content",
+        "Skip to navigation",
+        "Accessibility Statement",
+        "Notifications",
+        "Service Requests",
+        "Monthly Reports",
+        "Payment Info",
+        "Employment Plans",
+        "Account Info",
+        "Terms of Use",
+        "Accessibility",
+        "Confirmation of Assistance can be printed to verify you are in receipt of assistance from the ministry.",
+        "Tax Statement (T5007)",
+        "This information may not be up-to-date. If your monthly report has not been submitted or processed yet, the actual amount of assistance you receive may change. You can check your report status on the Monthly Reports page.",
+        "Due to inactivity you will be logged out in  seconds."
+      ],
+      "tableData": [
+        "Assistance",
+        "Support | $560.00 | ",
+        "SHELTER: RENT | $500.00 | ",
+        "Paid to: TROMMEL, JOSHUA | Payment Method: CHEQUE",
+        "Amount: $1060.00 | Name of Bank:",
+        "Cheque Number: 11866924 | Bank Account Number:",
+        "Payment Distribution: OFFICE | Bank Account Name:"
+      ],
+      "keywords": [
+        "Payment Info",
+        "Here is your payment information",
+        "Paid to: TROMMEL, JOSHUA\tPayment Method: CHEQUE",
+        "Payment Distribution: OFFICE\tBank Account Name:",
+        "This information may not be up-to-date. If your monthly report has not been submitted or processed yet, the actual amount of assistance you receive may change. You can check your report status on the Monthly Reports page.",
+        "Amount: $1060.00\tName of Bank:",
+        "te. If your monthly report has not been submitted or processed yet, the actual amount of assistance you receive may change. You can check your report status on the Monthly Reports page.",
+        "Notifications",
+        "Messages "
+      ],
+      "pageTitle": "My Self Serve - Payment Info",
+      "url": "https://myselfserve.gov.bc.ca/Auth/ChequeInfo",
+      "bodyLength": 1000,
+      "screenshot": "/Users/joshua/Documents/Code/selfserve/data/screenshots/payment-info-2026-02-08T06-35-30-214Z.png"
+    },
+    "Service Requests": {
+      "success": true,
+      "allText": [
+        "Skip to main content",
+        "Skip to navigation",
+        "Accessibility Statement",
+        "Notifications",
+        "Service Requests",
+        "Monthly Reports",
+        "Payment Info",
+        "Employment Plans",
+        "Account Info",
+        "Application for Assistance",
+        "Application for Assistance (Returning within 6 months)",
+        "Bus Pass Application",
+        "Consent to Disclosure of Information",
+        "Crisis Supplement Clothing",
+        "Crisis Supplement Food",
+        "Crisis Supplement Furniture",
+        "Crisis Supplement Home Repair",
+        "Crisis Supplement Shelter",
+        "Crisis Supplement Utilities",
+        "Direct Deposit",
+        "Diet Supplement",
+        "Medical Transportation",
+        "Natal Supplement",
+        "Shelter Update",
+        "Terms of Use",
+        "Accessibility",
+        "Create Service Request",
+        "A simple and secure way for you to submit, track and receive updates on individual requests for services. Below are the various types of service requests that can occur through My Self Serve.",
+        "Are you sure you want to withdraw this Service Request?",
+        "Due to inactivity you will be logged out in  seconds."
+      ],
+      "tableData": [
+        " | Shelter Update\n\n Documents\n\n1-83958519172\nCreated for Trommel, Joshua\n2026 / JAN / 08 | Closed - Service Provided"
+      ],
+      "keywords": [
+        "Payment Info",
+        "Direct Deposit",
+        "Notifications",
+        "Messages "
+      ],
+      "pageTitle": "My Self Serve - Service Requests",
+      "url": "https://myselfserve.gov.bc.ca/Auth/ServiceRequests",
+      "bodyLength": 1102,
+      "screenshot": "/Users/joshua/Documents/Code/selfserve/data/screenshots/service-requests-2026-02-08T06-35-39-003Z.png"
+    }
+  }
+}
