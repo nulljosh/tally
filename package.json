@@ -1,6 +1,6 @@
 {
   "name": "selfserve",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "BC Self-Serve Portal Scraper - Automated scraping of notifications, messages, payment info, and service requests",
   "main": "src/scraper.js",
   "scripts": {
