@@ -1,0 +1,377 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2026-02-06",
+  "programs": {
+    "dtc": {
+      "name": "Disability Tax Credit (DTC)",
+      "jurisdiction": "Federal (CRA)",
+      "form": "T2201",
+      "description": "Non-refundable tax credit that reduces income tax for people with severe and prolonged impairments in physical or mental functions.",
+      "retroactive": {
+        "maxYears": 10,
+        "estimatedRefund": {
+          "min": 1500,
+          "max": 25000,
+          "typical": "5000-10000",
+          "note": "Depends on income history, years eligible, and whether you qualify for the supplement"
+        }
+      },
+      "eligibility": {
+        "requirement": "You must have a severe and prolonged impairment in physical or mental functions that markedly restricts your ability to perform a basic activity of daily living OR you need life-sustaining therapy.",
+        "duration": "Impairment must have lasted or be expected to last for a continuous period of at least 12 months.",
+        "categories": [
+          {
+            "id": "vision",
+            "label": "Vision",
+            "description": "You are blind or have significant visual impairment even with corrective lenses"
+          },
+          {
+            "id": "speaking",
+            "label": "Speaking",
+            "description": "You are unable or take an extremely long time to speak so as to be understood in a quiet setting"
+          },
+          {
+            "id": "hearing",
+            "label": "Hearing",
+            "description": "You are unable or take an extremely long time to hear so as to understand someone in a quiet setting"
+          },
+          {
+            "id": "walking",
+            "label": "Walking",
+            "description": "You are unable or take an extremely long time to walk even with appropriate therapy, medication, or devices"
+          },
+          {
+            "id": "eliminating",
+            "label": "Eliminating (Bowel/Bladder)",
+            "description": "You are unable or take an extremely long time to manage bowel or bladder functions"
+          },
+          {
+            "id": "feeding",
+            "label": "Feeding",
+            "description": "You are unable or take an extremely long time to feed yourself even with appropriate therapy or devices"
+          },
+          {
+            "id": "dressing",
+            "label": "Dressing",
+            "description": "You are unable or take an extremely long time to dress yourself even with appropriate therapy or devices"
+          },
+          {
+            "id": "mental",
+            "label": "Mental Functions (Memory, Problem Solving, Judgment, Adaptive Functioning)",
+            "description": "You are unable or take an extremely long time to perform mental functions necessary for everyday life (includes autism, ADHD, intellectual disabilities, brain injuries)"
+          },
+          {
+            "id": "life_sustaining",
+            "label": "Life-Sustaining Therapy",
+            "description": "You need therapy at least 3 times per week, for at least 14 hours per week (includes dialysis, chest physiotherapy, insulin therapy)"
+          },
+          {
+            "id": "cumulative",
+            "label": "Cumulative Effect of Significant Restrictions",
+            "description": "You have 2+ significant restrictions that together are equivalent to a marked restriction (e.g. difficulty with both dressing AND mental functions)"
+          }
+        ]
+      },
+      "mentalFunctions": {
+        "note": "This is the most relevant category for autism/ADHD diagnoses",
+        "criteria": [
+          "Adaptive functioning - difficulty with daily routines, self-care, social interactions",
+          "Memory - significant difficulty remembering things needed for daily life",
+          "Problem solving and goal setting - difficulty planning, initiating, or completing tasks",
+          "Judgment - difficulty making safe and appropriate decisions",
+          "Processing speed - takes significantly longer to understand and respond"
+        ],
+        "autismSpecific": [
+          "Difficulty with social communication and interaction",
+          "Restricted/repetitive patterns of behavior, interests, or activities",
+          "Sensory processing difficulties that impact daily functioning",
+          "Executive function challenges (planning, organizing, transitioning)",
+          "Need for routine and difficulty adapting to changes",
+          "Difficulty with employment or maintaining employment",
+          "Need for significant support in daily living activities"
+        ],
+        "commonMistakes": [
+          "Describing what you CAN do instead of what you struggle with",
+          "Not mentioning how long activities take compared to others",
+          "Forgetting to mention the need for supervision or prompting",
+          "Not linking the impairment to specific daily activities",
+          "Doctor using too-clinical language instead of functional descriptions"
+        ]
+      },
+      "process": {
+        "steps": [
+          {
+            "step": 1,
+            "title": "Get Diagnosed",
+            "description": "You need a formal diagnosis from a qualified medical practitioner. For autism, this is typically a psychologist or psychiatrist.",
+            "tips": ["If diagnosed as an adult, the diagnosis date matters for retroactive claims", "Keep all assessment reports"]
+          },
+          {
+            "step": 2,
+            "title": "Find a Doctor to Complete T2201",
+            "description": "A medical practitioner must complete Part B of the T2201 form. This can be your family doctor, specialist, psychologist, or other qualified practitioner.",
+            "tips": [
+              "Not all doctors are familiar with DTC - some may refuse",
+              "Bring your diagnosis report and a summary of your daily limitations",
+              "A psychologist who diagnosed you is often the best person to fill it out",
+              "Some doctors charge a fee ($50-200) for completing the form"
+            ]
+          },
+          {
+            "step": 3,
+            "title": "Complete Part A (Your Part)",
+            "description": "Fill out your personal information and identify which categories of impairment apply to you.",
+            "tips": ["You can check multiple categories", "Be thorough - list everything that applies"]
+          },
+          {
+            "step": 4,
+            "title": "Doctor Completes Part B",
+            "description": "Your medical practitioner describes your impairment, its effects on daily living, and certifies that it is severe and prolonged.",
+            "tips": [
+              "The doctor should focus on what you CANNOT do or struggle with significantly",
+              "Use functional language, not just diagnostic labels",
+              "Mention specific daily activities affected",
+              "Note if the impairment existed before the diagnosis date"
+            ]
+          },
+          {
+            "step": 5,
+            "title": "Submit to CRA",
+            "description": "Mail or submit the completed T2201 to the CRA. Wait for their decision (typically 2-8 weeks).",
+            "tips": ["Keep copies of everything", "Submit digitally through My Account if possible", "You can check status online"]
+          },
+          {
+            "step": 6,
+            "title": "If Approved - File Amended Returns",
+            "description": "Once approved, you can request adjustments to previous tax returns to claim the DTC retroactively.",
+            "tips": [
+              "Use T1-ADJ or ReFILE to adjust previous years",
+              "You can go back up to 10 years",
+              "Consider hiring a tax professional for the amendments",
+              "The CRA will calculate and send you any refund owing"
+            ]
+          }
+        ]
+      },
+      "formFields": {
+        "partA": {
+          "personalInfo": ["Legal name", "SIN", "Date of birth", "Address", "Phone"],
+          "categories": "Check all that apply from the eligibility categories"
+        },
+        "partB": {
+          "practitionerInfo": ["Name", "Profession", "Address", "Phone", "License number"],
+          "diagnosis": "Describe the impairment(s)",
+          "effects": "Describe the effects on daily living",
+          "duration": "When did the impairment begin? Is it expected to last 12+ months?",
+          "certification": "Practitioner certifies the impairment is severe and prolonged"
+        }
+      }
+    },
+    "pwd": {
+      "name": "Persons with Disabilities (PWD) Designation",
+      "jurisdiction": "British Columbia",
+      "description": "Provincial designation that provides higher income assistance rates ($1,358.50/mo vs $935/mo) and additional benefits.",
+      "benefits": [
+        "Higher monthly assistance rate",
+        "Extended health benefits",
+        "Bus pass program",
+        "Higher earned income exemptions ($15,000/year)",
+        "Asset exemptions up to $200,000",
+        "Crisis supplements available"
+      ],
+      "eligibility": {
+        "requirements": [
+          "18 years or older",
+          "Resident of BC",
+          "Have a severe mental or physical impairment",
+          "Impairment expected to continue for at least 2 years",
+          "Impairment directly and significantly restricts daily living activities",
+          "Need help or assistive devices for daily living"
+        ]
+      },
+      "process": {
+        "steps": [
+          {
+            "step": 1,
+            "title": "Apply for Income Assistance First",
+            "description": "You must be receiving income assistance (welfare) before you can apply for PWD."
+          },
+          {
+            "step": 2,
+            "title": "Request PWD Application",
+            "description": "Ask your Employment and Assistance Worker for the PWD application package."
+          },
+          {
+            "step": 3,
+            "title": "Complete the Application",
+            "description": "Three parts: Self-Report, Assessor Report (doctor), and Activities of Daily Living report."
+          },
+          {
+            "step": 4,
+            "title": "Submit and Wait",
+            "description": "Submit to your worker. Decision typically takes 4-8 weeks."
+          }
+        ]
+      }
+    }
+  },
+  "screenerQuestions": [
+    {
+      "id": "q1",
+      "section": "basics",
+      "question": "Do you have a diagnosed medical condition or disability?",
+      "type": "yesno",
+      "required": true,
+      "helpText": "This includes physical disabilities, mental health conditions, neurodevelopmental conditions (autism, ADHD), chronic illnesses, etc."
+    },
+    {
+      "id": "q2",
+      "section": "basics",
+      "question": "What type of condition(s) do you have?",
+      "type": "multiselect",
+      "required": true,
+      "options": [
+        { "value": "autism", "label": "Autism Spectrum Disorder (ASD)" },
+        { "value": "adhd", "label": "ADHD" },
+        { "value": "depression", "label": "Depression / Anxiety" },
+        { "value": "physical", "label": "Physical Disability" },
+        { "value": "chronic", "label": "Chronic Illness" },
+        { "value": "vision", "label": "Vision Impairment" },
+        { "value": "hearing", "label": "Hearing Impairment" },
+        { "value": "intellectual", "label": "Intellectual Disability" },
+        { "value": "other", "label": "Other" }
+      ]
+    },
+    {
+      "id": "q3",
+      "section": "basics",
+      "question": "Has your condition lasted (or is expected to last) at least 12 months?",
+      "type": "yesno",
+      "required": true,
+      "helpText": "The DTC requires a 'prolonged' impairment lasting at least 12 continuous months."
+    },
+    {
+      "id": "q4",
+      "section": "basics",
+      "question": "What province do you live in?",
+      "type": "select",
+      "required": true,
+      "options": [
+        { "value": "BC", "label": "British Columbia" },
+        { "value": "AB", "label": "Alberta" },
+        { "value": "SK", "label": "Saskatchewan" },
+        { "value": "MB", "label": "Manitoba" },
+        { "value": "ON", "label": "Ontario" },
+        { "value": "QC", "label": "Quebec" },
+        { "value": "NB", "label": "New Brunswick" },
+        { "value": "NS", "label": "Nova Scotia" },
+        { "value": "PE", "label": "Prince Edward Island" },
+        { "value": "NL", "label": "Newfoundland and Labrador" },
+        { "value": "YT", "label": "Yukon" },
+        { "value": "NT", "label": "Northwest Territories" },
+        { "value": "NU", "label": "Nunavut" }
+      ]
+    },
+    {
+      "id": "q5",
+      "section": "impact",
+      "question": "Does your condition significantly affect your ability to perform daily activities compared to someone your age without the condition?",
+      "type": "yesno",
+      "required": true,
+      "helpText": "Think about things like: getting dressed, preparing meals, managing finances, navigating social situations, keeping a routine, maintaining employment."
+    },
+    {
+      "id": "q6",
+      "section": "impact",
+      "question": "Which daily activities are significantly affected? (Select all that apply)",
+      "type": "multiselect",
+      "required": true,
+      "options": [
+        { "value": "social", "label": "Social interactions and communication" },
+        { "value": "routine", "label": "Managing daily routines and schedules" },
+        { "value": "selfcare", "label": "Self-care (hygiene, dressing, grooming)" },
+        { "value": "meals", "label": "Preparing meals / feeding" },
+        { "value": "finances", "label": "Managing finances and paperwork" },
+        { "value": "employment", "label": "Maintaining employment" },
+        { "value": "decisions", "label": "Making decisions and problem-solving" },
+        { "value": "sensory", "label": "Sensory processing (noise, light, textures)" },
+        { "value": "memory", "label": "Memory and concentration" },
+        { "value": "mobility", "label": "Walking and physical mobility" },
+        { "value": "vision_daily", "label": "Seeing (even with glasses/contacts)" },
+        { "value": "hearing_daily", "label": "Hearing (even with hearing aids)" }
+      ]
+    },
+    {
+      "id": "q7",
+      "section": "impact",
+      "question": "Do daily activities take you significantly longer than someone without your condition?",
+      "type": "select",
+      "required": true,
+      "options": [
+        { "value": "no", "label": "No, about the same time" },
+        { "value": "sometimes", "label": "Sometimes takes longer" },
+        { "value": "usually", "label": "Usually takes much longer (2-3x)" },
+        { "value": "always", "label": "Almost always takes extremely long or I cannot do them at all" }
+      ]
+    },
+    {
+      "id": "q8",
+      "section": "impact",
+      "question": "Do you need help, supervision, or prompting from another person to complete daily activities?",
+      "type": "select",
+      "required": true,
+      "options": [
+        { "value": "no", "label": "No, I manage independently" },
+        { "value": "occasionally", "label": "Occasionally need reminders or help" },
+        { "value": "frequently", "label": "Frequently need help or supervision" },
+        { "value": "always", "label": "Almost always need someone to help or prompt me" }
+      ]
+    },
+    {
+      "id": "q9",
+      "section": "taxes",
+      "question": "Have you filed Canadian tax returns in the past 10 years?",
+      "type": "yesno",
+      "required": true,
+      "helpText": "You need to have filed taxes to receive a DTC refund. If you haven't filed, you can still file late."
+    },
+    {
+      "id": "q10",
+      "section": "taxes",
+      "question": "Have you had any taxable income (employment, EI, disability benefits, etc.) in the past 10 years?",
+      "type": "yesno",
+      "required": true,
+      "helpText": "Even small amounts of income can result in a refund through the DTC."
+    },
+    {
+      "id": "q11",
+      "section": "taxes",
+      "question": "When were you first diagnosed with your condition?",
+      "type": "select",
+      "required": true,
+      "options": [
+        { "value": "recent", "label": "Within the last year" },
+        { "value": "1-3", "label": "1-3 years ago" },
+        { "value": "3-5", "label": "3-5 years ago" },
+        { "value": "5-10", "label": "5-10 years ago" },
+        { "value": "10+", "label": "More than 10 years ago" },
+        { "value": "childhood", "label": "Childhood" },
+        { "value": "not_yet", "label": "Not formally diagnosed yet" }
+      ]
+    },
+    {
+      "id": "q12",
+      "section": "existing",
+      "question": "Have you already applied for any of the following? (Select all that apply)",
+      "type": "multiselect",
+      "required": false,
+      "options": [
+        { "value": "dtc", "label": "Disability Tax Credit (T2201)" },
+        { "value": "pwd", "label": "BC PWD (Persons with Disabilities) designation" },
+        { "value": "cppd", "label": "CPP Disability Benefits" },
+        { "value": "rdsp", "label": "Registered Disability Savings Plan (RDSP)" },
+        { "value": "none", "label": "None of the above" }
+      ]
+    }
+  ]
+}

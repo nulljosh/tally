@@ -1,0 +1,5 @@
+{
+  "watch": ["src/", "web/"],
+  "ignore": ["data/", "chrome-data/", "*.json"],
+  "ext": "js,html,css"
+}

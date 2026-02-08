@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "src/api.js",
+      "use": "@vercel/node",
+      "config": {
+        "maxDuration": 60,
+        "memory": 1024
+      }
+    },
+    {
+      "src": "api/upload.js",
+      "use": "@vercel/node",
+      "config": {
+        "maxDuration": 10
+      }
+    },
+    {
+      "src": "web/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    { "src": "/api/upload", "dest": "/api/upload.js" },
+    { "src": "/api/(.*)", "dest": "/src/api.js" },
+    { "src": "/data/(.*)", "dest": "/src/api.js" },
+    { "src": "^/$", "dest": "/web/unified.html" },
+    { "src": "/login", "dest": "/web/login.html" },
+    { "src": "/(.*\\.(html|css|js|png|jpg|svg|ico))", "dest": "/web/$1" }
+  ]
+}
