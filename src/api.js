@@ -213,8 +213,11 @@ app.post('/api/logout', (req, res) => {
 let lastCheckResult = null;
 let isChecking = false;
 
-// Serve dashboard directly (no login)
+// Serve dashboard (require login)
 app.get('/', (req, res) => {
+  if (!req.session || !req.session.authenticated) {
+    return res.redirect('/login.html');
+  }
   res.sendFile(path.join(__dirname, '../web/unified.html'));
 });
 
@@ -253,7 +256,7 @@ app.get('/api/health', (req, res) => {
 });
 
 
-app.get('/api/latest', async (req, res) => {
+app.get('/api/latest', requireAuth, async (req, res) => {
   try {
     console.log('[API] /api/latest called');
 
@@ -292,14 +295,14 @@ app.get('/api/latest', async (req, res) => {
       if (lastCheckResult && !hasErrors(lastCheckResult)) {
         return res.json({ file: 'in-memory', data: lastCheckResult });
       }
-      // Return hardcoded sample data with full structure
+      // Return generic demo data (no personal info)
       const sampleData = {
         success: true,
         timestamp: new Date().toISOString(),
         sections: {
           "Notifications": {
             success: true,
-            allText: ["Remember to declare any annual increases to your income on your Monthly Report"],
+            allText: ["Sample notification - login to view your actual data"],
             tableData: [],
             keywords: ["Notifications"],
             pageTitle: "My Self Serve - Notifications"
@@ -307,9 +310,9 @@ app.get('/api/latest', async (req, res) => {
           "Messages": {
             success: true,
             allText: [
-              "2026 / JAN / 21\nMonthly Reporting Period Open",
-              "2026 / JAN / 06\nInformation Required",
-              "2026 / JAN / 05\nMonthly Report Reminder"
+              "2026 / JAN / 21\nSample Message 1",
+              "2026 / JAN / 06\nSample Message 2",
+              "2026 / JAN / 05\nSample Message 3"
             ],
             tableData: [],
             keywords: ["Messages"],
@@ -317,27 +320,27 @@ app.get('/api/latest', async (req, res) => {
           },
           "Payment Info": {
             success: true,
-            allText: ["Payment information may not be up-to-date"],
+            allText: ["Login with your BC Self-Serve credentials to view payment info"],
             tableData: [
               "Assistance",
-              "Support | $560.00 | ",
-              "SHELTER: RENT | $500.00 | ",
-              "Paid to: TROMMEL, JOSHUA | Payment Method: CHEQUE",
-              "Amount: $1060.00 | Name of Bank:",
-              "Cheque Number: 11866924 | Bank Account Number:",
+              "Support | $XXX.XX | ",
+              "SHELTER: RENT | $XXX.XX | ",
+              "Paid to: Demo User | Payment Method: CHEQUE",
+              "Amount: $XXX.XX | Name of Bank:",
+              "Cheque Number: XXXXXXXX | Bank Account Number:",
               "Payment Distribution: OFFICE | Bank Account Name:"
             ],
             keywords: [
-              "Amount: $1060.00",
-              "Paid to: TROMMEL, JOSHUA\tPayment Method: CHEQUE"
+              "Amount: $XXX.XX",
+              "Paid to: Demo User\tPayment Method: CHEQUE"
             ],
             pageTitle: "My Self Serve - Payment Info"
           },
           "Service Requests": {
             success: true,
-            allText: ["Shelter Update", "Create Service Request"],
+            allText: ["Sample Request", "Create Service Request"],
             tableData: [
-              " | Shelter Update\n\n Documents\n\n1-83958519172\nCreated for Trommel, Joshua\n2026 / JAN / 08 | Closed - Service Provided"
+              " | Sample Request\n\n Documents\n\nXXXXXXXXXXXXX\nCreated for Demo User\n2026 / JAN / 08 | Sample Status"
             ],
             keywords: ["Service Requests"],
             pageTitle: "My Self Serve - Service Requests"

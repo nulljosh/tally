@@ -787,7 +787,7 @@
       isLoadingData = true;
 
       try {
-        const response = await fetch('/api/latest');
+        const response = await fetch('/api/latest', { credentials: 'include' });
 
         if (!response.ok) {
           // No data yet — show prompt to check
