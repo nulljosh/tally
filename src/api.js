@@ -292,15 +292,56 @@ app.get('/api/latest', async (req, res) => {
       if (lastCheckResult && !hasErrors(lastCheckResult)) {
         return res.json({ file: 'in-memory', data: lastCheckResult });
       }
-      // Return hardcoded sample data for now
+      // Return hardcoded sample data with full structure
       const sampleData = {
         success: true,
         timestamp: new Date().toISOString(),
         sections: {
-          "Payment Info": { success: true, keywords: ["Amount: $1060.00"] },
-          "Messages": { success: true, allText: ["10 new messages"] },
-          "Notifications": { success: true, allText: ["No new notifications"] },
-          "Service Requests": { success: true, tableData: ["1 active request"] }
+          "Notifications": {
+            success: true,
+            allText: ["Remember to declare any annual increases to your income on your Monthly Report"],
+            tableData: [],
+            keywords: ["Notifications"],
+            pageTitle: "My Self Serve - Notifications"
+          },
+          "Messages": {
+            success: true,
+            allText: [
+              "2026 / JAN / 21\nMonthly Reporting Period Open",
+              "2026 / JAN / 06\nInformation Required",
+              "2026 / JAN / 05\nMonthly Report Reminder"
+            ],
+            tableData: [],
+            keywords: ["Messages"],
+            pageTitle: "My Self Serve - Messages"
+          },
+          "Payment Info": {
+            success: true,
+            allText: ["Payment information may not be up-to-date"],
+            tableData: [
+              "Assistance",
+              "Support | $560.00 | ",
+              "SHELTER: RENT | $500.00 | ",
+              "Paid to: TROMMEL, JOSHUA | Payment Method: CHEQUE",
+              "Amount: $1060.00 | Name of Bank:",
+              "Cheque Number: 11866924 | Bank Account Number:",
+              "Payment Distribution: OFFICE | Bank Account Name:"
+            ],
+            keywords: [
+              "Amount: $1060.00",
+              "Paid to: TROMMEL, JOSHUA\tPayment Method: CHEQUE"
+            ],
+            pageTitle: "My Self Serve - Payment Info"
+          },
+          "Service Requests": {
+            success: true,
+            allText: ["Shelter Update", "Create Service Request"],
+            tableData: [
+              " | Shelter Update\n\n Documents\n\n1-83958519172\nCreated for Trommel, Joshua\n2026 / JAN / 08 | Closed - Service Provided"
+            ],
+            keywords: ["Service Requests"],
+            pageTitle: "My Self Serve - Service Requests"
+          }
         }
       };
       return res.json({ file: 'sample-data (hardcoded)', data: sampleData });
