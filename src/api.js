@@ -253,7 +253,7 @@ app.get('/api/health', (req, res) => {
 });
 
 
-app.get('/api/latest', requireAuth, async (req, res) => {
+app.get('/api/latest', async (req, res) => {
   try {
     console.log('[API] /api/latest called');
 
