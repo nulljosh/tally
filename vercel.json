@@ -1,9 +1,5 @@
 {
   "version": 2,
-  "env": {
-    "UPLOAD_SECRET": "@upload-secret",
-    "SESSION_SECRET": "@session-secret"
-  },
   "builds": [
     {
       "src": "src/api.js",
