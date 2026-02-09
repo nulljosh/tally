@@ -8,7 +8,7 @@
 - Navigate: Settings → Environment Variables
 - Add new variable:
   - **Name:** `UPLOAD_SECRET`
-  - **Value:** `e89db943097cd85e399bf38e64fdf901b5fd59c9007acc1cfe78dc682fc6c023`
+  - **Value:** (check your `.env` file for the actual secret - DO NOT commit it to git)
   - **Scope:** Production, Preview, Development
 - Click "Save"
 - Redeploy (might auto-redeploy)

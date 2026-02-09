@@ -27,7 +27,7 @@
 3. Verify dashboard loads instantly from Blob cache
 
 ### Technical Details
-- **Upload secret:** `e89db943097cd85e399bf38e64fdf901b5fd59c9007acc1cfe78dc682fc6c023`
+- **Upload secret:** (stored in `.env`, not committed to git)
 - **Vercel URL:** https://chequecheck.vercel.app
 - **Blob path:** `claimcheck-cache/results.json`
 - **Latest local scrape:** `2026-02-08T07:00:16.870Z`
