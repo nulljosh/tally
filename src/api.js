@@ -296,6 +296,123 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
 });
 
+// Summary endpoint for OpenClaw integration
+app.get('/api/summary', async (req, res) => {
+  try {
+    // Check for API token (optional - for security)
+    const apiToken = req.headers['x-api-token'] || req.query.token;
+    const expectedToken = process.env.API_TOKEN || 'dev-token';
+
+    if (apiToken !== expectedToken) {
+      return res.status(401).json({ error: 'Invalid API token' });
+    }
+
+    // Get latest data (same logic as /api/latest but simplified)
+    let data = null;
+
+    // Try Vercel Blob first
+    if (process.env.VERCEL) {
+      try {
+        const { list } = require('@vercel/blob');
+        const { blobs } = await list({ prefix: 'claimcheck-cache/results.json' });
+        if (blobs && blobs.length > 0) {
+          const response = await fetch(blobs[0].url);
+          data = await response.json();
+        }
+      } catch (err) {
+        console.log('[SUMMARY] Blob read failed:', err.message);
+      }
+    }
+
+    // Fallback to local files
+    if (!data) {
+      const dataDir = path.join(__dirname, '../data');
+      const files = fs.readdirSync(dataDir)
+        .filter(f => f.startsWith('results-') && f.endsWith('.json'))
+        .map(f => ({
+          name: f,
+          path: path.join(dataDir, f),
+          time: fs.statSync(path.join(dataDir, f)).mtime.getTime()
+        }))
+        .sort((a, b) => b.time - a.time);
+
+      if (files.length > 0) {
+        data = JSON.parse(fs.readFileSync(files[0].path, 'utf8'));
+      }
+    }
+
+    if (!data || !data.sections) {
+      return res.status(404).json({ error: 'No data available' });
+    }
+
+    // Extract payment info
+    const paymentSection = data.sections['Payment Info'];
+    let totalPayment = null;
+    let supportAmount = null;
+    let shelterAmount = null;
+
+    if (paymentSection && paymentSection.tableData) {
+      const totalRow = paymentSection.tableData.find(row => row.includes('Amount:'));
+      if (totalRow) {
+        const match = totalRow.match(/\$[\d,]+\.\d{2}/);
+        if (match) totalPayment = match[0];
+      }
+
+      paymentSection.tableData.forEach(row => {
+        if (row.includes('Support')) {
+          const match = row.match(/\$[\d,]+\.\d{2}/);
+          if (match) supportAmount = match[0];
+        }
+        if (row.includes('SHELTER')) {
+          const match = row.match(/\$[\d,]+\.\d{2}/);
+          if (match) shelterAmount = match[0];
+        }
+      });
+    }
+
+    // Extract messages count
+    const messagesSection = data.sections.Messages;
+    const messageCount = messagesSection && messagesSection.allText
+      ? messagesSection.allText.filter(msg =>
+          msg.match(/^\d{4} \/ [A-Z]{3} \/ \d{2}/)
+        ).length
+      : 0;
+
+    // Extract notifications
+    const notificationsSection = data.sections.Notifications;
+    const hasNotifications = notificationsSection && notificationsSection.allText
+      ? notificationsSection.allText.some(n => !n.includes('no notifications'))
+      : false;
+
+    // Extract service requests count
+    const requestsSection = data.sections['Service Requests'];
+    const requestCount = requestsSection && requestsSection.allText
+      ? requestsSection.allText.filter(r => r.match(/^\d{4} \/ [A-Z]{3} \/ \d{2}/)).length
+      : 0;
+
+    // Build clean response
+    const summary = {
+      payment: {
+        total: totalPayment,
+        support: supportAmount,
+        shelter: shelterAmount
+      },
+      counts: {
+        messages: messageCount,
+        notifications: hasNotifications ? 1 : 0,
+        requests: requestCount
+      },
+      lastUpdated: data.timestamp,
+      status: 'ok'
+    };
+
+    res.json(summary);
+  } catch (error) {
+    console.error('[SUMMARY] Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 app.get('/api/latest', requireAuth, async (req, res) => {
   try {
