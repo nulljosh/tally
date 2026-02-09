@@ -2,7 +2,7 @@
 
 > "Disability benefits shouldn't require a PhD in bureaucracy."
 
-## Why This Exists
+## Fuck Bureaucracy
 
 Joshua was diagnosed with autism at 26, after working age 16-20 without accommodations. He's currently navigating:
 - **DTC (Disability Tax Credit)** - Retroactive claim worth ~$5-10k
