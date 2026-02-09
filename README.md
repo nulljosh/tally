@@ -4,6 +4,17 @@
 
 Multi-user BC Self-Serve portal scraper with DTC (Disability Tax Credit) eligibility navigator.
 
+## How It Works
+
+![Workflow Diagram](docs/workflow.svg)
+
+**Quick summary:**
+1. Login with BC Self-Serve credentials
+2. Script validates & encrypts credentials in session
+3. Puppeteer scrapes benefits data (30-60s)
+4. Upload to Vercel Blob for instant dashboard load
+5. View benefits, messages, DTC eligibility calculator
+
 ## Features
 
 ### ✅ Implemented (v2.0)
@@ -16,12 +27,12 @@ Multi-user BC Self-Serve portal scraper with DTC (Disability Tax Credit) eligibi
 - **DTC Navigator** - Free eligibility screener for Disability Tax Credit and BC PWD
 - **Automated scraping** - Notifications, Messages, Payment Info, Service Requests
 
-### 🔧 Remaining Work
-- [ ] Deploy to Vercel with environment variables
-- [ ] Test Blob upload/download workflow
-- [ ] Add vercel.json configuration
-- [ ] Rename project from "selfserve" to "claimcheck"
-- [ ] Consolidate documentation (9 markdown files → 4-6)
+### 🔧 TODO
+- [ ] Deploy to Vercel production
+- [ ] Add cron job for automatic scraping
+- [ ] Multi-tenant storage (per-user Blob keys)
+- [ ] T2201 form pre-filler (DTC application)
+- [ ] Email notifications for benefit updates
 
 ## Quick Start
 
