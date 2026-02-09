@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1000" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
   <defs>
     <style>
-      .box { fill: rgba(255, 255, 255, 0.7); stroke: rgba(0, 0, 0, 0.1); stroke-width: 1.5; rx: 12; filter: url(#glass); }
-      .box-success { fill: rgba(52, 199, 89, 0.15); stroke: rgba(52, 199, 89, 0.4); stroke-width: 1.5; rx: 12; filter: url(#glass); }
-      .box-user { fill: rgba(0, 122, 255, 0.15); stroke: rgba(0, 122, 255, 0.4); stroke-width: 1.5; rx: 12; filter: url(#glass); }
-      .box-cloud { fill: rgba(255, 149, 0, 0.15); stroke: rgba(255, 149, 0, 0.4); stroke-width: 1.5; rx: 12; filter: url(#glass); }
+      .box { fill: rgba(255, 255, 255, 0.9); stroke: rgba(0, 0, 0, 0.2); stroke-width: 2; rx: 12; }
+      .box-success { fill: rgba(52, 199, 89, 0.2); stroke: rgba(52, 199, 89, 0.6); stroke-width: 2; rx: 12; }
+      .box-user { fill: rgba(0, 122, 255, 0.2); stroke: rgba(0, 122, 255, 0.6); stroke-width: 2; rx: 12; }
+      .box-cloud { fill: rgba(255, 149, 0, 0.2); stroke: rgba(255, 149, 0, 0.6); stroke-width: 2; rx: 12; }
       .text { fill: #1d1d1f; font-size: 15px; text-anchor: middle; font-weight: 500; }
       .text-small { fill: #6e6e73; font-size: 12px; text-anchor: middle; font-weight: 400; }
       .text-user { fill: #007aff; }
@@ -14,12 +14,6 @@
       .arrow-cloud { stroke: #ff9500; stroke-width: 2; marker-end: url(#arrowhead-cloud); }
       .title { fill: #1d1d1f; font-size: 24px; font-weight: 600; text-anchor: middle; }
     </style>
-
-    <filter id="glass">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="0" result="blur"/>
-      <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo"/>
-      <feBlend in="SourceGraphic" in2="goo"/>
-    </filter>
 
     <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
       <polygon points="0 0, 10 3, 0 6" fill="#86868b" />
@@ -31,119 +25,90 @@
       <polygon points="0 0, 10 3, 0 6" fill="#ff9500" />
     </marker>
 
-    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" style="stop-color:#f5f5f7;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#e8e8ed;stop-opacity:1" />
     </linearGradient>
   </defs>
 
-  <rect width="900" height="1000" fill="url(#bgGradient)"/>
+  <rect width="900" height="1000" fill="url(#bg)"/>
+  <text x="450" y="40" class="title">Chequecheck - BC Benefits Scraper</text>
 
-  <text x="450" y="40" class="title">Chequecheck Workflow - BC Self-Serve Scraper</text>
-
-  <!-- User Login -->
   <rect x="300" y="70" width="300" height="60" class="box-user"/>
-  <text x="450" y="100" class="text text-user">👤 Login with BC Self-Serve</text>
-  <text x="450" y="118" class="text-small">Enter BCeID credentials</text>
-
+  <text x="450" y="100" class="text text-user">👤 User Login</text>
+  <text x="450" y="118" class="text-small">BC Self-Serve credentials</text>
   <path d="M 450 130 L 450 160" class="arrow-user"/>
 
-  <!-- Validate Credentials -->
   <rect x="300" y="160" width="300" height="70" class="box"/>
-  <text x="450" y="188" class="text">🔐 Validate Credentials</text>
-  <text x="450" y="206" class="text-small">Test login to BC Self-Serve</text>
-  <text x="450" y="220" class="text-small">Rate limited: 5 attempts/15min</text>
-
+  <text x="450" y="188" class="text">🔐 Validate + Encrypt</text>
+  <text x="450" y="206" class="text-small">Test login, AES-256-CBC</text>
+  <text x="450" y="220" class="text-small">Rate limited: 5/15min</text>
   <path d="M 450 230 L 450 260" class="arrow"/>
 
-  <!-- Create Session -->
   <rect x="300" y="260" width="300" height="70" class="box-success"/>
   <text x="450" y="288" class="text">✓ Session Created</text>
-  <text x="450" y="306" class="text-small">Credentials encrypted (AES-256-CBC)</text>
-  <text x="450" y="320" class="text-small">2hr max age, 1hr activity timeout</text>
-
+  <text x="450" y="306" class="text-small">2hr max, 1hr timeout</text>
+  <text x="450" y="320" class="text-small">Encrypted storage</text>
   <path d="M 450 330 L 450 360" class="arrow"/>
 
-  <!-- Dashboard Choice -->
   <rect x="300" y="360" width="300" height="60" class="box-user"/>
-  <text x="450" y="390" class="text text-user">🖱️ User clicks "Check Now"</text>
+  <text x="450" y="390" class="text text-user">🖱️ Click "Check Now"</text>
   <text x="450" y="408" class="text-small">Or view cached data</text>
 
-  <!-- Local Path -->
   <path d="M 300 390 L 120 390 L 120 480" class="arrow" stroke-dasharray="5,5"/>
-  <text x="180" y="410" class="text-small">Local Dev</text>
-
-  <!-- Vercel Path -->
+  <text x="180" y="410" class="text-small">Local</text>
   <path d="M 600 390 L 780 390 L 780 480" class="arrow-cloud" stroke-dasharray="5,5"/>
   <text x="720" y="410" class="text-small text-cloud">Vercel</text>
-
   <path d="M 450 420 L 450 450" class="arrow"/>
 
-  <!-- Scraper Start -->
   <rect x="50" y="480" width="250" height="70" class="box"/>
-  <text x="175" y="508" class="text">🤖 Puppeteer Scraper</text>
+  <text x="175" y="508" class="text">🤖 Puppeteer Scrape</text>
   <text x="175" y="526" class="text-small">Headless Chrome</text>
   <text x="175" y="540" class="text-small">~30-60 seconds</text>
 
-  <!-- Vercel Cached -->
   <rect x="600" y="480" width="250" height="70" class="box-cloud"/>
-  <text x="725" y="508" class="text text-cloud">☁️ Read from Blob</text>
-  <text x="725" y="526" class="text-small">Cached data</text>
-  <text x="725" y="540" class="text-small">Instant load</text>
+  <text x="725" y="508" class="text text-cloud">☁️ Read Blob Cache</text>
+  <text x="725" y="526" class="text-small">Instant load</text>
+  <text x="725" y="540" class="text-small">Pre-scraped data</text>
 
   <path d="M 175 550 L 175 580" class="arrow"/>
 
-  <!-- BC Self-Serve -->
   <rect x="50" y="580" width="250" height="70" class="box"/>
-  <text x="175" y="608" class="text">🌐 BC Self-Serve Portal</text>
-  <text x="175" y="626" class="text-small">Navigate & scrape</text>
-  <text x="175" y="640" class="text-small">Notifications, messages, payments</text>
-
+  <text x="175" y="608" class="text">🌐 BC Self-Serve</text>
+  <text x="175" y="626" class="text-small">Navigate portal</text>
+  <text x="175" y="640" class="text-small">Extract data</text>
   <path d="M 175 650 L 175 680" class="arrow"/>
 
-  <!-- Parse Data -->
   <rect x="50" y="680" width="250" height="70" class="box-success"/>
-  <text x="175" y="708" class="text">📊 Extract Data</text>
-  <text x="175" y="726" class="text-small">Support: $560, Shelter: $500</text>
-  <text x="175" y="740" class="text-small">Messages, service requests</text>
-
+  <text x="175" y="708" class="text">📊 Parse Data</text>
+  <text x="175" y="726" class="text-small">Support: $560</text>
+  <text x="175" y="740" class="text-small">Messages, requests</text>
   <path d="M 300 715 L 450 715" class="arrow"/>
 
-  <!-- Save Local -->
   <rect x="300" y="680" width="250" height="70" class="box"/>
   <text x="425" y="708" class="text">💾 Save to data/</text>
-  <text x="425" y="726" class="text-small">JSON files with timestamp</text>
+  <text x="425" y="726" class="text-small">JSON + timestamp</text>
   <text x="425" y="740" class="text-small">Local filesystem</text>
-
   <path d="M 425 750 L 425 780" class="arrow"/>
 
-  <!-- Upload to Blob -->
   <rect x="300" y="780" width="250" height="70" class="box-cloud"/>
-  <text x="425" y="808" class="text text-cloud">☁️ Upload to Vercel Blob</text>
+  <text x="425" y="808" class="text text-cloud">☁️ Upload to Blob</text>
   <text x="425" y="826" class="text-small">npm run upload-blob</text>
-  <text x="425" y="840" class="text-small">Requires UPLOAD_SECRET</text>
-
-  <!-- Blob connects to Vercel path -->
+  <text x="425" y="840" class="text-small">UPLOAD_SECRET auth</text>
   <path d="M 550 815 L 725 815 L 725 550" class="arrow-cloud"/>
-
   <path d="M 425 850 L 425 880" class="arrow"/>
 
-  <!-- Display Dashboard -->
   <rect x="300" y="880" width="250" height="70" class="box-success"/>
   <text x="425" y="908" class="text">✅ Dashboard Updated</text>
-  <text x="425" y="926" class="text-small">Show benefits, messages</text>
-  <text x="425" y="940" class="text-small">DTC eligibility calculator</text>
+  <text x="425" y="926" class="text-small">Benefits, messages</text>
+  <text x="425" y="940" class="text-small">DTC calculator</text>
 
-  <!-- Legend -->
-  <rect x="80" y="30" width="140" height="26" class="box" opacity="0.8"/>
-  <text x="150" y="48" class="text-small" font-weight="500">Automated</text>
-
-  <rect x="230" y="30" width="140" height="26" class="box-user" opacity="0.8"/>
-  <text x="300" y="48" class="text-small text-user" font-weight="500">User Action</text>
-
-  <rect x="380" y="30" width="140" height="26" class="box-cloud" opacity="0.8"/>
-  <text x="450" y="48" class="text-small text-cloud" font-weight="500">Cloud/Vercel</text>
-
-  <rect x="530" y="30" width="140" height="26" class="box-success" opacity="0.8"/>
-  <text x="600" y="48" class="text-small" font-weight="500" fill="#34c759">Success</text>
+  <rect x="80" y="30" width="120" height="26" class="box" opacity="0.8"/>
+  <text x="140" y="48" class="text-small" font-weight="500">Automated</text>
+  <rect x="210" y="30" width="120" height="26" class="box-user" opacity="0.8"/>
+  <text x="270" y="48" class="text-small text-user" font-weight="500">User Action</text>
+  <rect x="340" y="30" width="120" height="26" class="box-cloud" opacity="0.8"/>
+  <text x="400" y="48" class="text-small text-cloud" font-weight="500">Cloud/Vercel</text>
+  <rect x="470" y="30" width="120" height="26" class="box-success" opacity="0.8"/>
+  <text x="530" y="48" class="text-small" font-weight="500" fill="#34c759">Success</text>
 </svg>
