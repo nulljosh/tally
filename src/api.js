@@ -246,7 +246,16 @@ let lastCheckResult = null;
 let isChecking = false;
 
 // Serve dashboard (require login)
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
+  // Auto-login if .env credentials exist and no session
+  if ((!req.session || !req.session.authenticated) && process.env.BCEID_USERNAME && process.env.BCEID_PASSWORD) {
+    console.log('[AUTO-LOGIN] Creating session from .env credentials');
+    req.session.authenticated = true;
+    req.session.bceidUsername = process.env.BCEID_USERNAME;
+    req.session.bceidPassword = encrypt(process.env.BCEID_PASSWORD);
+    await new Promise((resolve) => req.session.save(resolve));
+  }
+
   if (!req.session || !req.session.authenticated) {
     return res.redirect('/login.html');
   }
