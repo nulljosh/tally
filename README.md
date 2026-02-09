@@ -4,9 +4,9 @@
 
 Multi-user BC Self-Serve portal scraper with DTC (Disability Tax Credit) eligibility navigator.
 
-## How It Works
-
 ![Workflow Diagram](docs/workflow.svg)
+
+## How It Works
 
 **Quick summary:**
 1. Login with BC Self-Serve credentials
