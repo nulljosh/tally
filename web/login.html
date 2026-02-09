@@ -99,6 +99,30 @@
         error.classList.remove('hidden');
       }
     });
+
+    // Auto-login with .env credentials on page load
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        // Try to access dashboard - if successful, we're already logged in
+        const checkAuth = await fetch('/api/health', { credentials: 'same-origin' });
+        if (checkAuth.ok) {
+          // Try auto-login with blank credentials (.env fallback)
+          const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({ username: '', password: '', rememberMe: true })
+          });
+
+          if (response.ok) {
+            window.location.href = '/';
+          }
+        }
+      } catch (err) {
+        // Silently fail - user can manually login
+        console.log('Auto-login skipped');
+      }
+    });
   </script>
 </body>
 </html>
