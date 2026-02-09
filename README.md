@@ -1,6 +1,6 @@
 # Chequecheck
 
-*"Fuck bureaucracy. Check your cheques."*
+*"Check your eligibility."*
 
 Multi-user BC Self-Serve portal scraper with DTC (Disability Tax Credit) eligibility navigator.
 
