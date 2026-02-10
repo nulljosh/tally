@@ -1,5 +1,5 @@
 {
-  "name": "selfserve",
+  "name": "chequecheck",
   "version": "1.0.2",
   "description": "BC Self-Serve Portal Scraper - Automated scraping of notifications, messages, payment info, and service requests",
   "main": "src/scraper.js",

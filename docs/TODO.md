@@ -2,8 +2,8 @@
 
 ## 🔥 PRIORITY: Verify Vercel Works + Update Domain
 
-- [ ] Test https://selfserve-rose.vercel.app in the morning (verify dashboard loads)
-- [ ] Update Vercel domain to chequecheck.vercel.app (Settings → Domains)
+- [ ] Test https://chequecheck.vercel.app in the morning (verify dashboard loads)
+- [ ] Verify Vercel domain is set to chequecheck.vercel.app (Settings → Domains)
 - [ ] Test login with BC Self-Serve credentials
 - [ ] Set up Vercel Blob storage (optional - for real-time updates)
 
@@ -81,7 +81,7 @@
 - [ ] Test Blob upload/download workflow
 - [ ] Update README with new login flow (DONE)
 - [ ] Consolidate docs (9 markdown files → 4-6)
-- [ ] Rename project from "selfserve" to "claimcheck"
+- [x] Rename project from "selfserve" to "chequecheck"
 
 **Status:** v2.3.0 implemented, pending testing & deployment
 **Security fixes:** All critical vulnerabilities resolved
@@ -118,7 +118,7 @@
 **Dashboard:**
 - [DONE] Password protected (hunter2)
 - [DONE] Dark/light mode toggle
-- [DONE] Deployed to Vercel: https://selfserve-c2cldmw48-nulljosh-9577s-projects.vercel.app
+- [DONE] Deployed to Vercel: https://chequecheck.vercel.app
 - [DONE] Mobile-first responsive design
 - [DONE] Clickable links to BC Self-Serve
 
@@ -126,7 +126,7 @@
 
 ## Vercel Deployment Notes
 
-**URL:** https://selfserve-c2cldmw48-nulljosh-9577s-projects.vercel.app
+**URL:** https://chequecheck.vercel.app
 **Password:** hunter2
 
 **Important:** Data on Vercel is static (from Jan 16, 2026). To update:

@@ -131,7 +131,7 @@ OpenClaw responds naturally
 1. **Vercel Environment Variables** (see MANUAL-TODOS.md)
    - Add `UPLOAD_SECRET` to Vercel dashboard
    - Add `API_TOKEN` for OpenClaw integration
-   - Fix domain: selfserve-rose.vercel.app → chequecheck.vercel.app
+   - Fix domain: chequecheck.vercel.app (was selfserve-rose.vercel.app)
    - Verify Blob storage enabled
 
 2. **Test Vercel Deployment**

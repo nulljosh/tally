@@ -1,4 +1,4 @@
-# Claimcheck - Claude Development Guide
+# ChequeCheck - Claude Development Guide
 
 ## Project Overview
 Multi-user BC Self-Serve scraper with DTC Navigator. Each user logs in with their own BC Self-Serve credentials to view their benefits data.
@@ -60,7 +60,7 @@ BCEID_USERNAME=your_username
 BCEID_PASSWORD=your_password
 SESSION_SECRET=random_string
 UPLOAD_SECRET=random_string
-VERCEL_URL=https://claimcheck.vercel.app
+VERCEL_URL=https://chequecheck.vercel.app
 ```
 
 **Vercel Dashboard:**
@@ -92,7 +92,8 @@ VERCEL_URL=https://claimcheck.vercel.app
 - [ ] Add session persistence (currently in-memory, won't work multi-instance)
 
 ## Naming
-Project is being renamed from "selfserve" to "claimcheck" or "chequecheck" (TBD)
+Project name: **chequecheck**
 - **check** = American spelling (verify/review)
 - **cheque** = Canadian spelling (payment)
 - "chequecheck" = playful pun combining both
+- Decision finalized: "chequecheck" (lowercase), display as "ChequeCheck" where appropriate

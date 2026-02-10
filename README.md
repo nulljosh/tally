@@ -104,7 +104,7 @@ npm run upload-blob
 ```
 
 ### 5. Access Dashboard
-Visit https://claimcheck.vercel.app
+Visit https://chequecheck.vercel.app
 - Dashboard loads instantly from Blob cache
 - "Check Now" button won't work on Vercel (Puppeteer timeout)
 - Must scrape locally and upload
@@ -136,7 +136,7 @@ Local Machine → Scraper → Upload Script → Vercel Blob (instant load)
 
 ## File Structure
 ```
-selfserve/
+chequecheck/
 ├── api/
 │   └── upload.js            # Vercel Blob upload endpoint
 ├── brute/                   # Security testing tools
@@ -178,11 +178,11 @@ curl -X POST http://localhost:3000/api/login \
 npm run upload-blob
 
 # Verify on Vercel
-curl https://claimcheck.vercel.app/api/latest
+curl https://chequecheck.vercel.app/api/latest
 ```
 
 ## License
 ISC
 
 ## Support
-File issues at https://github.com/YOUR_USERNAME/claimcheck/issues
+File issues at https://github.com/YOUR_USERNAME/chequecheck/issues

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Benefits Guide - ChequeCheck</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <button id="darkModeToggle" class="dark-mode-toggle" aria-label="Toggle dark mode">
+    <span class="sun">☀️</span>
+    <span class="moon">🌙</span>
+  </button>
+  <div class="progress-bar" id="progressBar"></div>
+  <nav style="padding: 1rem; display: flex; gap: 1rem; font-size: 0.9rem;">
+    <a href="unified.html">Dashboard</a>
+    <a href="benefits.html"><strong>Benefits Guide</strong></a>
+    <a href="dca.html">DCA Calculator</a>
+  </nav>
+  <div class="container">
+    <div class="box" style="padding: 1.5rem;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+        <div style="text-align: center; padding: 1rem; background: #FFFFFF; border: 2px solid #DDDDDD; border-radius: 8px;">
+          <p style="font-size: 0.85rem; color: #AAAAAA; margin-bottom: 0.25rem;">Current Income</p>
+          <p style="font-size: 2rem; font-weight: bold; color: #FF851B;">$1,060</p>
+          <p style="font-size: 0.8rem; color: #AAAAAA;">per month</p>
+        </div>
+        <div style="text-align: center; padding: 1rem; background: #FFFFFF; border: 2px solid #2ECC40; border-radius: 8px;">
+          <p style="font-size: 0.85rem; color: #AAAAAA; margin-bottom: 0.25rem;">Potential Income</p>
+          <p class="money" id="moneyAmount" onclick="celebrateMoney()" style="font-size: 2rem; font-weight: bold; color: #2ECC40; cursor: pointer;">$1,735</p>
+          <p style="font-size: 0.8rem; color: #AAAAAA;">per month</p>
+        </div>
+      </div>
+      <div style="text-align: center; padding: 1rem; background: #FFFFFF; border: 2px solid #FFDC00; border-left: 4px solid #FFDC00; border-radius: 8px;">
+        <p style="font-size: 0.95rem; margin-bottom: 0.25rem;">One-time DTC Refund: <strong style="color: #FF851B;">$5,000-$10,000</strong></p>
+        <p style="font-size: 0.8rem; color: #AAAAAA;">Retroactive tax refund for working years (2015-2020)</p>
+      </div>
+    </div>
+
+    <h2 class="title is-3">Current Status Timeline</h2>
+
+    <div class="box" style="background-color: #FFFFFF; border: 2px solid #FFDC00; border-left: 6px solid #FFDC00;">
+      <h3 class="subtitle is-5" style="color: #111111;">⏳ PWD (Persons with Disabilities) - Processing</h3>
+      <p><strong>Expected Approval:</strong> ~May 2026</p>
+      <p style="margin-top: 0.5rem;">After approval, your income jumps from $1,060/month to <strong>$1,483.50/month</strong></p>
+      <p style="font-size: 0.9rem; margin-top: 0.5rem; color: #AAAAAA;">• Doctor fee ($100) will be reimbursed by PWD (save receipt)</p>
+    </div>
+
+    <div class="box" style="background-color: #FFFFFF; border: 2px solid #0074D9; border-left: 6px solid #0074D9;">
+      <h3 class="subtitle is-5" style="color: #111111;">⏳ DTC (Disability Tax Credit) - Waiting on CRA</h3>
+      <p><strong>Current Status:</strong></p>
+      <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+        <li>✅ Jan 15, 2026: Sent T2201 request to Four Oaks Medical</li>
+        <li>✅ Doctor completed form and sent to CRA</li>
+        <li>⏳ <strong>Waiting on CRA to process (8-12 weeks from submission)</strong></li>
+      </ul>
+      <div style="background-color: #d4edda; padding: 1rem; border-radius: 8px; margin-top: 1rem; border-left: 4px solid #28a745;">
+        <p><strong>💰 What You Get When Approved:</strong></p>
+        <p style="margin-top: 0.5rem;"><strong>It's a TAX REFUND (not free money):</strong></p>
+        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <li>CRA recalculates your past tax returns (up to 10 years back)</li>
+          <li>You get a <strong>lump sum refund</strong> for taxes you overpaid during working years (2015-2020)</li>
+          <li>Only refunds taxes you actually paid when you were working</li>
+        </ul>
+        <p style="font-size: 1.5rem; font-weight: bold; color: #28a745; margin-top: 0.75rem;">$5,000-$10,000 one-time payment</p>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem;">Yes, it's actual cash deposited to your account - spend it on whatever you need!</p>
+      </div>
+    </div>
+
+    <div class="box" style="background-color: #f8d7da; border-left: 6px solid #dc3545;">
+      <h3 class="subtitle is-5" style="color: #721c24;">❌ CDB (Canada Disability Benefit) - Not Eligible Yet</h3>
+      <p><strong>Why blocked:</strong> You need DTC approval FIRST before you can apply for CDB.</p>
+      <div style="background-color: #d4edda; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+        <p><strong>After DTC Gets Approved:</strong></p>
+        <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
+          <li>Service Canada sends you invitation letter to apply for CDB</li>
+          <li>You apply for CDB online at canada.ca/cdb</li>
+          <li>If approved, you get <strong>back pay from approval month</strong></li>
+          <li>Monthly $200 payments start (BC won't claw this back)</li>
+        </ol>
+        <p style="margin-top: 0.75rem; font-weight: bold;">Final monthly income: $1,600 (PWD) + $200 (CDB) = <span style="color: #28a745;">$1,800/month</span></p>
+      </div>
+    </div>
+
+    <div class="box" style="background-color: #f0f9ff; border: 2px solid #4ecdc4;">
+      <h3 class="subtitle is-5">Work Equivalency (BC min wage $17.85/hour)</h3>
+      <p><strong>$1,800/month</strong> (PWD + CDB) equals:</p>
+      <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+        <li><strong>100 hours/month</strong> of work</li>
+        <li><strong>25 hours/week</strong></li>
+        <li><strong>63% of full-time</strong> (160 hrs/month)</li>
+      </ul>
+      <p style="margin-top: 0.75rem; font-size: 0.9rem; opacity: 0.8;">CDB alone ($200/month) = 11.2 hours of work = 1.5 work days saved</p>
+    </div>
+
+    <div class="box" style="background-color: #fff3cd; border: 2px solid #ff9800; border-left: 6px solid #ff5722;">
+      <h3 class="subtitle is-5" style="color: #d32f2f; margin-bottom: 0.75rem;">⚠️ Currently Owed by Government</h3>
+
+      <div style="background: white; padding: 1rem; border-radius: 4px; margin-bottom: 0.75rem;">
+        <p style="font-size: 1.1rem; margin-bottom: 0.25rem;"><strong>December 17 Welfare Check: $1,100</strong></p>
+        <p style="font-size: 0.9rem; color: #666;">(Overdue - still not received)</p>
+      </div>
+
+      <div style="background: white; padding: 1rem; border-radius: 4px; margin-bottom: 0.75rem;">
+        <p style="font-size: 1.1rem; margin-bottom: 0.25rem;"><strong>January 21 Welfare Check: $1,100</strong></p>
+        <p style="font-size: 0.9rem; color: #666;">(Due next Tuesday)</p>
+      </div>
+
+      <div style="background: #f5f5f5; padding: 0.75rem; border-radius: 4px; border-left: 3px solid #d32f2f;">
+        <p style="font-size: 1.2rem; font-weight: bold; color: #d32f2f;">Total Owed: $2,200</p>
+      </div>
+
+      <p style="font-size: 0.85rem; color: #555; margin-top: 0.75rem;">📞 Call 1-866-866-0800 to follow up on missing payments</p>
+    </div>
+
+    <h2 class="title is-3">Key Rules</h2>
+
+    <div class="content">
+      <ul>
+        <li>Save up to <strong>$100,000</strong> without losing disability benefits</li>
+        <li>CDB $200/month won't reduce your disability benefits</li>
+        <li>Must have DTC to qualify for CDB</li>
+        <li>Always report income/asset changes to Ministry</li>
+      </ul>
+    </div>
+
+    <h2 class="title is-3">Build Wealth Strategically</h2>
+
+    <div style="display: grid; grid-template-columns: 1fr; gap: 2rem; margin-bottom: 2rem;">
+      <div class="box">
+        <h3 class="subtitle is-5">Tax-Free Growth</h3>
+        <p><strong>TFSA First</strong> - $7,000/year limit, no tax on growth or withdrawals</p>
+        <p class="mt-2"><strong>Then RRSP</strong> - Up to $18K/year, tax deductions reduce your taxable income</p>
+        <p class="mt-2 is-size-7"><em>Max investment: ~$1,400/month from your income = $16.8K/year</em></p>
+      </div>
+
+      <div class="box">
+        <h3 class="subtitle is-5">Disability-Friendly Income</h3>
+        <p><strong>Won't reduce benefits:</strong> Freelance writing, coding, tutoring, consulting</p>
+        <p class="mt-2"><strong>Report earnings</strong> to Ministry to stay compliant</p>
+        <p class="mt-2 is-size-7"><em>Many earn $500-2K/month on top of disability income</em></p>
+      </div>
+    </div>
+
+    <div class="box" style="background-color: #fafafa; border-left: 4px solid #4ecdc4;">
+      <h3 class="subtitle is-5">Real Money Math</h3>
+      <p>If you save $400/month at 6% annual return:</p>
+      <div style="margin-top: 1rem;">
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; font-size: 0.9rem;">
+          <div><strong>5 years</strong><br>$28K</div>
+          <div><strong>10 years</strong><br>$66K</div>
+          <div><strong>20 years</strong><br>$186K</div>
+          <div><strong>30 years</strong><br>$466K</strong></div>
+        </div>
+      </div>
+      <p class="mt-3 is-size-7"><em>After rent, food, utilities. That's life-changing wealth from consistency alone.</em></p>
+      <p class="mt-3"><a href="sp500.html" style="display: inline-block; background: #4ecdc4; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 600;">Calculate Your DCA Growth</a></p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr; gap: 2rem;">
+      <div class="box">
+        <h3 class="subtitle is-5">Sample Budget</h3>
+        <ul style="font-size: 0.9rem; line-height: 1.8;">
+          <li><strong>Rent:</strong> $900 (shared)</li>
+          <li><strong>Food:</strong> $250</li>
+          <li><strong>Utilities:</strong> $100</li>
+          <li><strong>Transport:</strong> $0 (transit covered)</li>
+          <li><strong>Savings:</strong> $485</li>
+          <li style="border-top: 1px solid #ddd; margin-top: 0.5rem; padding-top: 0.5rem;"><strong>Total:</strong> $1,735</li>
+        </ul>
+      </div>
+
+      <div class="box">
+        <h3 class="subtitle is-5">Provincial Variations</h3>
+        <p><strong>Higher benefits:</strong> ON, AB, SK</p>
+        <p><strong>Lower benefits:</strong> MB, NS</p>
+        <p class="mt-2 is-size-7"><em>BC is mid-tier but cost of living is high</em></p>
+        <p class="mt-2"><strong>Pro tip:</strong> Some provinces have additional supplements for housing</p>
+      </div>
+    </div>
+
+    <h2 class="title is-3">Sources & Verification</h2>
+
+    <div class="box" style="background-color: #f8f9fa;">
+      <h3 class="subtitle is-5">CDB Information</h3>
+      <ul style="list-style: none; margin-left: 0;">
+        <li>• <a href="https://www.canada.ca/en/services/benefits/disability/canada-disability-benefit.html" target="_blank">Canada Disability Benefit Official</a></li>
+        <li>• <a href="https://dailyhive.com/canada/canada-disability-benefit-jan-2026" target="_blank">CDB Payment Jan 2026</a></li>
+        <li>• <a href="https://news.gov.bc.ca/releases/2025SDPR0008-000604" target="_blank">BC Won't Claw Back CDB</a></li>
+      </ul>
+    </div>
+
+    <div class="box" style="background-color: #f8f9fa;">
+      <h3 class="subtitle is-5">DTC Information</h3>
+      <ul style="list-style: none; margin-left: 0;">
+        <li>• <a href="https://www.canada.ca/en/revenue-agency/services/tax/individuals/segments/tax-credits-deductions-persons-disabilities/disability-tax-credit.html" target="_blank">Disability Tax Credit Official</a></li>
+        <li>• <a href="https://numeracyaccounting.com/blog/retroactive-disability-tax-credit-canada/" target="_blank">Retroactive DTC Claims</a></li>
+        <li>• <a href="https://disabilitycreditcanada.com/disability-tax-credit-ultimate-resource-guide/" target="_blank">DTC Guide</a></li>
+      </ul>
+    </div>
+
+    <div class="box" style="background-color: #f8f9fa;">
+      <h3 class="subtitle is-5">BC PWD Rates</h3>
+      <ul style="list-style: none; margin-left: 0;">
+        <li>• <a href="https://snappyrates.ca/pwd-payment-dates-benefits/" target="_blank">BC PWD 2026 Rates</a></li>
+        <li>• <a href="https://www2.gov.bc.ca/gov/content/family-social-supports/services-for-people-with-disabilities/disability-assistance/on-disability-assistance" target="_blank">BC Official PWD Info</a></li>
+      </ul>
+    </div>
+
+    <footer class="has-text-centered mt-5">
+      <p class="is-size-7">Made with <span class="beating-heart" style="color: red;">&hearts;</span> in Vancouver, BC, Canada</p>
+      <p class="is-size-7 mt-2"><a href="https://github.com/nulljosh/chequecheck" target="_blank" style="color: #4ecdc4; text-decoration: none;">View on GitHub</a></p>
+    </footer>
+
+  </div>
+
+  <script>
+    // Dark mode toggle
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const body = document.body;
+
+    // Load dark mode preference
+    if (localStorage.getItem('darkMode') === 'enabled') {
+      body.classList.add('dark-mode');
+    }
+
+    // Toggle dark mode
+    darkModeToggle.addEventListener('click', () => {
+      body.classList.toggle('dark-mode');
+      if (body.classList.contains('dark-mode')) {
+        localStorage.setItem('darkMode', 'enabled');
+      } else {
+        localStorage.setItem('darkMode', 'disabled');
+      }
+    });
+
+    // Province income data
+    const provinceData = {
+      bc: { monthly: 1735, yearly: 20820 },
+      ab: { monthly: 1850, yearly: 22200 },
+      sk: { monthly: 1795, yearly: 21540 },
+      mb: { monthly: 1650, yearly: 19800 },
+      on: { monthly: 1900, yearly: 22800 },
+      qc: { monthly: 1680, yearly: 20160 },
+      ns: { monthly: 1550, yearly: 18600 },
+      nb: { monthly: 1600, yearly: 19200 }
+    };
+
+    // Province calculator
+    document.getElementById('provinceSelector').addEventListener('change', function() {
+      const province = this.value;
+      if (province && provinceData[province]) {
+        const data = provinceData[province];
+        document.getElementById('monthlyResult').textContent = '$' + data.monthly.toLocaleString();
+        document.getElementById('yearlyResult').textContent = '$' + data.yearly.toLocaleString();
+        document.getElementById('calculatorResults').style.display = 'block';
+        document.getElementById('moneyAmount').textContent = '$' + data.monthly.toLocaleString() + '/month';
+      }
+    });
+
+    // Progress bar on scroll
+    window.addEventListener('scroll', () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('progressBar').style.width = scrolled + '%';
+    });
+
+    // Confetti burst
+    function createConfetti(x, y) {
+      const colors = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7'];
+      for (let i = 0; i < 30; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = x + 'px';
+        confetti.style.top = y + 'px';
+        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+        confetti.style.setProperty('--x', (Math.random() - 0.5) * 200 + 'px');
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 3000);
+      }
+    }
+
+    // Money celebration on click
+    function celebrateMoney() {
+      const rect = document.getElementById('moneyAmount').getBoundingClientRect();
+      createConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
+    }
+
+    // Checkbox persistence and completion tracking
+    const steps = ['step0', 'step1', 'step2', 'step3'];
+
+    // Load saved state
+    window.addEventListener('load', () => {
+      steps.forEach((stepId, index) => {
+        const saved = localStorage.getItem(stepId);
+        if (saved === 'true') {
+          const checkbox = document.querySelector(`#${stepId} .action-checkbox`);
+          checkbox.checked = true;
+          document.getElementById(stepId).classList.add('completed-step');
+        }
+      });
+      checkAllCompleted();
+    });
+
+    function toggleStep(stepNum) {
+      const stepId = 'step' + stepNum;
+      const checkbox = document.querySelector(`#${stepId} .action-checkbox`);
+      const stepBox = document.getElementById(stepId);
+
+      if (checkbox.checked) {
+        stepBox.classList.add('completed-step');
+        localStorage.setItem(stepId, 'true');
+
+        // Celebrate with confetti
+        const rect = stepBox.getBoundingClientRect();
+        createConfetti(rect.left + rect.width / 2, rect.top + 50);
+      } else {
+        stepBox.classList.remove('completed-step');
+        localStorage.setItem(stepId, 'false');
+      }
+
+      checkAllCompleted();
+    }
+
+    // Check if all steps completed
+    function checkAllCompleted() {
+      const allCompleted = steps.every(stepId => {
+        return localStorage.getItem(stepId) === 'true';
+      });
+
+      if (allCompleted) {
+        const celebBox = document.getElementById('celebrationBox');
+        celebBox.classList.add('celebration');
+        setTimeout(() => celebBox.classList.remove('celebration'), 500);
+      }
+    }
+
+    // Konami code easter egg
+    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    let konamiIndex = 0;
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === konamiCode[konamiIndex]) {
+        konamiIndex++;
+        if (konamiIndex === konamiCode.length) {
+          activateKonami();
+          konamiIndex = 0;
+        }
+      } else {
+        konamiIndex = 0;
+      }
+    });
+
+    function activateKonami() {
+      // Money rain!
+      let count = 0;
+      const interval = setInterval(() => {
+        const money = document.createElement('div');
+        money.className = 'floating-money';
+        money.textContent = '$';
+        money.style.left = Math.random() * window.innerWidth + 'px';
+        money.style.top = '0px';
+        money.style.fontSize = (20 + Math.random() * 30) + 'px';
+        document.body.appendChild(money);
+        setTimeout(() => money.remove(), 4000);
+
+        count++;
+        if (count > 30) clearInterval(interval);
+      }, 200);
+    }
+
+  </script>
+</body>
+</html>

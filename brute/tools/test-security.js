@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Security Test Suite for Self-Serve Dashboard
+ * Security Test Suite for ChequeCheck Dashboard
  * Tests: Authentication, Rate Limiting, Input Validation
  */
 

@@ -18,7 +18,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const blob = await put('claimcheck-cache/results.json', JSON.stringify(data), {
+    const blob = await put('chequecheck-cache/results.json', JSON.stringify(data), {
       access: 'public',
       addRandomSuffix: false,
     });

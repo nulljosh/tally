@@ -12,7 +12,7 @@
 ### 1. You Own the System
 - Your own website, server, or application
 - Your own code running on your infrastructure
-- Example: Testing your selfserve dashboard on localhost
+- Example: Testing your chequecheck dashboard on localhost
 
 ### 2. Written Authorization
 Requires ALL of these:

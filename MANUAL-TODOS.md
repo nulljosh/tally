@@ -16,7 +16,7 @@
 ### 2. Fix Domain Name
 - Same Vercel project settings
 - Navigate: Settings → Domains
-- Current: `selfserve-rose.vercel.app` (?)
+- Was: `selfserve-rose.vercel.app`
 - Should be: `chequecheck.vercel.app`
 - Update domain if needed
 

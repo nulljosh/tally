@@ -10,7 +10,7 @@ const puppeteer = require('puppeteer-core');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const ENCRYPTION_KEY = process.env.SESSION_SECRET || 'selfserve-secret-key-change-me';
+const ENCRYPTION_KEY = process.env.SESSION_SECRET || 'chequecheck-secret-key-change-me';
 
 // Encryption helpers for session credential storage
 function encrypt(text) {
@@ -314,7 +314,7 @@ app.get('/api/summary', async (req, res) => {
     if (process.env.VERCEL) {
       try {
         const { list } = require('@vercel/blob');
-        const { blobs } = await list({ prefix: 'claimcheck-cache/results.json' });
+        const { blobs } = await list({ prefix: 'chequecheck-cache/results.json' });
         if (blobs && blobs.length > 0) {
           const response = await fetch(blobs[0].url);
           data = await response.json();
@@ -422,7 +422,7 @@ app.get('/api/latest', requireAuth, async (req, res) => {
     if (process.env.VERCEL) {
       try {
         const { list } = require('@vercel/blob');
-        const { blobs } = await list({ prefix: 'claimcheck-cache/results.json' });
+        const { blobs } = await list({ prefix: 'chequecheck-cache/results.json' });
 
         if (blobs && blobs.length > 0) {
           const blobUrl = blobs[0].url;
