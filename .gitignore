@@ -13,3 +13,4 @@ api-calls-*.json
 .api.pid
 .vercel
 .env*.local
+.env.production
