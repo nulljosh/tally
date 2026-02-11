@@ -4,7 +4,7 @@ Strategic suggestions for automating Chequecheck with AI agents.
 
 ## Implemented Agents
 
-### 1. BC Self-Serve Scraper ✅
+### 1. BC Self-Serve Scraper 
 **Status:** Complete
 **What it does:** Automated scraping of BC benefits portal
 **Tech:** Puppeteer, Express, AES-256 encryption
@@ -123,8 +123,8 @@ Strategic suggestions for automating Chequecheck with AI agents.
 5. Log change history for audit trail
 
 **Example alerts:**
-- "✅ Support increased by $10 (now $570)"
-- "📬 New message from Ministry"
+- " Support increased by $10 (now $570)"
+- " New message from Ministry"
 - "⚠️ Payment delayed - contact ministry"
 
 ---
@@ -241,8 +241,8 @@ Strategic suggestions for automating Chequecheck with AI agents.
 
 ## Next Steps
 
-1. ✅ Complete multi-user authentication
-2. ✅ Deploy to Vercel with Blob storage
+1.  Complete multi-user authentication
+2.  Deploy to Vercel with Blob storage
 3. ⏳ Build DTC form assistant (v3.0)
 4. ⏳ Add change detection & notifications
 5. ⏳ Test with real users (5-10 beta testers)

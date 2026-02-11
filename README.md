@@ -17,7 +17,7 @@ Multi-user BC Self-Serve portal scraper with DTC (Disability Tax Credit) eligibi
 
 ## Features
 
-### ✅ Implemented (v2.0)
+###  Implemented (v2.0)
 - **Multi-user authentication** - Each user logs in with their own BC Self-Serve credentials
 - **Secure credential handling** - AES-256-CBC encryption, session-based storage, never logged
 - **Rate limiting** - 5 login attempts per 15 minutes
@@ -27,7 +27,7 @@ Multi-user BC Self-Serve portal scraper with DTC (Disability Tax Credit) eligibi
 - **DTC Navigator** - Free eligibility screener for Disability Tax Credit and BC PWD
 - **Automated scraping** - Notifications, Messages, Payment Info, Service Requests
 
-### 🔧 TODO
+###  TODO
 - [ ] Deploy to Vercel production
 - [ ] Add cron job for automatic scraping
 - [ ] Multi-tenant storage (per-user Blob keys)
@@ -66,12 +66,12 @@ npm run upload-blob
 ## Security
 
 ### What Changed (v2.0)
-- ❌ Removed `/api/default-credentials` endpoint (was leaking credentials)
-- ✅ Added authentication to `/api/latest` endpoint
-- ✅ Login validates credentials with actual BC Self-Serve login attempt
-- ✅ Credentials encrypted in session (AES-256-CBC)
-- ✅ Rate limiting on login attempts
-- ✅ .env file excluded from git (.gitignore)
+-  Removed `/api/default-credentials` endpoint (was leaking credentials)
+-  Added authentication to `/api/latest` endpoint
+-  Login validates credentials with actual BC Self-Serve login attempt
+-  Credentials encrypted in session (AES-256-CBC)
+-  Rate limiting on login attempts
+-  .env file excluded from git (.gitignore)
 
 ### Important
 - ⚠️ **Never commit .env files** - Already in .gitignore

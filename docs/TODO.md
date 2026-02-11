@@ -1,13 +1,13 @@
 # TODO - BC Self-Serve Scraper
 
-## 🔥 PRIORITY: Verify Vercel Works + Update Domain
+##  PRIORITY: Verify Vercel Works + Update Domain
 
 - [ ] Test https://chequecheck.vercel.app in the morning (verify dashboard loads)
 - [ ] Verify Vercel domain is set to chequecheck.vercel.app (Settings → Domains)
 - [ ] Test login with BC Self-Serve credentials
 - [ ] Set up Vercel Blob storage (optional - for real-time updates)
 
-## ✅ DONE: Fix Vercel — Dashboard loads with no data
+##  DONE: Fix Vercel — Dashboard loads with no data
 
 **Problem:** On Vercel, dashboard shows "Scraping BC Self-Serve... This takes ~30-60 seconds" forever. Locally it works because `auto-scrape` runs on startup and populates `lastCheckResult` in memory. On Vercel (serverless), there's no persistent memory between requests.
 
@@ -34,31 +34,31 @@
 
 ---
 
-## ✅ COMPLETED: Multi-User Login System (v2.3.0)
+##  COMPLETED: Multi-User Login System (v2.3.0)
 
 **Goal:** Replace simple password ("hunter2") with BC Self-Serve credentials. Each user logs in with their own username/password and sees their own data.
 
 ### Checklist
 
-#### Phase 1: Frontend Login ✅
+#### Phase 1: Frontend Login 
 - [x] Update `web/login.html`: Add username + password fields for BC Self-Serve
 - [x] Update login form to send both username + password to `/api/login`
 - [x] Allow blank fields to use .env defaults (admin convenience)
 
-#### Phase 2: Backend Auth ✅
+#### Phase 2: Backend Auth 
 - [x] Update `/api/login` endpoint to accept username + password
 - [x] Validate credentials by attempting BC Self-Serve login (attemptBCLogin())
 - [x] Store credentials in session with AES-256-CBC encryption
 - [x] Add session timeout (2 hour max age, 1 hour activity timeout)
 - [x] Secure cookies (httpOnly, sameSite strict, secure in production)
 
-#### Phase 3: Dynamic Scraping ✅
+#### Phase 3: Dynamic Scraping 
 - [x] Modify `checkAllSections()` to accept username/password parameters (already supported)
 - [x] Update `/api/check` to use session credentials with .env fallback
 - [x] Keep .env credentials as fallback for admin auto-login
 - [x] Scraper dynamically uses session or .env credentials
 
-#### Phase 4: Security & Polish ✅
+#### Phase 4: Security & Polish 
 - [x] Add rate limiting to `/api/login` (5 attempts per 15 min)
 - [x] Add "Logout" button in dashboard nav
 - [x] Destroy session on logout (POST /api/logout)
@@ -66,14 +66,14 @@
 - [x] Add auth to `/api/latest` endpoint
 - [x] .env excluded from git (.gitignore)
 
-#### Phase 5: Vercel Blob Integration ✅
+#### Phase 5: Vercel Blob Integration 
 - [x] Install `@vercel/blob` dependency
 - [x] Create `api/upload.js` — secure upload endpoint (requires UPLOAD_SECRET)
 - [x] Update `/api/latest` — read from Blob on Vercel, fall back to files locally
 - [x] Create `scripts/upload-to-blob.js` — local upload script
 - [x] Add `npm run upload-blob` script to package.json
 
-#### Remaining Work 🔧
+#### Remaining Work 
 - [ ] Add `vercel.json` config with env var references
 - [ ] Test Vercel deployment end-to-end
 - [ ] Set Vercel env vars (UPLOAD_SECRET, SESSION_SECRET, BLOB_READ_WRITE_TOKEN)
@@ -89,7 +89,7 @@
 
 ---
 
-## ✅ COMPLETED: UI Improvements (v2.2.1)
+##  COMPLETED: UI Improvements (v2.2.1)
 
 **Changes made:**
 - [x] Increased max container width (1400px → 1600px)

@@ -12,8 +12,8 @@
 - **Status:** DTC application processing (waiting period)
 
 ### June - July 2026 (Conservative Estimate)
-- **DTC Approval:** ✅
-- **Refund arrives:** **$10,000** 🎉
+- **DTC Approval:** 
+- **Refund arrives:** **$10,000** 
 - **Pay off Visa debt:** -$5,500
 - **Remaining:** $6,700
 
@@ -29,10 +29,10 @@
 - **SPY investment:** Quietly growing
 
 ### Late 2026 / Early 2027
-- **PWD approved:** ✅
+- **PWD approved:** 
 - **Monthly upgrade:** +$423/month
 - **New monthly income:** $1,483
-- **Dog fund:** Start saving? 🐕
+- **Dog fund:** Start saving? 
 
 ---
 
@@ -87,7 +87,7 @@
 - Cheapest reliable car: ~$5-8K (eats most of your $6.5K)
 - Do you even want a job?
 
-**Verdict:** ❌ Not worth it right now
+**Verdict:**  Not worth it right now
 
 ---
 
@@ -102,7 +102,7 @@
 - MacBook Pro 2026 already handles most things
 - Diminishing returns unless you have specific compute-heavy needs
 
-**Verdict:** ✅ Good investment if you have build ideas
+**Verdict:**  Good investment if you have build ideas
 
 ---
 
@@ -132,13 +132,13 @@
 - Doesn't generate immediate income or quality of life improvement
 - Just sits there growing slowly
 
-**Verdict:** ✅ Safety net that compounds
+**Verdict:**  Safety net that compounds
 
 ---
 
 ## Investment Strategy (Final Decision)
 
-**Phase 1:** Pay off debt ($5,500) ✅
+**Phase 1:** Pay off debt ($5,500) 
 **Phase 2:** Computer setup ($2,000) - enables building/income
 **Phase 3:** SPY/VOO index funds ($4,500) - liquid safety net
 **Phase 4:** Let it grow while building projects
