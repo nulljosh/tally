@@ -1,0 +1,96 @@
+/* TryAlcove Design System - Stolen Vibe */
+/* Mobile-first, warm palette, liquid glass aesthetic */
+
+:root {
+  /* Primary Colors - Warm earthy palette */
+  --color-primary: #431407;
+  --color-secondary: #d8b4fe;
+  --color-accent-1: #431407;
+  --color-accent-2: #d8b4fe;
+  --color-accent-3: #fff0df;
+  --color-accent-4: #f5e5d5;
+  --color-accent-5: #fffaf4;
+
+  /* Neutral Colors */
+  --color-neutral-1: #292524;
+  --color-neutral-2: #1c1917;
+  --color-neutral-3: #000000;
+  --color-neutral-4: #d6d3d1;
+  --color-neutral-5: #57534e;
+
+  /* Typography */
+  --font-primary: SF Pro, -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  --font-secondary: SF Soft Time, -apple-system, sans-serif;
+
+  --text-xs: 0.625rem;   /* 10px */
+  --text-sm: 0.75rem;    /* 12px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 1.875rem;  /* 30px */
+
+  --font-weight-1: 400;
+  --font-weight-2: 500;
+  --font-weight-3: 600;
+  --font-weight-4: 700;
+  --font-weight-5: 800;
+
+  /* Spacing - 4px base unit */
+  --space-0: 0;
+  --space-1: 0.5px;
+  --space-2: 1px;
+  --space-3: 2px;
+  --space-4: 3px;
+  --space-5: 4px;
+  --space-6: 6px;
+  --space-7: 8px;
+  --space-8: 12px;
+  --space-9: 16px;
+  --space-10: 24px;
+  --space-11: 32px;
+  --space-12: 48px;
+  --space-13: 64px;
+
+  /* Effects */
+  --shadow-sm: rgba(67, 20, 7, 0.25) 0px 20px 25px -5px, rgba(67, 20, 7, 0.25) 0px 8px 10px -6px;
+  --shadow-md: 0 4px 6px rgba(67, 20, 7, 0.1);
+  --shadow-lg: 0 10px 15px rgba(67, 20, 7, 0.1);
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  --border: 0px solid rgb(229, 231, 235);
+
+  /* Glass Morphism */
+  --glass-bg-light: rgba(255, 255, 255, 0.7);
+  --glass-bg-dark: rgba(44, 62, 80, 0.4);
+  --glass-border-light: rgba(67, 20, 7, 0.2);
+  --glass-border-dark: rgba(216, 180, 254, 0.2);
+  --glass-blur: blur(20px);
+
+  /* Dark mode overrides */
+  --bg-primary: #fffaf4;
+  --bg-secondary: #fff0df;
+  --text-primary: #292524;
+  --text-secondary: #57534e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #1c1917;
+    --bg-secondary: #292524;
+    --text-primary: #f5e5d5;
+    --text-secondary: #d6d3d1;
+  }
+}
+
+/* Dark mode class override */
+body.dark-mode {
+  --bg-primary: #1c1917;
+  --bg-secondary: #292524;
+  --text-primary: #f5e5d5;
+  --text-secondary: #d6d3d1;
+}
