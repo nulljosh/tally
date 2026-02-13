@@ -1,5 +1,5 @@
 :root {
-  /* Colors */
+  /* Primary Palette (Tryalcove-inspired) */
   --color-primary: #431407;
   --color-secondary: #d8b4fe;
   --color-accent-1: #431407;
@@ -8,51 +8,89 @@
   --color-accent-4: #f5e5d5;
   --color-accent-5: #fffaf4;
 
+  /* Neutrals */
   --color-neutral-1: #292524;
   --color-neutral-2: #1c1917;
   --color-neutral-3: #000000;
   --color-neutral-4: #d6d3d1;
   --color-neutral-5: #57534e;
 
+  /* Text Colors */
+  --text-primary: #1d1d1f;
+  --text-secondary: #6e6e73;
+
   /* Typography */
-  --font-primary: SF Pro;
-  --font-secondary: SF Soft Time;
+  --font-primary: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', sans-serif;
+  --font-secondary: 'SF Pro Rounded', -apple-system, BlinkMacSystemFont, sans-serif;
 
-  --text-xs: 10px;
-  --text-sm: 12px;
-  --text-base: 16px;
-  --text-lg: 18px;
-  --text-xl: 20px;
-  --text-2xl: 24px;
-  --text-3xl: 30px;
+  /* Font Weights */
+  --font-weight-1: 300;
+  --font-weight-2: 400;
+  --font-weight-3: 500;
+  --font-weight-4: 600;
+  --font-weight-5: 700;
+  --font-weight-6: 800;
 
-  --font-weight-1: 400;
-  --font-weight-2: 500;
-  --font-weight-3: 600;
-  --font-weight-4: 700;
-  --font-weight-5: 800;
+  /* Font Sizes */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
 
-  /* Spacing */
-  --space-0: 0px;
-  --space-1: 0.5px;
-  --space-2: 1px;
-  --space-3: 2px;
-  --space-4: 3px;
-  --space-5: 4px;
-  --space-6: 6px;
-  --space-7: 8px;
-  --space-8: 12px;
-  --space-9: 16px;
-  --space-10: 24px;
-  --space-11: 32px;
-  --space-12: 48px;
-  --space-13: 64px;
+  /* Spacing (4px base grid) */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-7: 1.75rem;
+  --space-8: 2rem;
+  --space-9: 2.25rem;
+  --space-10: 2.5rem;
+  --space-11: 3rem;
+  --space-12: 4rem;
+  --space-13: 5rem;
+  --space-14: 6rem;
+  --space-15: 8rem;
+  --space-16: 10rem;
 
-  /* Effects */
-  --shadow-sm: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(67, 20, 7, 0.25) 0px 20px 25px -5px, rgba(67, 20, 7, 0.25) 0px 8px 10px -6px;
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-full: 9999px;
 
-  --radius: 12px;
-  --border: 0px solid rgb(229, 231, 235);
+  /* Shadows */
+  --shadow-xs: 0 1px 2px 0 rgba(67, 20, 7, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(67, 20, 7, 0.1), 0 1px 2px -1px rgba(67, 20, 7, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(67, 20, 7, 0.1), 0 2px 4px -2px rgba(67, 20, 7, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(67, 20, 7, 0.1), 0 4px 6px -4px rgba(67, 20, 7, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(67, 20, 7, 0.1), 0 8px 10px -6px rgba(67, 20, 7, 0.1);
+
+  /* Glass Morphism */
+  --glass-bg-light: rgba(255, 255, 255, 0.7);
+  --glass-bg-dark: rgba(0, 0, 0, 0.5);
+  --glass-blur: blur(20px);
+  --glass-border-light: rgba(255, 255, 255, 0.3);
+  --glass-border-dark: rgba(255, 255, 255, 0.1);
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark mode overrides */
+body.dark-mode {
+  --text-primary: #f5f5f7;
+  --text-secondary: #a1a1a6;
 }
