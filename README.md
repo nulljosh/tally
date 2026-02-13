@@ -33,6 +33,7 @@ Multi-user BC Self-Serve portal scraper with DTC (Disability Tax Credit) eligibi
 - [ ] Multi-tenant storage (per-user Blob keys)
 - [ ] T2201 form pre-filler (DTC application)
 - [ ] Email notifications for benefit updates
+- [ ] Add session persistence (currently in-memory, won't work multi-instance)
 
 ## Quick Start
 
@@ -80,34 +81,72 @@ npm run upload-blob
 
 ## Deployment (Vercel)
 
-### 1. Set Environment Variables
+### Prerequisites
+- Vercel account with Blob storage enabled
+- Local .env file configured for scraping
+- GitHub repository connected to Vercel
+
+### Step 1: Set Environment Variables
 In Vercel Dashboard → Settings → Environment Variables:
 ```
 UPLOAD_SECRET=<random-string>  # Generate with: openssl rand -hex 32
 SESSION_SECRET=<random-string>  # Generate with: openssl rand -hex 32
+API_TOKEN=<random-string>       # Optional: for OpenClaw integration
 ```
 
-### 2. Enable Blob Storage
+### Step 2: Enable Blob Storage
 Vercel Dashboard → Storage → Blob → Enable
 (Auto-creates `BLOB_READ_WRITE_TOKEN`)
 
-### 3. Deploy
+### Step 3: Verify Domain
+- Check Settings → Domains
+- Should be `chequecheck.vercel.app`
+- HTTPS enabled automatically
+
+### Step 4: Deploy
 ```bash
+# Option A: Git push (auto-deploys)
+git push origin main
+
+# Option B: CLI
 vercel --prod
 ```
 
-### 4. Upload Data
+### Step 5: Upload Data
 ```bash
 # Run locally to scrape and upload
 npm run check
 npm run upload-blob
 ```
 
-### 5. Access Dashboard
+### Step 6: Verify Deployment
+```bash
+# Test Blob endpoint
+curl https://chequecheck.vercel.app/api/latest
+
+# Check summary API (if configured)
+curl https://chequecheck.vercel.app/api/summary?token=YOUR_API_TOKEN
+```
+
+### Step 7: Access Dashboard
 Visit https://chequecheck.vercel.app
 - Dashboard loads instantly from Blob cache
 - "Check Now" button won't work on Vercel (Puppeteer timeout)
 - Must scrape locally and upload
+
+### Troubleshooting
+
+**Problem:** Dashboard shows old data
+```bash
+npm run check && npm run upload-blob
+```
+
+**Problem:** "Unauthorized" on /api/upload
+- Check UPLOAD_SECRET in Vercel environment variables
+
+**Problem:** Blob endpoint returns 404
+- Settings → Storage → Blob → Ensure enabled
+- Redeploy after enabling
 
 ## Architecture
 

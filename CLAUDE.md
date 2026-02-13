@@ -83,13 +83,19 @@ VERCEL_URL=https://checkcheck.vercel.app
 - ⚠️ Credentials are encrypted in session storage (AES-256-CBC)
 - ⚠️ Session timeout prevents stale sessions
 
-## TODO
-- [ ] Add vercel.json config (env vars, build settings)
-- [ ] Test Vercel deployment end-to-end
-- [ ] Set up Vercel environment variables
-- [ ] (Optional) Set up local cron job for automatic scraping
-- [ ] Consider multi-tenant storage (per-user Blob keys or database)
-- [ ] Add session persistence (currently in-memory, won't work multi-instance)
+## Development History
+
+### 2026-02-09 - Auto-Login + OpenClaw Integration
+- Fixed server-side auto-login with .env credentials
+- Added `/api/summary` endpoint for OpenClaw integration (token-authenticated)
+- Security fix: rotated UPLOAD_SECRET after accidental exposure
+- OpenClaw can now query "how much am I getting?" and receive payment data
+
+### Key Learnings
+- Server-side auth checks happen before client JS loads
+- Never commit secrets (always check git diff)
+- Browser cache requires hard refresh (Cmd+Shift+R) when testing
+- API keys go in launchd env vars, not config files
 
 ## Naming
 Project name: **checkcheck**
