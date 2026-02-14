@@ -18,7 +18,7 @@ const path = require('path');
 // Test configuration
 const TARGET_URL = 'http://localhost:3000';
 const USERNAME = 'joshuatrommel';
-const WORDLIST_PATH = path.join(__dirname, '../wordlists/josh-pattern.txt');
+const WORDLIST_PATH = path.join(__dirname, '../wordlists/top-100.txt');
 const LOG_FILE = path.join(__dirname, '../logs/test-checkcheck.log');
 
 // Ensure logs directory exists
