@@ -1,7 +1,7 @@
 {
-  "name": "checkcheck",
-  "version": "1.1.0",
-  "description": "BC Self-Serve Portal Scraper - Automated scraping of notifications, messages, payment info, and service requests",
+  "name": "tally",
+  "version": "1.2.0",
+  "description": "Tally - BC Self-Serve Portal Scraper - Automated scraping of notifications, messages, payment info, and service requests",
   "main": "src/scraper.js",
   "scripts": {
     "check": "node src/scraper.js",
