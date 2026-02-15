@@ -26,7 +26,7 @@ async function uploadToBlob() {
 
   // Upload to Vercel
   const UPLOAD_SECRET = process.env.UPLOAD_SECRET;
-  const VERCEL_URL = process.env.VERCEL_URL || 'https://tally.vercel.app';
+  const VERCEL_URL = process.env.VERCEL_URL || 'https://chequecheck.vercel.app';
 
   const response = await fetch(`${VERCEL_URL}/api/upload`, {
     method: 'POST',
