@@ -1,4 +1,4 @@
-# CheckCheck - Claude Development Guide
+# Tally - Claude Development Guide
 
 ## Project Overview
 Multi-user BC Self-Serve scraper with DTC Navigator. Each user logs in with their own BC Self-Serve credentials to view their benefits data.
@@ -60,7 +60,7 @@ BCEID_USERNAME=your_username
 BCEID_PASSWORD=your_password
 SESSION_SECRET=random_string
 UPLOAD_SECRET=random_string
-VERCEL_URL=https://checkcheck.vercel.app
+VERCEL_URL=https://tally.vercel.app
 ```
 
 **Vercel Dashboard:**
@@ -98,8 +98,8 @@ VERCEL_URL=https://checkcheck.vercel.app
 - API keys go in launchd env vars, not config files
 
 ## Naming
-Project name: **checkcheck**
+Project name: **tally**
 - **check** = American spelling (verify/review)
 - **cheque** = Canadian spelling (payment)
-- "checkcheck" = playful pun combining both
-- Decision finalized: "checkcheck" (lowercase), display as "CheckCheck" where appropriate
+- "tally" = playful pun combining both
+- Decision finalized: "tally" (lowercase), display as "Tally" where appropriate
