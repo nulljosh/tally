@@ -163,34 +163,25 @@ const requireAuth = (req, res, next) => {
 // Login endpoint - validate BC Self-Serve credentials
 app.post('/api/login', loginLimiter, async (req, res) => {
   let { username, password, rememberMe } = req.body;
+  let usedLocalEnvFallback = false;
 
-  // Fall back to .env credentials if not provided
-  username = username || process.env.BCEID_USERNAME;
-  password = password || process.env.BCEID_PASSWORD;
+  // Local-only convenience: allow empty login to use .env credentials
+  if ((!username || !password) && !process.env.VERCEL) {
+    username = process.env.BCEID_USERNAME;
+    password = process.env.BCEID_PASSWORD;
+    usedLocalEnvFallback = !!(username && password);
+  }
 
   if (!username || !password) {
     return res.status(400).json({
       success: false,
-      error: 'Username and password required (or configure .env file)'
+      error: 'Username and password required'
     });
   }
 
   try {
-    // On Vercel: just check credentials match .env (no Puppeteer)
-    if (process.env.VERCEL) {
-      const envUser = process.env.BCEID_USERNAME;
-      const envPass = process.env.BCEID_PASSWORD;
-
-      if (!username || !password || username !== envUser || password !== envPass) {
-        console.log('[LOGIN] Vercel: Invalid credentials (not matching .env)');
-        return res.status(401).json({
-          success: false,
-          error: 'Invalid BC Self-Serve credentials'
-        });
-      }
-      console.log('[LOGIN] Vercel: Credentials match .env, skipping BC validation');
-    } else {
-      // Local dev: full BC Self-Serve validation with Puppeteer
+    if (!process.env.VERCEL && !usedLocalEnvFallback) {
+      // Local dev: validate explicit credentials against BC Self-Serve.
       console.log('[LOGIN] Local: Validating credentials with BC Self-Serve...');
       const result = await attemptBCLogin(username, password);
 
@@ -201,6 +192,10 @@ app.post('/api/login', loginLimiter, async (req, res) => {
           error: 'Invalid BC Self-Serve credentials'
         });
       }
+    } else if (!process.env.VERCEL && usedLocalEnvFallback) {
+      console.log('[LOGIN] Local: Using .env credentials fallback (no live validation)');
+    } else {
+      console.log('[LOGIN] Vercel: Using submitted credentials (session-scoped)');
     }
 
     // Store encrypted credentials in session
@@ -698,13 +693,30 @@ app.get('/api/check', async (req, res) => {
   try {
     console.log('[API] Starting check for all sections...');
 
-    // Use session credentials if authenticated, otherwise fall back to .env
-    let username = process.env.BCEID_USERNAME;
-    let password = process.env.BCEID_PASSWORD;
+    let username;
+    let password;
 
-    if (req.session && req.session.authenticated) {
+    if (process.env.VERCEL) {
+      // Production: only use credentials supplied at login and stored in session.
+      if (!req.session || !req.session.authenticated) {
+        return res.status(401).json({ error: 'Not authenticated. Please login first.' });
+      }
       username = req.session.bceidUsername;
       password = decrypt(req.session.bceidPassword);
+      if (!username || !password) {
+        return res.status(400).json({ error: 'Missing login credentials in session. Please login again.' });
+      }
+    } else if (req.session && req.session.authenticated) {
+      // Local: authenticated session takes priority.
+      username = req.session.bceidUsername;
+      password = decrypt(req.session.bceidPassword);
+    } else {
+      // Local-only fallback for quick testing.
+      username = process.env.BCEID_USERNAME;
+      password = process.env.BCEID_PASSWORD;
+      if (!username || !password) {
+        return res.status(400).json({ error: 'Missing local .env credentials' });
+      }
     }
 
     const result = await checkAllSections({
