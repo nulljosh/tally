@@ -730,6 +730,17 @@ app.get('/api/check', requireAuth, async (req, res) => {
       checkedAt: new Date().toISOString()
     };
 
+    if (!result || !result.success) {
+      isChecking = false;
+      const scrapeError = (result && result.error) ? result.error : 'Scrape failed';
+      console.error('[API] Scrape failed:', scrapeError);
+      return res.status(502).json({
+        success: false,
+        error: scrapeError,
+        data: lastCheckResult
+      });
+    }
+
     if (process.env.VERCEL && req.session?.userId && result && result.success) {
       try {
         const { put } = require('@vercel/blob');
