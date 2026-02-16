@@ -30,10 +30,9 @@
   ],
   "routes": [
     { "src": "/api/upload", "dest": "/api/upload.js" },
-    { "src": "/api/latest", "dest": "/api/latest.js" },
     { "src": "/api/(.*)", "dest": "/src/api.js" },
     { "src": "/data/(.*)", "dest": "/src/api.js" },
-    { "src": "^/$", "dest": "/web/unified.html" },
+    { "src": "^/$", "dest": "/src/api.js" },
     { "src": "/login", "dest": "/web/login.html" },
     { "src": "/(.*\\.(html|css|js|png|jpg|svg|ico))", "dest": "/web/$1" }
   ]
