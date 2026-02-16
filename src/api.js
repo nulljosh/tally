@@ -248,8 +248,13 @@ app.get('/api/me', (req, res) => {
 let lastCheckResult = null;
 let isChecking = false;
 
-// Serve dashboard (require login)
+// Root always starts at login page
 app.get('/', async (req, res) => {
+  return res.redirect('/login.html');
+});
+
+// Serve dashboard (require login)
+app.get('/app', async (req, res) => {
   if (!req.session || !req.session.authenticated) {
     return res.redirect('/login.html');
   }

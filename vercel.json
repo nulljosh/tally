@@ -33,6 +33,7 @@
     { "src": "/api/(.*)", "dest": "/src/api.js" },
     { "src": "/data/(.*)", "dest": "/src/api.js" },
     { "src": "^/$", "dest": "/src/api.js" },
+    { "src": "^/app$", "dest": "/src/api.js" },
     { "src": "/login", "dest": "/web/login.html" },
     { "src": "/(.*\\.(html|css|js|png|jpg|svg|ico))", "dest": "/web/$1" }
   ]
