@@ -1,8 +1,18 @@
-# Chequecheck
+# Tally
 
-*"Check your eligibility."*
+*"Track your BC benefits."*
 
 Multi-user BC Self-Serve portal scraper with DTC (Disability Tax Credit) eligibility navigator.
+
+**Live Demo**: https://tally-production.vercel.app | **GitHub Pages**: https://nulljosh.github.io/tally/ | **Local**: `npm start` → http://localhost:3000
+
+## Current Status (2026-02-15)
+
+- ✅ **Deployed**: Production live on Vercel
+- ✅ **Cookie Sessions**: No database needed (Vercel-ready)
+- ✅ **Blob Cache**: Infrastructure ready for instant loading
+- ⏳ **Needs Setup**: Blob storage + initial data upload (10 min)
+- 💰 **Revenue Potential**: $450/mo (50 users @ $9/mo)
 
 ![Workflow Diagram](docs/workflow.svg)
 
