@@ -1,59 +1,57 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 520" width="920" height="520">
   <style>
     text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-    .title { font-size: 14px; font-weight: 600; fill: #ffffff; }
-    .label { font-size: 10px; font-weight: 500; fill: #1d1d1f; }
-    .sub { font-size: 8px; fill: #6e6e73; }
-    .line { stroke: #d2d2d7; stroke-width: 1.5; fill: none; }
+    .bg { fill: #f5f5f7; }
+    .node { fill: #ffffff; stroke: #d2d2d7; stroke-width: 2; rx: 12; }
+    .node-auth { fill: #e8f1ff; stroke: #7aaef7; stroke-width: 2; rx: 12; }
+    .node-cloud { fill: #fff4e5; stroke: #f5a623; stroke-width: 2; rx: 12; }
+    .title { font-size: 24px; font-weight: 700; fill: #1d1d1f; }
+    .label { font-size: 15px; font-weight: 600; fill: #1d1d1f; }
+    .sub { font-size: 12px; fill: #6e6e73; }
+    .line { stroke: #8e8e93; stroke-width: 2; fill: none; }
   </style>
-  <rect width="400" height="300" fill="#ffffff" rx="8"/>
 
-  <!-- Center node -->
-  <rect x="150" y="120" width="100" height="40" rx="10" fill="#0071e3"/>
-  <text x="200" y="145" text-anchor="middle" class="title">CheckCheck</text>
+  <rect class="bg" x="0" y="0" width="920" height="520" rx="14"/>
+  <text class="title" x="460" y="42" text-anchor="middle">Tally Architecture</text>
 
-  <!-- Auth / Login -->
-  <rect x="20" y="20" width="100" height="36" rx="8" fill="#f5f5f7"/>
-  <text x="70" y="35" text-anchor="middle" class="label">Authentication</text>
-  <text x="70" y="47" text-anchor="middle" class="sub">AES-256, Sessions</text>
-  <line x1="110" y1="56" x2="165" y2="120" class="line"/>
+  <rect class="node-auth" x="50" y="90" width="180" height="80" rx="12"/>
+  <text class="label" x="140" y="122" text-anchor="middle">Login UI</text>
+  <text class="sub" x="140" y="142" text-anchor="middle">web/login.html</text>
 
-  <!-- Scraper -->
-  <rect x="150" y="20" width="100" height="36" rx="8" fill="#f5f5f7"/>
-  <text x="200" y="35" text-anchor="middle" class="label">Scraper</text>
-  <text x="200" y="47" text-anchor="middle" class="sub">Puppeteer, BC Self-Serve</text>
-  <line x1="200" y1="56" x2="200" y2="120" class="line"/>
+  <rect class="node-auth" x="280" y="90" width="220" height="80" rx="12"/>
+  <text class="label" x="390" y="122" text-anchor="middle">Auth + Session</text>
+  <text class="sub" x="390" y="142" text-anchor="middle">src/api.js /api/login /api/me</text>
 
-  <!-- DTC Navigator -->
-  <rect x="280" y="20" width="100" height="36" rx="8" fill="#f5f5f7"/>
-  <text x="330" y="35" text-anchor="middle" class="label">DTC Navigator</text>
-  <text x="330" y="47" text-anchor="middle" class="sub">Eligibility Screener</text>
-  <line x1="290" y1="56" x2="235" y2="120" class="line"/>
+  <rect class="node" x="560" y="90" width="310" height="80" rx="12"/>
+  <text class="label" x="715" y="122" text-anchor="middle">Dashboard</text>
+  <text class="sub" x="715" y="142" text-anchor="middle">web/unified.html via /app</text>
 
-  <!-- Express API -->
-  <rect x="5" y="130" width="105" height="36" rx="8" fill="#f5f5f7"/>
-  <text x="57" y="145" text-anchor="middle" class="label">Express API</text>
-  <text x="57" y="157" text-anchor="middle" class="sub">Rate Limiting, REST</text>
-  <line x1="110" y1="145" x2="150" y2="140" class="line"/>
+  <rect class="node" x="120" y="250" width="260" height="90" rx="12"/>
+  <text class="label" x="250" y="285" text-anchor="middle">Scraper</text>
+  <text class="sub" x="250" y="305" text-anchor="middle">src/scraper.js (local run)</text>
+  <text class="sub" x="250" y="323" text-anchor="middle">check notifications/messages/payments</text>
 
-  <!-- Vercel Blob -->
-  <rect x="290" y="130" width="105" height="36" rx="8" fill="#f5f5f7"/>
-  <text x="342" y="145" text-anchor="middle" class="label">Vercel Blob</text>
-  <text x="342" y="157" text-anchor="middle" class="sub">Cached Data, CDN</text>
-  <line x1="290" y1="145" x2="250" y2="140" class="line"/>
+  <rect class="node-cloud" x="430" y="250" width="220" height="90" rx="12"/>
+  <text class="label" x="540" y="285" text-anchor="middle">Upload API</text>
+  <text class="sub" x="540" y="305" text-anchor="middle">api/upload.js</text>
+  <text class="sub" x="540" y="323" text-anchor="middle">requires UPLOAD_SECRET + X-User-ID</text>
 
-  <!-- Dashboard -->
-  <rect x="30" y="225" width="110" height="36" rx="8" fill="#f5f5f7"/>
-  <text x="85" y="240" text-anchor="middle" class="label">Dashboard</text>
-  <text x="85" y="252" text-anchor="middle" class="sub">Benefits, Messages</text>
-  <line x1="120" y1="230" x2="180" y2="160" class="line"/>
+  <rect class="node-cloud" x="700" y="250" width="170" height="90" rx="12"/>
+  <text class="label" x="785" y="285" text-anchor="middle">Vercel Blob</text>
+  <text class="sub" x="785" y="305" text-anchor="middle">tally-cache</text>
+  <text class="sub" x="785" y="323" text-anchor="middle">/userId/results.json</text>
 
-  <!-- Upload Pipeline -->
-  <rect x="260" y="225" width="110" height="36" rx="8" fill="#f5f5f7"/>
-  <text x="315" y="240" text-anchor="middle" class="label">Upload Pipeline</text>
-  <text x="315" y="252" text-anchor="middle" class="sub">Local Scrape to Blob</text>
-  <line x1="275" y1="230" x2="220" y2="160" class="line"/>
+  <rect class="node" x="360" y="400" width="220" height="80" rx="12"/>
+  <text class="label" x="470" y="432" text-anchor="middle">Latest Data API</text>
+  <text class="sub" x="470" y="452" text-anchor="middle">src/api.js /api/latest</text>
 
-  <!-- Subtitle -->
-  <text x="200" y="288" text-anchor="middle" class="sub">BC Self-Serve benefits scraper + DTC eligibility</text>
+  <path class="line" d="M 230 130 L 280 130"/>
+  <path class="line" d="M 500 130 L 560 130"/>
+  <path class="line" d="M 390 170 L 390 250"/>
+  <path class="line" d="M 380 295 L 430 295"/>
+  <path class="line" d="M 650 295 L 700 295"/>
+  <path class="line" d="M 785 340 L 785 440 L 580 440"/>
+  <path class="line" d="M 580 420 L 715 170"/>
+
+  <text class="sub" x="460" y="500" text-anchor="middle">Root path redirects to login. Dashboard is at /app after session auth.</text>
 </svg>

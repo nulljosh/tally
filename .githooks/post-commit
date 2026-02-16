@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -u
+
+branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '')"
+if [ -z "$branch" ] || [ "$branch" = "HEAD" ]; then
+  exit 0
+fi
+
+# Auto-push commits for this repo; do not block commit success on network errors.
+git push origin "$branch" >/dev/null 2>&1 || true

@@ -1,106 +1,66 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1100" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
-  <defs>
-    <style>
-      .box { fill: rgba(255, 255, 255, 0.9); stroke: rgba(0, 0, 0, 0.2); stroke-width: 2; rx: 12; }
-      .box-success { fill: rgba(52, 199, 89, 0.2); stroke: rgba(52, 199, 89, 0.6); stroke-width: 2; rx: 12; }
-      .box-user { fill: rgba(0, 122, 255, 0.2); stroke: rgba(0, 122, 255, 0.6); stroke-width: 2; rx: 12; }
-      .box-cloud { fill: rgba(255, 149, 0, 0.2); stroke: rgba(255, 149, 0, 0.6); stroke-width: 2; rx: 12; }
-      .text { fill: #1d1d1f; font-size: 15px; text-anchor: middle; font-weight: 500; }
-      .text-small { fill: #6e6e73; font-size: 12px; text-anchor: middle; font-weight: 400; }
-      .text-user { fill: #007aff; }
-      .text-cloud { fill: #ff9500; }
-      .arrow { stroke: #86868b; stroke-width: 2; fill: none; }
-      .arrow-user { stroke: #007aff; stroke-width: 2; fill: none; }
-      .arrow-cloud { stroke: #ff9500; stroke-width: 2; fill: none; }
-      .title { fill: #1d1d1f; font-size: 24px; font-weight: 600; text-anchor: middle; }
-    </style>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 1200" width="980" height="1200">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .bg { fill: #f5f5f7; }
+    .card { fill: #ffffff; stroke: #d2d2d7; stroke-width: 2; rx: 12; }
+    .card-auth { fill: #e8f1ff; stroke: #7aaef7; stroke-width: 2; rx: 12; }
+    .card-cloud { fill: #fff4e5; stroke: #f5a623; stroke-width: 2; rx: 12; }
+    .card-ok { fill: #eaf8ec; stroke: #6ac17a; stroke-width: 2; rx: 12; }
+    .title { font-size: 28px; font-weight: 700; fill: #1d1d1f; }
+    .label { font-size: 16px; font-weight: 600; fill: #1d1d1f; }
+    .sub { font-size: 13px; fill: #6e6e73; }
+    .arrow { stroke: #8e8e93; stroke-width: 2; fill: none; }
+    .arrow-cloud { stroke: #f5a623; stroke-width: 2; fill: none; }
+  </style>
 
-    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#f5f5f7;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#e8e8ed;stop-opacity:1" />
-    </linearGradient>
-  </defs>
+  <rect class="bg" x="0" y="0" width="980" height="1200" rx="16"/>
+  <text class="title" x="490" y="52" text-anchor="middle">Tally User and Data Workflow</text>
 
-  <rect width="900" height="1100" fill="url(#bg)"/>
-  <text x="450" y="50" class="title">Chequecheck - BC Benefits Scraper</text>
+  <rect class="card-auth" x="320" y="90" width="340" height="72" rx="12"/>
+  <text class="label" x="490" y="120" text-anchor="middle">1. Open Root URL</text>
+  <text class="sub" x="490" y="142" text-anchor="middle">/ redirects to /login.html</text>
 
-  <!-- Legend -->
-  <rect x="80" y="80" width="120" height="26" class="box" opacity="0.8"/>
-  <text x="140" y="98" class="text-small" font-weight="500">Automated</text>
-  <rect x="210" y="80" width="120" height="26" class="box-user" opacity="0.8"/>
-  <text x="270" y="98" class="text-small text-user" font-weight="500">User Action</text>
-  <rect x="340" y="80" width="120" height="26" class="box-cloud" opacity="0.8"/>
-  <text x="400" y="98" class="text-small text-cloud" font-weight="500">Cloud/Vercel</text>
-  <rect x="470" y="80" width="120" height="26" class="box-success" opacity="0.8"/>
-  <text x="530" y="98" class="text-small" font-weight="500" fill="#34c759">Success</text>
+  <rect class="card-auth" x="320" y="195" width="340" height="92" rx="12"/>
+  <text class="label" x="490" y="228" text-anchor="middle">2. Login</text>
+  <text class="sub" x="490" y="250" text-anchor="middle">POST /api/login validates BC Self-Serve credentials</text>
+  <text class="sub" x="490" y="268" text-anchor="middle">session stores hashed userId and encrypted password</text>
 
-  <!-- Workflow -->
-  <rect x="300" y="140" width="300" height="60" class="box-user"/>
-  <text x="450" y="170" class="text text-user">👤 User Login</text>
-  <text x="450" y="188" class="text-small">BC Self-Serve credentials</text>
-  <line x1="450" y1="200" x2="450" y2="230" class="arrow-user"/>
+  <rect class="card-ok" x="320" y="320" width="340" height="72" rx="12"/>
+  <text class="label" x="490" y="350" text-anchor="middle">3. Redirect</text>
+  <text class="sub" x="490" y="372" text-anchor="middle">client navigates to /app</text>
 
-  <rect x="300" y="230" width="300" height="70" class="box"/>
-  <text x="450" y="258" class="text">🔐 Validate + Encrypt</text>
-  <text x="450" y="276" class="text-small">Test login, AES-256-CBC</text>
-  <text x="450" y="290" class="text-small">Rate limited: 5/15min</text>
-  <line x1="450" y1="300" x2="450" y2="330" class="arrow"/>
+  <rect class="card" x="100" y="435" width="340" height="96" rx="12"/>
+  <text class="label" x="270" y="468" text-anchor="middle">4A. Check Latest</text>
+  <text class="sub" x="270" y="490" text-anchor="middle">GET /api/latest (auth required)</text>
+  <text class="sub" x="270" y="508" text-anchor="middle">server returns user-scoped cached data</text>
 
-  <rect x="300" y="330" width="300" height="70" class="box-success"/>
-  <text x="450" y="358" class="text">✓ Session Created</text>
-  <text x="450" y="376" class="text-small">2hr max, 1hr timeout</text>
-  <text x="450" y="390" class="text-small">Encrypted storage</text>
-  <line x1="450" y1="400" x2="450" y2="430" class="arrow"/>
+  <rect class="card" x="540" y="435" width="340" height="96" rx="12"/>
+  <text class="label" x="710" y="468" text-anchor="middle">4B. Run Scrape (Local)</text>
+  <text class="sub" x="710" y="490" text-anchor="middle">npm run check</text>
+  <text class="sub" x="710" y="508" text-anchor="middle">scrapes BC Self-Serve sections</text>
 
-  <rect x="300" y="430" width="300" height="60" class="box-user"/>
-  <text x="450" y="460" class="text text-user">🖱️ Click "Check Now"</text>
-  <text x="450" y="478" class="text-small">Or view cached data</text>
+  <rect class="card-cloud" x="540" y="575" width="340" height="96" rx="12"/>
+  <text class="label" x="710" y="608" text-anchor="middle">5. Upload Result</text>
+  <text class="sub" x="710" y="630" text-anchor="middle">npm run upload-blob</text>
+  <text class="sub" x="710" y="648" text-anchor="middle">POST /api/upload with X-User-ID</text>
 
-  <path d="M 300 460 L 120 460 L 120 550" class="arrow" stroke-dasharray="5,5"/>
-  <text x="180" y="480" class="text-small">Local</text>
-  <path d="M 600 460 L 780 460 L 780 550" class="arrow-cloud" stroke-dasharray="5,5"/>
-  <text x="720" y="480" class="text-small text-cloud">Vercel</text>
-  <line x1="450" y1="490" x2="450" y2="520" class="arrow"/>
+  <rect class="card-cloud" x="540" y="715" width="340" height="96" rx="12"/>
+  <text class="label" x="710" y="748" text-anchor="middle">6. Blob Storage</text>
+  <text class="sub" x="710" y="770" text-anchor="middle">tally-cache/&lt;userId&gt;/results.json</text>
+  <text class="sub" x="710" y="788" text-anchor="middle">no cross-user cache contamination</text>
 
-  <rect x="50" y="550" width="250" height="70" class="box"/>
-  <text x="175" y="578" class="text">🤖 Puppeteer Scrape</text>
-  <text x="175" y="596" class="text-small">Headless Chrome</text>
-  <text x="175" y="610" class="text-small">~30-60 seconds</text>
+  <rect class="card-ok" x="320" y="865" width="340" height="92" rx="12"/>
+  <text class="label" x="490" y="898" text-anchor="middle">7. Dashboard Render</text>
+  <text class="sub" x="490" y="920" text-anchor="middle">/app shows payment/messages/notifications/requests</text>
+  <text class="sub" x="490" y="938" text-anchor="middle">from user-scoped data path</text>
 
-  <rect x="600" y="550" width="250" height="70" class="box-cloud"/>
-  <text x="725" y="578" class="text text-cloud">☁️ Read Blob Cache</text>
-  <text x="725" y="596" class="text-small">Instant load</text>
-  <text x="725" y="610" class="text-small">Pre-scraped data</text>
+  <path class="arrow" d="M 490 162 L 490 195"/>
+  <path class="arrow" d="M 490 287 L 490 320"/>
+  <path class="arrow" d="M 490 392 L 490 435"/>
+  <path class="arrow" d="M 710 531 L 710 575"/>
+  <path class="arrow-cloud" d="M 710 671 L 710 715"/>
+  <path class="arrow-cloud" d="M 710 811 L 710 900 L 660 900"/>
+  <path class="arrow" d="M 440 483 L 370 483 L 370 865"/>
 
-  <line x1="175" y1="620" x2="175" y2="650" class="arrow"/>
-
-  <rect x="50" y="650" width="250" height="70" class="box"/>
-  <text x="175" y="678" class="text">🌐 BC Self-Serve</text>
-  <text x="175" y="696" class="text-small">Navigate portal</text>
-  <text x="175" y="710" class="text-small">Extract data</text>
-  <line x1="175" y1="720" x2="175" y2="750" class="arrow"/>
-
-  <rect x="50" y="750" width="250" height="70" class="box-success"/>
-  <text x="175" y="778" class="text">📊 Parse Data</text>
-  <text x="175" y="796" class="text-small">Support: $560</text>
-  <text x="175" y="810" class="text-small">Messages, requests</text>
-  <line x1="300" y1="785" x2="450" y2="785" class="arrow"/>
-
-  <rect x="300" y="750" width="250" height="70" class="box"/>
-  <text x="425" y="778" class="text">💾 Save to data/</text>
-  <text x="425" y="796" class="text-small">JSON + timestamp</text>
-  <text x="425" y="810" class="text-small">Local filesystem</text>
-  <line x1="425" y1="820" x2="425" y2="850" class="arrow"/>
-
-  <rect x="300" y="850" width="250" height="70" class="box-cloud"/>
-  <text x="425" y="878" class="text text-cloud">☁️ Upload to Blob</text>
-  <text x="425" y="896" class="text-small">npm run upload-blob</text>
-  <text x="425" y="910" class="text-small">UPLOAD_SECRET auth</text>
-  <path d="M 550 885 L 725 885 L 725 620" class="arrow-cloud"/>
-  <line x1="425" y1="920" x2="425" y2="950" class="arrow"/>
-
-  <rect x="300" y="950" width="250" height="70" class="box-success"/>
-  <text x="425" y="978" class="text">✅ Dashboard Updated</text>
-  <text x="425" y="996" class="text-small">Benefits, messages</text>
-  <text x="425" y="1010" class="text-small">DTC calculator</text>
+  <text class="sub" x="490" y="1128" text-anchor="middle">Auth entrypoint is always login page. Dashboard is intentionally separated at /app.</text>
 </svg>
