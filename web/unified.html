@@ -781,6 +781,7 @@
     let isLoadingData = false;
     let dataLoaded = false;
     let pollTimer = null;
+    let autoCheckAttempted = false;
 
     // Load dashboard data
     async function loadData() {
@@ -791,8 +792,24 @@
         const response = await fetch('/api/latest', { credentials: 'include' });
 
         if (!response.ok) {
-          // No data yet — show prompt to check
-          showNoData();
+          let errorMessage = '';
+          try {
+            const errBody = await response.json();
+            errorMessage = errBody.message || errBody.error || '';
+          } catch (_) {
+            // Ignore JSON parse failure
+          }
+
+          // If no cached blob for this user yet, auto-start first check once.
+          if (response.status === 404 && !autoCheckAttempted) {
+            autoCheckAttempted = true;
+            showWaitingForData();
+            await runCheck(true);
+            isLoadingData = false;
+            return;
+          }
+
+          showNoData(errorMessage);
           isLoadingData = false;
           return;
         }
@@ -983,43 +1000,51 @@
       });
     }
 
-    function showNoData() {
+    function showNoData(reason) {
       const lists = ['messages-list', 'notifications-list', 'payment-info'];
       lists.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-          el.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No data yet. Click <strong>Check Now</strong> to scrape.</div>';
+          const extra = reason ? `<div style="margin-top: 8px; font-size: 12px; color: var(--error);">${reason}</div>` : '';
+          el.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No data yet. Click <strong>Check Now</strong> to scrape.${extra}</div>`;
         }
       });
     }
 
-    async function runCheck() {
+    async function runCheck(silent = false) {
       const btn = document.getElementById('check-btn');
-      btn.disabled = true;
-      btn.textContent = 'Checking...';
+      if (!silent) {
+        btn.disabled = true;
+        btn.textContent = 'Checking...';
+      }
 
       try {
-        const response = await fetch('/api/check');
+        const response = await fetch('/api/check', { credentials: 'include' });
         const result = await response.json();
 
         if (response.ok) {
           // Success - reload the data
           await loadData();
-          btn.textContent = 'Check Complete!';
-          setTimeout(() => {
-            btn.textContent = 'Check Now';
-            btn.disabled = false;
-          }, 2000);
+          if (!silent) {
+            btn.textContent = 'Check Complete!';
+            setTimeout(() => {
+              btn.textContent = 'Check Now';
+              btn.disabled = false;
+            }, 2000);
+          }
         } else {
           throw new Error(result.error || 'Check failed');
         }
       } catch (err) {
         console.error('Error running check:', err);
-        btn.textContent = 'Error - Try Again';
-        setTimeout(() => {
-          btn.textContent = 'Check Now';
-          btn.disabled = false;
-        }, 2000);
+        showNoData(err.message || 'Check failed');
+        if (!silent) {
+          btn.textContent = 'Error - Try Again';
+          setTimeout(() => {
+            btn.textContent = 'Check Now';
+            btn.disabled = false;
+          }, 2000);
+        }
       }
     }
 

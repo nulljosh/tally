@@ -51,8 +51,8 @@
         </label>
       </div>
 
-      <div class="mb-4 text-xs text-gray-600 dark:text-gray-400">
-        Enter your BC Self-Serve credentials, or leave blank to use .env file defaults
+      <div id="login-help" class="mb-4 text-xs text-gray-600 dark:text-gray-400">
+        Enter your BC Self-Serve credentials to start your session
       </div>
 
       <div id="error" class="hidden mb-4 text-sm text-red-600 dark:text-red-400"></div>
@@ -100,19 +100,6 @@
           }
           window.location.href = '/app';
         } else {
-          // Fallback to server defaults (.env credentials) if saved/browser creds are stale
-          const fallback = await fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'same-origin',
-            body: JSON.stringify({ username: '', password: '', rememberMe })
-          });
-
-          if (fallback.ok) {
-            window.location.href = '/app';
-            return;
-          }
-
           error.textContent = data.error || 'Invalid credentials';
           error.classList.remove('hidden');
         }
@@ -124,6 +111,10 @@
 
     // Prefill credentials from browser storage
     window.addEventListener('DOMContentLoaded', async () => {
+      if (!window.location.hostname.includes('localhost')) {
+        document.getElementById('login-help').textContent = 'Enter your BC Self-Serve credentials to login';
+      }
+
       const saved = localStorage.getItem(STORAGE_KEY) || sessionStorage.getItem(STORAGE_KEY);
       if (!saved) return;
 

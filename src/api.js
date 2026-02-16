@@ -680,7 +680,7 @@ function calculateDTCEligibility(answers) {
   };
 }
 
-app.get('/api/check', async (req, res) => {
+app.get('/api/check', requireAuth, async (req, res) => {
   if (isChecking) {
     return res.status(429).json({
       error: 'Check already in progress',
@@ -729,6 +729,21 @@ app.get('/api/check', async (req, res) => {
       ...result,
       checkedAt: new Date().toISOString()
     };
+
+    if (process.env.VERCEL && req.session?.userId && result && result.success) {
+      try {
+        const { put } = require('@vercel/blob');
+        const blobPath = `tally-cache/${req.session.userId}/results.json`;
+        await put(blobPath, JSON.stringify(lastCheckResult), {
+          access: 'public',
+          contentType: 'application/json',
+          addRandomSuffix: false
+        });
+        console.log(`[API] Saved scrape result to Blob: ${blobPath}`);
+      } catch (blobWriteError) {
+        console.error('[API] Failed to write scrape result to Blob:', blobWriteError.message);
+      }
+    }
 
     isChecking = false;
 
