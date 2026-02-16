@@ -445,7 +445,12 @@ app.get('/api/latest', requireAuth, async (req, res) => {
         });
       } catch (blobError) {
         console.log('[API] Blob read failed:', blobError.message);
-        return res.status(500).json({ error: 'Failed to read user cache from Blob' });
+        return res.status(200).json({
+          cached: false,
+          error: 'Failed to read user cache from Blob',
+          details: blobError.message,
+          message: 'Check BLOB_READ_WRITE_TOKEN and ensure user-scoped cache exists.',
+        });
       }
     }
 
