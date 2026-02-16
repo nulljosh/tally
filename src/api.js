@@ -126,11 +126,12 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: true, // Always use HTTPS (Vercel enforces this)
     httpOnly: true,
     sameSite: 'strict',
     maxAge: 2 * 60 * 60 * 1000 // 2 hours
   }
+  // No store needed - defaults to MemoryStore locally, cookies on Vercel serverless
 }));
 
 // Session timeout middleware
