@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 require('dotenv').config();
 
 async function uploadToBlob() {
@@ -27,12 +28,15 @@ async function uploadToBlob() {
   // Upload to Vercel
   const UPLOAD_SECRET = process.env.UPLOAD_SECRET;
   const VERCEL_URL = process.env.VERCEL_URL || 'https://tally-production.vercel.app';
+  const bceidUsername = process.env.BCEID_USERNAME || '';
+  const userId = crypto.createHash('sha256').update(bceidUsername).digest('hex').slice(0, 16);
 
   const response = await fetch(`${VERCEL_URL}/api/upload`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${UPLOAD_SECRET}`
+      'Authorization': `Bearer ${UPLOAD_SECRET}`,
+      'X-User-ID': userId
     },
     body: JSON.stringify({ data })
   });

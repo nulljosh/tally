@@ -207,6 +207,8 @@ app.post('/api/login', loginLimiter, async (req, res) => {
     req.session.authenticated = true;
     req.session.bceidUsername = username;
     req.session.bceidPassword = encrypt(password);
+    const userId = crypto.createHash('sha256').update(username).digest('hex').slice(0, 16);
+    req.session.userId = userId;
     req.session.lastActivity = Date.now();
 
     // If "Remember Me" checked, extend session to 30 days
@@ -254,6 +256,7 @@ app.get('/', async (req, res) => {
     req.session.authenticated = true;
     req.session.bceidUsername = process.env.BCEID_USERNAME;
     req.session.bceidPassword = encrypt(process.env.BCEID_PASSWORD);
+    req.session.userId = crypto.createHash('sha256').update(process.env.BCEID_USERNAME).digest('hex').slice(0, 16);
     await new Promise((resolve) => req.session.save(resolve));
   }
 

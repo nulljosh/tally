@@ -12,13 +12,17 @@ module.exports = async function handler(req, res) {
   }
 
   const { data } = req.body;
+  const userId = req.headers['x-user-id'] || req.query.userId;
 
   if (!data) {
     return res.status(400).json({ error: 'Missing data' });
   }
+  if (!userId) {
+    return res.status(401).json({ error: 'Missing userId' });
+  }
 
   try {
-    const blob = await put('tally-cache/results.json', JSON.stringify(data), {
+    const blob = await put(`tally-cache/${userId}/results.json`, JSON.stringify(data), {
       access: 'public',
       addRandomSuffix: false,
     });

@@ -5,8 +5,13 @@ module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
 
   try {
+    const userId = req.session?.userId || req.headers['x-user-id'] || req.query.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Not logged in' });
+    }
+
     // Find the blob by prefix (most recent cache)
-    const { blobs } = await list({ prefix: 'tally-cache/results.json' });
+    const { blobs } = await list({ prefix: `tally-cache/${userId}/` });
 
     if (!blobs || blobs.length === 0) {
       console.warn('[LATEST] No cache blob found');
@@ -18,11 +23,12 @@ module.exports = async function handler(req, res) {
     }
 
     // Fetch the blob content with timeout
-    const blobUrl = blobs[0].url;
+    const targetBlob = blobs.find((b) => b.pathname === `tally-cache/${userId}/results.json`) || blobs[0];
+    const blobUrl = targetBlob.url;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-    console.log(`[LATEST] Fetching blob: ${blobs[0].pathname}`);
+    console.log(`[LATEST] Fetching blob: ${targetBlob.pathname}`);
     const response = await fetch(blobUrl, { signal: controller.signal });
     clearTimeout(timeoutId);
 

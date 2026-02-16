@@ -69,6 +69,7 @@
   <script>
     const form = document.getElementById('login-form');
     const error = document.getElementById('error');
+    const STORAGE_KEY = 'tally_login_credentials';
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -89,6 +90,14 @@
         const data = await response.json();
 
         if (response.ok) {
+          const creds = JSON.stringify({ username, password, rememberMe });
+          if (rememberMe) {
+            localStorage.setItem(STORAGE_KEY, creds);
+            sessionStorage.removeItem(STORAGE_KEY);
+          } else {
+            sessionStorage.setItem(STORAGE_KEY, creds);
+            localStorage.removeItem(STORAGE_KEY);
+          }
           window.location.href = '/';
         } else {
           error.textContent = data.error || 'Invalid credentials';
@@ -100,28 +109,19 @@
       }
     });
 
-    // Auto-login with .env credentials on page load
+    // Prefill credentials from browser storage
     window.addEventListener('DOMContentLoaded', async () => {
-      try {
-        // Try auto-login with blank credentials (.env fallback)
-        const response = await fetch('/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'same-origin',
-          body: JSON.stringify({ username: '', password: '', rememberMe: true })
-        });
+      const saved = localStorage.getItem(STORAGE_KEY) || sessionStorage.getItem(STORAGE_KEY);
+      if (!saved) return;
 
-        if (response.ok) {
-          // Success - redirect to dashboard
-          window.location.href = '/';
-        } else {
-          // Failed - show error in console but allow manual login
-          const data = await response.json();
-          console.log('Auto-login failed:', data.error || 'Invalid credentials');
-        }
-      } catch (err) {
-        // Network error - allow manual login
-        console.log('Auto-login error:', err.message);
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.username) document.getElementById('username').value = parsed.username;
+        if (parsed.password) document.getElementById('password').value = parsed.password;
+        document.getElementById('rememberMe').checked = Boolean(parsed.rememberMe);
+      } catch {
+        localStorage.removeItem(STORAGE_KEY);
+        sessionStorage.removeItem(STORAGE_KEY);
       }
     });
   </script>
