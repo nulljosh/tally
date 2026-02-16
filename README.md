@@ -86,7 +86,7 @@ Optional/local:
 ## Journaling and Auto Push
 
 Project journaling location (centralized):
-- `~/Documents/Code/JOURNAL.md`
+- `~/Documents/Code/journal/tally.md`
 
 Auto-push hook:
 - `.githooks/post-commit`

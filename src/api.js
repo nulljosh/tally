@@ -416,23 +416,36 @@ app.get('/api/summary', async (req, res) => {
 app.get('/api/latest', requireAuth, async (req, res) => {
   try {
     console.log('[API] /api/latest called');
+    const userId = req.session?.userId;
 
     // On Vercel: try to read from Blob first
     if (process.env.VERCEL) {
+      if (!userId) {
+        return res.status(401).json({ error: 'Missing user session' });
+      }
+
       try {
         const { list } = require('@vercel/blob');
-        const { blobs } = await list({ prefix: 'chequecheck-cache/results.json' });
+        const prefix = `tally-cache/${userId}/`;
+        const { blobs } = await list({ prefix });
 
         if (blobs && blobs.length > 0) {
-          const blobUrl = blobs[0].url;
+          const targetBlob = blobs.find((b) => b.pathname === `${prefix}results.json`) || blobs[0];
+          const blobUrl = targetBlob.url;
           const response = await fetch(blobUrl);
           const data = await response.json();
 
-          console.log('[API] Returning data from Vercel Blob');
+          console.log(`[API] Returning data from Vercel Blob: ${targetBlob.pathname}`);
           return res.json({ file: 'vercel-blob', data });
         }
+
+        return res.status(404).json({
+          cached: false,
+          message: 'No cached results for this user. Run a scrape and upload first.',
+        });
       } catch (blobError) {
-        console.log('[API] Blob read failed, falling back:', blobError.message);
+        console.log('[API] Blob read failed:', blobError.message);
+        return res.status(500).json({ error: 'Failed to read user cache from Blob' });
       }
     }
 
@@ -445,66 +458,6 @@ app.get('/api/latest', requireAuth, async (req, res) => {
     // If in-memory data has errors, log it
     if (lastCheckResult && hasErrors(lastCheckResult)) {
       console.log('[API] WARNING: In-memory result has errors, falling back to file');
-    }
-
-    // On Vercel, no persistent disk — return sample data
-    if (process.env.VERCEL) {
-      if (lastCheckResult && !hasErrors(lastCheckResult)) {
-        return res.json({ file: 'in-memory', data: lastCheckResult });
-      }
-      // Return generic demo data (no personal info)
-      const sampleData = {
-        success: true,
-        timestamp: new Date().toISOString(),
-        sections: {
-          "Notifications": {
-            success: true,
-            allText: ["Sample notification - login to view your actual data"],
-            tableData: [],
-            keywords: ["Notifications"],
-            pageTitle: "My Self Serve - Notifications"
-          },
-          "Messages": {
-            success: true,
-            allText: [
-              "2026 / JAN / 21\nSample Message 1",
-              "2026 / JAN / 06\nSample Message 2",
-              "2026 / JAN / 05\nSample Message 3"
-            ],
-            tableData: [],
-            keywords: ["Messages"],
-            pageTitle: "My Self Serve - Messages"
-          },
-          "Payment Info": {
-            success: true,
-            allText: ["Login with your BC Self-Serve credentials to view payment info"],
-            tableData: [
-              "Assistance",
-              "Support | $XXX.XX | ",
-              "SHELTER: RENT | $XXX.XX | ",
-              "Paid to: Demo User | Payment Method: CHEQUE",
-              "Amount: $XXX.XX | Name of Bank:",
-              "Cheque Number: XXXXXXXX | Bank Account Number:",
-              "Payment Distribution: OFFICE | Bank Account Name:"
-            ],
-            keywords: [
-              "Amount: $XXX.XX",
-              "Paid to: Demo User\tPayment Method: CHEQUE"
-            ],
-            pageTitle: "My Self Serve - Payment Info"
-          },
-          "Service Requests": {
-            success: true,
-            allText: ["Sample Request", "Create Service Request"],
-            tableData: [
-              " | Sample Request\n\n Documents\n\nXXXXXXXXXXXXX\nCreated for Demo User\n2026 / JAN / 08 | Sample Status"
-            ],
-            keywords: ["Service Requests"],
-            pageTitle: "My Self Serve - Service Requests"
-          }
-        }
-      };
-      return res.json({ file: 'sample-data (hardcoded)', data: sampleData });
     }
 
     // Fall back to latest GOOD results file on disk (local dev only)
