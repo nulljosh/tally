@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 const { checkAllSections } = require('./scraper');
 const puppeteer = require('puppeteer-core');
+const chromium = require('@sparticuz/chromium');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -41,11 +42,19 @@ function decrypt(encrypted) {
 async function attemptBCLogin(username, password) {
   let browser;
   try {
+    const isVercel = !!process.env.VERCEL || !!process.env.LAMBDA_TASK_ROOT;
+    const executablePath = isVercel
+      ? await chromium.executablePath()
+      : (process.env.PUPPETEER_EXECUTABLE_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome');
+    const launchArgs = isVercel
+      ? chromium.args
+      : ['--no-sandbox', '--disable-setuid-sandbox'];
+
     browser = await puppeteer.launch({
-      headless: true,
+      headless: isVercel ? chromium.headless : true,
       defaultViewport: { width: 1920, height: 1080 },
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      executablePath,
+      args: launchArgs
     });
 
     const page = await browser.newPage();
