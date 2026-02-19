@@ -13,22 +13,23 @@ Multi-user BC Self-Serve scraper with DTC Navigator. Each user logs in with thei
 
 ## Vercel Deployment
 
-### Why We Need Blob Storage (ELI5)
-**Problem:** Vercel = serverless (no hard drive, can't save files)
-- Puppeteer scraping takes 30-60 seconds
-- Vercel free tier times out after 60 seconds
-- Can't run scraper on Vercel → no data to show
+### Puppeteer on Vercel
+Puppeteer works on Vercel via `@sparticuz/chromium`. Both `src/api.js` and `src/scraper.js` detect the `VERCEL` env and use the bundled Chromium instead of a local Chrome path.
 
-**Solution:** Blob = Cloud storage (like Dropbox for your app)
-1. **Local:** Run scraper → get results ($560 support, $500 shelter, etc.)
-2. **Upload:** Push results to Vercel Blob (cloud storage)
-3. **Vercel:** Read from Blob (instant, no scraping needed)
+```js
+const isVercel = !!process.env.VERCEL || !!process.env.LAMBDA_TASK_ROOT;
+const executablePath = isVercel
+  ? await chromium.executablePath()
+  : (process.env.PUPPETEER_EXECUTABLE_PATH || '/Applications/Google Chrome.app/...');
+```
 
-### How It Works
-- Blob storage for cached data (instant load)
-- Scrape locally, upload to Blob via /api/upload
-- No Puppeteer on Vercel (timeout issues)
-- Dashboard reads from Blob cache
+### Blob Storage (for large scrape results)
+Blob = cloud storage for scraped data when live scraping isn't practical:
+1. **Local:** Run scraper → get results
+2. **Upload:** `npm run upload-blob` → push to Vercel Blob
+3. **Vercel:** `/api/latest` reads from Blob instantly
+
+Blob keys: `tally-cache/<userId>/results.json`
 
 ## Local Development
 ```bash
@@ -41,9 +42,11 @@ npm run upload-blob  # Upload to Vercel Blob
 ## Key Files
 - `src/api.js` - Express API, auth, session handling, encryption
 - `src/scraper.js` - Puppeteer BC Self-Serve scraper
-- `web/unified.html` - Dashboard UI
+- `web/landing.html` - Public landing page (served at `/`)
 - `web/login.html` - Login page (BC Self-Serve credentials)
+- `web/index.html` - Dashboard UI (served at `/app`, auth required)
 - `api/upload.js` - Vercel Blob upload endpoint
+- `api/latest.js` - Vercel Blob read endpoint
 - `scripts/upload-to-blob.js` - Local upload script
 
 ## Multi-User Flow
@@ -54,13 +57,12 @@ npm run upload-blob  # Upload to Vercel Blob
 5. Data cached in Vercel Blob for instant dashboard load
 
 ## Environment Variables
-**Local (.env):**
+**Local (.env — copy from .env.example):**
 ```
 BCEID_USERNAME=your_username
 BCEID_PASSWORD=your_password
 SESSION_SECRET=random_string
 UPLOAD_SECRET=random_string
-VERCEL_URL=https://tally.vercel.app
 ```
 
 **Vercel Dashboard:**
@@ -85,7 +87,15 @@ VERCEL_URL=https://tally.vercel.app
 
 ## Development History
 
-### 2026-02-09 - Auto-Login + OpenClaw Integration
+### 2026-02-19 — v1.3.0 (Vercel fix + landing page)
+- Fixed: `api.js` had macOS hardcoded Chrome path — crashed on Vercel Linux. Now uses `@sparticuz/chromium` when `VERCEL` env is set (`scraper.js` already had this right)
+- Fixed: CI workflow was "Deploy to GitHub Pages" (Pages never enabled, failed every push since Feb 16). Replaced with proper Node.js CI
+- Added: public landing page `web/landing.html` — Fraunces serif, dark green/amber, explains product to laymen
+- Updated: `vercel.json` routes `/` → `web/landing.html` (was api.js redirect)
+- Tested: login with real BCEID creds locally → `{"success":true}` HTTP 200 confirmed
+- Git: local repo had mmap EDEADLK corruption; rebuilt via GitHub API push + fresh clone
+
+### 2026-02-09 — Auto-Login + OpenClaw Integration
 - Fixed server-side auto-login with .env credentials
 - Added `/api/summary` endpoint for OpenClaw integration (token-authenticated)
 - Security fix: rotated UPLOAD_SECRET after accidental exposure
@@ -96,6 +106,8 @@ VERCEL_URL=https://tally.vercel.app
 - Never commit secrets (always check git diff)
 - Browser cache requires hard refresh (Cmd+Shift+R) when testing
 - API keys go in launchd env vars, not config files
+- `@sparticuz/chromium` is the correct way to run Puppeteer on Vercel — detect with `!!process.env.VERCEL`
+- Git mmap EDEADLK on macOS: don't waste time fixing it, just push via GitHub API and re-clone
 
 ## Naming
 Project name: **tally**
