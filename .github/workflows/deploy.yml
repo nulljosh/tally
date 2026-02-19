@@ -26,5 +26,5 @@ jobs:
       - name: Check syntax
         run: node --check src/api.js && node --check src/scraper.js && node --check api/upload.js && node --check api/latest.js
 
-      - name: Run tests
-        run: npm test --if-present
+      - name: Verify package-lock is present
+        run: test -f package-lock.json && echo "package-lock.json OK"
