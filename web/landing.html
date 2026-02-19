@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tally — Check your cheques without the bureaucracy</title>
+  <meta name="description" content="Tally gives BC residents instant access to their Self-Serve benefits data — payments, messages, and notifications — without the government portal maze.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #1a5c3a;
+      --green-mid: #2d7a52;
+      --green-light: #3d9e6a;
+      --cream: #f5f0e8;
+      --cream-dark: #e8e0d0;
+      --amber: #d4a843;
+      --bg: #0c1a12;
+      --bg-2: #111f16;
+      --text: #e8e4da;
+      --muted: #8a9e90;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Noise texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(to bottom, rgba(12,26,18,0.95), transparent);
+    }
+
+    .nav-logo {
+      font-family: 'Fraunces', serif;
+      font-size: 1.4rem;
+      font-weight: 400;
+      color: var(--cream);
+      letter-spacing: -0.02em;
+      text-decoration: none;
+    }
+
+    .nav-cta {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--bg);
+      background: var(--cream);
+      padding: 9px 22px;
+      border-radius: 100px;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.2s;
+      letter-spacing: 0.01em;
+    }
+
+    .nav-cta:hover { background: var(--amber); transform: translateY(-1px); }
+
+    /* HERO */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      z-index: 1;
+    }
+
+    /* Radial glow behind hero */
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(45,122,82,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--green-light);
+      border: 1px solid rgba(61,158,106,0.3);
+      padding: 6px 14px;
+      border-radius: 100px;
+      margin-bottom: 36px;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green-light);
+      animation: pulse 2s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 300;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      color: var(--cream);
+      max-width: 800px;
+      margin-bottom: 12px;
+      animation: fadeUp 0.7s 0.1s ease both;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--amber);
+      font-weight: 300;
+    }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--muted);
+      max-width: 520px;
+      margin: 20px auto 44px;
+      animation: fadeUp 0.7s 0.2s ease both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeUp 0.7s 0.3s ease both;
+    }
+
+    .btn-primary {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--bg);
+      background: var(--cream);
+      padding: 14px 32px;
+      border-radius: 100px;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--amber);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(212,168,67,0.25);
+    }
+
+    .btn-secondary {
+      font-size: 0.95rem;
+      color: var(--muted);
+      padding: 14px 28px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .btn-secondary:hover { color: var(--text); }
+
+    /* PREVIEW CARD */
+    .hero-preview {
+      position: relative;
+      margin-top: 72px;
+      max-width: 680px;
+      width: 100%;
+      animation: fadeUp 0.8s 0.4s ease both;
+    }
+
+    .preview-card {
+      background: var(--bg-2);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px;
+      padding: 28px;
+      text-align: left;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+    }
+
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .preview-title { font-family: 'Fraunces', serif; font-size: 1rem; color: var(--cream); }
+    .preview-status { font-size: 0.75rem; color: var(--green-light); }
+
+    .preview-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .preview-row:last-child { border-bottom: none; }
+
+    .preview-label { font-size: 0.8rem; color: var(--muted); }
+    .preview-value { font-size: 0.9rem; color: var(--text); text-align: right; }
+    .preview-value.green { color: var(--green-light); }
+    .preview-value.amber { color: var(--amber); }
+
+    /* FEATURES */
+    .features {
+      position: relative;
+      z-index: 1;
+      padding: 100px 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green-light);
+      margin-bottom: 48px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2px;
+    }
+
+    .feature {
+      padding: 40px 36px;
+      background: var(--bg-2);
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .feature:first-child { border-radius: 16px 0 0 16px; }
+    .feature:last-child { border-radius: 0 16px 16px 0; }
+
+    @media (max-width: 700px) {
+      .feature { border-radius: 0 !important; }
+      .feature:first-child { border-radius: 16px 16px 0 0 !important; }
+      .feature:last-child { border-radius: 0 0 16px 16px !important; }
+    }
+
+    .feature:hover {
+      background: rgba(45,122,82,0.08);
+      border-color: rgba(61,158,106,0.2);
+    }
+
+    .feature-icon {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    .feature h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 1.2rem;
+      font-weight: 400;
+      color: var(--cream);
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+    }
+
+    .feature p {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* HOW IT WORKS */
+    .how {
+      position: relative;
+      z-index: 1;
+      padding: 80px 24px 120px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 48px;
+      border-left: 1px solid rgba(255,255,255,0.08);
+      padding-left: 32px;
+    }
+
+    .step {
+      position: relative;
+      padding-bottom: 40px;
+    }
+
+    .step:last-child { padding-bottom: 0; }
+
+    .step::before {
+      content: '';
+      position: absolute;
+      left: -38px;
+      top: 4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--green-mid);
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 0 2px var(--green-mid);
+    }
+
+    .step-num {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--green-light);
+      margin-bottom: 8px;
+    }
+
+    .step h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: var(--cream);
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .step p { font-size: 0.875rem; color: var(--muted); max-width: 500px; }
+
+    /* CTA SECTION */
+    .cta-section {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 100px 24px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .cta-section h2 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 300;
+      color: var(--cream);
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+    }
+
+    .cta-section h2 em {
+      font-style: italic;
+      color: var(--amber);
+    }
+
+    .cta-section p {
+      color: var(--muted);
+      font-size: 1rem;
+      margin-bottom: 40px;
+    }
+
+    /* FOOTER */
+    footer {
+      position: relative;
+      z-index: 1;
+      padding: 32px 40px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    footer .logo { font-family: 'Fraunces', serif; font-size: 1rem; color: var(--muted); }
+
+    footer p {
+      font-size: 0.8rem;
+      color: rgba(138,158,144,0.5);
+    }
+
+    footer a {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    footer a:hover { color: var(--text); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 600px) {
+      nav { padding: 16px 20px; }
+      .hero { padding: 100px 20px 60px; }
+      .features { padding: 60px 20px; }
+      .how { padding: 60px 20px 80px; }
+      footer { padding: 24px 20px; flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="nav-logo">Tally</a>
+    <a href="/login" class="nav-cta">Sign in</a>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-badge">BC Self-Serve, simplified</div>
+    <h1>Your benefits.<br><em>Without the maze.</em></h1>
+    <p class="hero-sub">Tally pulls your BC Self-Serve data — payments, messages, notifications — and shows it to you in plain English. No government portal required.</p>
+    <div class="hero-actions">
+      <a href="/login" class="btn-primary">Get started free</a>
+      <a href="#how" class="btn-secondary">How it works</a>
+    </div>
+
+    <div class="hero-preview">
+      <div class="preview-card">
+        <div class="preview-header">
+          <span class="preview-title">Your Summary</span>
+          <span class="preview-status">● Live</span>
+        </div>
+        <div class="preview-row">
+          <span class="preview-label">Next payment</span>
+          <span class="preview-value green">$847.00 — Feb 25</span>
+        </div>
+        <div class="preview-row">
+          <span class="preview-label">Unread messages</span>
+          <span class="preview-value amber">2 new</span>
+        </div>
+        <div class="preview-row">
+          <span class="preview-label">Active benefits</span>
+          <span class="preview-value">Income Assistance</span>
+        </div>
+        <div class="preview-row">
+          <span class="preview-label">Last updated</span>
+          <span class="preview-value">Just now</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features">
+    <p class="section-label">What you get</p>
+    <div class="features-grid">
+      <div class="feature">
+        <span class="feature-icon">📋</span>
+        <h3>Payments at a glance</h3>
+        <p>See your next payment date and amount instantly. No more logging in and clicking through five screens to find a number.</p>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">📬</span>
+        <h3>Messages &amp; notifications</h3>
+        <p>All your BC Self-Serve messages and notifications in one clean list. Read them without fighting the government portal UI.</p>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">🔒</span>
+        <h3>Your credentials, secure</h3>
+        <p>Your BCEID login is encrypted end-to-end. Tally never stores your password in plain text or shares your data.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="how" id="how">
+    <p class="section-label">How it works</p>
+    <div class="steps">
+      <div class="step">
+        <p class="step-num">Step 01</p>
+        <h3>Sign in with your BCEID</h3>
+        <p>Enter the same username and password you use on BC Self-Serve. Tally handles the login on your behalf.</p>
+      </div>
+      <div class="step">
+        <p class="step-num">Step 02</p>
+        <h3>Tally fetches your data</h3>
+        <p>We pull your payments, messages, and notifications automatically. Fresh data every time you check in.</p>
+      </div>
+      <div class="step">
+        <p class="step-num">Step 03</p>
+        <h3>Read it in plain English</h3>
+        <p>No jargon, no government-speak. Just the information you need, laid out clearly.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <h2>Stop fighting<br><em>the portal.</em></h2>
+    <p>Free to use. No account needed beyond your existing BCEID.</p>
+    <a href="/login" class="btn-primary">Check your benefits now</a>
+  </section>
+
+  <footer>
+    <span class="logo">Tally</span>
+    <p>Built for BC residents. Not affiliated with the Government of British Columbia.</p>
+    <a href="/login">Sign in</a>
+  </footer>
+
+</body>
+</html>
