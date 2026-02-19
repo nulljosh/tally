@@ -1,57 +1,153 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 520" width="920" height="520">
-  <style>
-    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-    .bg { fill: #f5f5f7; }
-    .node { fill: #ffffff; stroke: #d2d2d7; stroke-width: 2; rx: 12; }
-    .node-auth { fill: #e8f1ff; stroke: #7aaef7; stroke-width: 2; rx: 12; }
-    .node-cloud { fill: #fff4e5; stroke: #f5a623; stroke-width: 2; rx: 12; }
-    .title { font-size: 24px; font-weight: 700; fill: #1d1d1f; }
-    .label { font-size: 15px; font-weight: 600; fill: #1d1d1f; }
-    .sub { font-size: 12px; fill: #6e6e73; }
-    .line { stroke: #8e8e93; stroke-width: 2; fill: none; }
-  </style>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="960" height="560">
+  <defs>
+    <style>
+      text { font-family: 'DM Sans', 'Segoe UI', sans-serif; }
+      .label { font-size: 11px; fill: #8a9e90; letter-spacing: 0.08em; }
+      .title { font-size: 13px; fill: #e8e4da; font-weight: 500; }
+      .sub { font-size: 10px; fill: #6b7f70; }
+      .arrow-label { font-size: 10px; fill: #8a9e90; }
+      .version { font-size: 10px; fill: #d4a843; letter-spacing: 0.06em; }
+    </style>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#2d7a52"/>
+    </marker>
+    <marker id="arrow-muted" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#3a4a3e"/>
+    </marker>
+    <marker id="arrow-amber" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#d4a843"/>
+    </marker>
+  </defs>
 
-  <rect class="bg" x="0" y="0" width="920" height="520" rx="14"/>
-  <text class="title" x="460" y="42" text-anchor="middle">Tally Architecture</text>
+  <!-- Background -->
+  <rect width="960" height="560" fill="#0c1a12"/>
+  <!-- Subtle grid -->
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.02)" stroke-width="1"/>
+  </pattern>
+  <rect width="960" height="560" fill="url(#grid)"/>
 
-  <rect class="node-auth" x="50" y="90" width="180" height="80" rx="12"/>
-  <text class="label" x="140" y="122" text-anchor="middle">Login UI</text>
-  <text class="sub" x="140" y="142" text-anchor="middle">web/login.html</text>
+  <!-- Title -->
+  <text x="40" y="44" font-family="'DM Sans','Segoe UI',sans-serif" font-size="18" fill="#e8e4da" font-weight="400" letter-spacing="-0.02em">Tally — Architecture</text>
+  <text x="40" y="62" class="version">v1.3.0 · 2026-02-19</text>
 
-  <rect class="node-auth" x="280" y="90" width="220" height="80" rx="12"/>
-  <text class="label" x="390" y="122" text-anchor="middle">Auth + Session</text>
-  <text class="sub" x="390" y="142" text-anchor="middle">src/api.js /api/login /api/me</text>
+  <!-- ─── ROW 1: User-facing layer ─── -->
+  <text x="40" y="100" class="label">USER LAYER</text>
 
-  <rect class="node" x="560" y="90" width="310" height="80" rx="12"/>
-  <text class="label" x="715" y="122" text-anchor="middle">Dashboard</text>
-  <text class="sub" x="715" y="142" text-anchor="middle">web/unified.html via /app</text>
+  <!-- Landing -->
+  <rect x="40" y="112" width="160" height="72" rx="10" fill="#111f16" stroke="#1a5c3a" stroke-width="1.5"/>
+  <text x="120" y="141" text-anchor="middle" class="title">Landing Page</text>
+  <text x="120" y="157" text-anchor="middle" class="sub">web/landing.html</text>
+  <text x="120" y="171" text-anchor="middle" class="sub">GET /</text>
 
-  <rect class="node" x="120" y="250" width="260" height="90" rx="12"/>
-  <text class="label" x="250" y="285" text-anchor="middle">Scraper</text>
-  <text class="sub" x="250" y="305" text-anchor="middle">src/scraper.js (local run)</text>
-  <text class="sub" x="250" y="323" text-anchor="middle">check notifications/messages/payments</text>
+  <!-- Login -->
+  <rect x="240" y="112" width="160" height="72" rx="10" fill="#111f16" stroke="#1a5c3a" stroke-width="1.5"/>
+  <text x="320" y="141" text-anchor="middle" class="title">Login</text>
+  <text x="320" y="157" text-anchor="middle" class="sub">web/login.html</text>
+  <text x="320" y="171" text-anchor="middle" class="sub">POST /api/login</text>
 
-  <rect class="node-cloud" x="430" y="250" width="220" height="90" rx="12"/>
-  <text class="label" x="540" y="285" text-anchor="middle">Upload API</text>
-  <text class="sub" x="540" y="305" text-anchor="middle">api/upload.js</text>
-  <text class="sub" x="540" y="323" text-anchor="middle">requires UPLOAD_SECRET + X-User-ID</text>
+  <!-- Dashboard -->
+  <rect x="440" y="112" width="160" height="72" rx="10" fill="#111f16" stroke="#1a5c3a" stroke-width="1.5"/>
+  <text x="520" y="141" text-anchor="middle" class="title">Dashboard</text>
+  <text x="520" y="157" text-anchor="middle" class="sub">web/index.html</text>
+  <text x="520" y="171" text-anchor="middle" class="sub">GET /app · auth required</text>
 
-  <rect class="node-cloud" x="700" y="250" width="170" height="90" rx="12"/>
-  <text class="label" x="785" y="285" text-anchor="middle">Vercel Blob</text>
-  <text class="sub" x="785" y="305" text-anchor="middle">tally-cache</text>
-  <text class="sub" x="785" y="323" text-anchor="middle">/userId/results.json</text>
+  <!-- arrow: landing → login -->
+  <line x1="200" y1="148" x2="238" y2="148" stroke="#2d7a52" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="219" y="143" text-anchor="middle" class="arrow-label">CTA</text>
 
-  <rect class="node" x="360" y="400" width="220" height="80" rx="12"/>
-  <text class="label" x="470" y="432" text-anchor="middle">Latest Data API</text>
-  <text class="sub" x="470" y="452" text-anchor="middle">src/api.js /api/latest</text>
+  <!-- arrow: login → dashboard -->
+  <line x1="400" y1="148" x2="438" y2="148" stroke="#2d7a52" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="419" y="143" text-anchor="middle" class="arrow-label">session</text>
 
-  <path class="line" d="M 230 130 L 280 130"/>
-  <path class="line" d="M 500 130 L 560 130"/>
-  <path class="line" d="M 390 170 L 390 250"/>
-  <path class="line" d="M 380 295 L 430 295"/>
-  <path class="line" d="M 650 295 L 700 295"/>
-  <path class="line" d="M 785 340 L 785 440 L 580 440"/>
-  <path class="line" d="M 580 420 L 715 170"/>
+  <!-- ─── ROW 2: API Layer ─── -->
+  <text x="40" y="228" class="label">API LAYER · src/api.js</text>
 
-  <text class="sub" x="460" y="500" text-anchor="middle">Root path redirects to login. Dashboard is at /app after session auth.</text>
+  <!-- Express server box -->
+  <rect x="40" y="240" width="560" height="80" rx="10" fill="#0f1d14" stroke="#2d7a52" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+  <rect x="60" y="256" width="130" height="48" rx="8" fill="#111f16" stroke="#1a5c3a" stroke-width="1"/>
+  <text x="125" y="277" text-anchor="middle" class="title" font-size="11">Auth + Sessions</text>
+  <text x="125" y="291" text-anchor="middle" class="sub">AES-256-CBC</text>
+  <text x="125" y="303" text-anchor="middle" class="sub">rate limit 5/15min</text>
+
+  <rect x="210" y="256" width="130" height="48" rx="8" fill="#111f16" stroke="#1a5c3a" stroke-width="1"/>
+  <text x="275" y="277" text-anchor="middle" class="title" font-size="11">Scrape Trigger</text>
+  <text x="275" y="291" text-anchor="middle" class="sub">GET /api/check</text>
+  <text x="275" y="303" text-anchor="middle" class="sub">auth required</text>
+
+  <rect x="360" y="256" width="130" height="48" rx="8" fill="#111f16" stroke="#1a5c3a" stroke-width="1"/>
+  <text x="425" y="277" text-anchor="middle" class="title" font-size="11">Data Read</text>
+  <text x="425" y="291" text-anchor="middle" class="sub">GET /api/latest</text>
+  <text x="425" y="303" text-anchor="middle" class="sub">reads Blob cache</text>
+
+  <rect x="510" y="256" width="70" height="48" rx="8" fill="#111f16" stroke="#1a5c3a" stroke-width="1"/>
+  <text x="545" y="277" text-anchor="middle" class="title" font-size="11">DTC</text>
+  <text x="545" y="291" text-anchor="middle" class="sub">POST</text>
+  <text x="545" y="303" text-anchor="middle" class="sub">/api/dtc/screen</text>
+
+  <!-- arrows from user layer to API -->
+  <line x1="320" y1="184" x2="320" y2="238" stroke="#2d7a52" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="520" y1="184" x2="520" y2="238" stroke="#2d7a52" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ─── ROW 3: Runtime split ─── -->
+  <text x="40" y="366" class="label">RUNTIME</text>
+
+  <!-- Puppeteer / Chromium box -->
+  <rect x="40" y="378" width="260" height="80" rx="10" fill="#111f16" stroke="#3d9e6a" stroke-width="1.5"/>
+  <text x="170" y="403" text-anchor="middle" class="title">Puppeteer</text>
+  <text x="170" y="419" text-anchor="middle" class="sub">@sparticuz/chromium on Vercel</text>
+  <text x="170" y="433" text-anchor="middle" class="sub">local Chrome on dev</text>
+  <text x="170" y="447" text-anchor="middle" class="sub">detects VERCEL env automatically</text>
+
+  <!-- Vercel Blob box -->
+  <rect x="340" y="378" width="260" height="80" rx="10" fill="#111f16" stroke="#d4a843" stroke-width="1.5"/>
+  <text x="470" y="403" text-anchor="middle" class="title">Vercel Blob</text>
+  <text x="470" y="419" text-anchor="middle" class="sub">tally-cache/&lt;userId&gt;/results.json</text>
+  <text x="470" y="433" text-anchor="middle" class="sub">userId = SHA-256(username)[:16]</text>
+  <text x="470" y="447" text-anchor="middle" class="sub">write: upload.js · read: latest.js</text>
+
+  <!-- arrows: API → Puppeteer -->
+  <line x1="170" y1="320" x2="170" y2="376" stroke="#3d9e6a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- arrows: API → Blob -->
+  <line x1="425" y1="320" x2="425" y2="376" stroke="#d4a843" stroke-width="1.5" marker-end="url(#arrow-amber)"/>
+
+  <!-- ─── ROW 4: External ─── -->
+  <text x="40" y="502" class="label">EXTERNAL</text>
+
+  <!-- BC Self-Serve -->
+  <rect x="40" y="514" width="200" height="36" rx="8" fill="#0c1a12" stroke="#3a4a3e" stroke-width="1"/>
+  <text x="140" y="536" text-anchor="middle" class="sub" font-size="11" fill="#6b7f70">myselfserve.gov.bc.ca</text>
+
+  <!-- arrow: Puppeteer → BC Self-Serve -->
+  <line x1="170" y1="458" x2="140" y2="512" stroke="#3a4a3e" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arrow-muted)"/>
+  <text x="108" y="490" class="arrow-label">scrape</text>
+
+  <!-- ─── LOCAL UPLOADER (right side) ─── -->
+  <text x="660" y="100" class="label">LOCAL WORKFLOW</text>
+
+  <rect x="660" y="112" width="260" height="72" rx="10" fill="#111f16" stroke="#3a4a3e" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="790" y="136" text-anchor="middle" class="title" font-size="12">Local Scraper</text>
+  <text x="790" y="152" text-anchor="middle" class="sub">npm run check</text>
+  <text x="790" y="166" text-anchor="middle" class="sub">scripts/upload-to-blob.js</text>
+
+  <rect x="660" y="240" width="260" height="80" rx="10" fill="#111f16" stroke="#3a4a3e" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="790" y="270" text-anchor="middle" class="title" font-size="12">POST /api/upload</text>
+  <text x="790" y="286" text-anchor="middle" class="sub">Authorization: Bearer UPLOAD_SECRET</text>
+  <text x="790" y="302" text-anchor="middle" class="sub">X-User-ID: &lt;hashed username&gt;</text>
+  <text x="790" y="316" text-anchor="middle" class="sub">writes → Vercel Blob</text>
+
+  <!-- arrow: local scraper → upload -->
+  <line x1="790" y1="184" x2="790" y2="238" stroke="#3a4a3e" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arrow-muted)"/>
+
+  <!-- arrow: upload → blob (cross) -->
+  <line x1="660" y1="300" x2="602" y2="420" stroke="#d4a843" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arrow-amber)"/>
+
+  <!-- CI badge -->
+  <rect x="660" y="378" width="260" height="80" rx="10" fill="#0f1d14" stroke="#1a5c3a" stroke-width="1"/>
+  <text x="790" y="406" text-anchor="middle" class="title" font-size="12">CI · .github/workflows/deploy.yml</text>
+  <text x="790" y="422" text-anchor="middle" class="sub">checkout → npm ci</text>
+  <text x="790" y="436" text-anchor="middle" class="sub">node --check (4 files)</text>
+  <text x="790" y="450" text-anchor="middle" class="sub" fill="#3d9e6a">● passing</text>
+
 </svg>
