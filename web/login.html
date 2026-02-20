@@ -1,131 +1,276 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tally Login</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class'
-    }
-  </script>
-</head>
-<body class="min-h-screen bg-white dark:bg-black text-gray-900 dark:text-white flex items-center justify-center p-4" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, system-ui, sans-serif;">
-  <div class="max-w-md w-full">
-    <h1 class="text-2xl font-medium mb-6 text-center tracking-tight">Tally</h1>
-    <p class="text-sm text-gray-600 dark:text-gray-400 text-center mb-6 italic">Check your cheques without the bureaucracy.</p>
+  <title>Tally — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <form id="login-form" class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
-      <div class="mb-4">
-        <label for="username" class="block text-sm font-medium mb-2">BCEID Username</label>
+    :root {
+      --blue: #1a5a96;
+      --blue-mid: #2472b2;
+      --blue-light: #4e9cd7;
+      --amber: #d4a843;
+      --bg: #0c1220;
+      --bg-2: #111828;
+      --bg-card: #141d2e;
+      --text: #e8e4da;
+      --muted: #8a9eb8;
+      --border: rgba(78, 156, 215, 0.15);
+      --input-bg: rgba(12, 18, 32, 0.8);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo {
+      font-family: 'Fraunces', serif;
+      font-size: 1.75rem;
+      font-weight: 400;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .tagline {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 2rem;
+      font-style: italic;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    input {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9375rem;
+      font-weight: 300;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    input:focus {
+      border-color: var(--blue-light);
+    }
+
+    input::placeholder {
+      color: var(--muted);
+      opacity: 0.5;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.8125rem 1rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
+    }
+
+    button[type="submit"]:hover {
+      background: var(--blue-mid);
+      transform: translateY(-1px);
+    }
+
+    button[type="submit"]:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #error-msg {
+      display: none;
+      background: rgba(220, 60, 60, 0.12);
+      border: 1px solid rgba(220, 60, 60, 0.3);
+      border-radius: 8px;
+      color: #f08080;
+      font-size: 0.8125rem;
+      padding: 0.75rem 1rem;
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    #success-msg {
+      display: none;
+      background: rgba(26, 90, 150, 0.12);
+      border: 1px solid rgba(78, 156, 215, 0.3);
+      border-radius: 8px;
+      color: var(--blue-light);
+      font-size: 0.8125rem;
+      padding: 0.75rem 1rem;
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 1.75rem;
+      opacity: 0.6;
+    }
+
+    .footer-note a {
+      color: var(--blue-light);
+      text-decoration: none;
+    }
+
+    .footer-note a:hover {
+      text-decoration: underline;
+    }
+
+    /* Rate limit / loading spinner inline */
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">Tally</div>
+    <div class="tagline">Check your cheques without the bureaucracy.</div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label for="username">BCEID Username</label>
         <input
           type="text"
           id="username"
           name="username"
-          class="w-full px-3 py-2 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Your BCEID username"
+          autocomplete="username"
+          placeholder="your.username"
+          required
         >
       </div>
 
-      <div class="mb-4">
-        <label for="password" class="block text-sm font-medium mb-2">BCEID Password</label>
+      <div class="form-group">
+        <label for="password">Password</label>
         <input
           type="password"
           id="password"
           name="password"
-          class="w-full px-3 py-2 bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Your BCEID password"
+          autocomplete="current-password"
+          placeholder="••••••••"
+          required
         >
       </div>
 
-      <div class="mb-4 flex items-center gap-2">
-        <input
-          type="checkbox"
-          id="rememberMe"
-          name="rememberMe"
-          class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
-        >
-        <label for="rememberMe" class="text-sm font-medium">
-          Remember me (stay logged in for 30 days)
-        </label>
-      </div>
+      <button type="submit" id="submit-btn">Sign In</button>
 
-      <div id="login-help" class="mb-4 text-xs text-gray-600 dark:text-gray-400">
-        Enter your BC Self-Serve credentials to start your session
-      </div>
-
-      <div id="error" class="hidden mb-4 text-sm text-red-600 dark:text-red-400"></div>
-
-      <button
-        type="submit"
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-      >
-        Login
-      </button>
+      <div id="error-msg"></div>
+      <div id="success-msg">Signed in. Loading your dashboard...</div>
     </form>
+
+    <div class="footer-note">
+      <a href="/">Back to home</a> &nbsp;·&nbsp; Not affiliated with the Government of BC.
+    </div>
   </div>
 
   <script>
     const form = document.getElementById('login-form');
-    const error = document.getElementById('error');
-    const STORAGE_KEY = 'tally_login_credentials';
+    const submitBtn = document.getElementById('submit-btn');
+    const errorMsg = document.getElementById('error-msg');
+    const successMsg = document.getElementById('success-msg');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      error.classList.add('hidden');
 
-      const username = document.getElementById('username').value;
+      const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
-      const rememberMe = document.getElementById('rememberMe').checked;
+
+      if (!username || !password) return;
+
+      // Reset state
+      errorMsg.style.display = 'none';
+      successMsg.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span>Signing in...';
 
       try {
-        const response = await fetch('/api/login', {
+        const res = await fetch('/api/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          credentials: 'same-origin',
-          body: JSON.stringify({ username, password, rememberMe })
+          body: JSON.stringify({ username, password }),
         });
 
-        const data = await response.json();
+        const data = await res.json();
 
-        if (response.ok) {
-          const creds = JSON.stringify({ username, password, rememberMe });
-          if (rememberMe) {
-            localStorage.setItem(STORAGE_KEY, creds);
-            sessionStorage.removeItem(STORAGE_KEY);
-          } else {
-            sessionStorage.setItem(STORAGE_KEY, creds);
-            localStorage.removeItem(STORAGE_KEY);
-          }
-          window.location.href = '/app';
+        if (res.ok && data.success) {
+          successMsg.style.display = 'block';
+          setTimeout(() => { window.location.href = '/app'; }, 800);
         } else {
-          error.textContent = data.error || 'Invalid credentials';
-          error.classList.remove('hidden');
+          const msg = data.error || data.message || 'Invalid credentials. Please try again.';
+          errorMsg.textContent = msg;
+          errorMsg.style.display = 'block';
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Sign In';
         }
       } catch (err) {
-        error.textContent = 'Login failed';
-        error.classList.remove('hidden');
-      }
-    });
-
-    // Prefill credentials from browser storage
-    window.addEventListener('DOMContentLoaded', async () => {
-      if (!window.location.hostname.includes('localhost')) {
-        document.getElementById('login-help').textContent = 'Enter your BC Self-Serve credentials to login';
-      }
-
-      const saved = localStorage.getItem(STORAGE_KEY) || sessionStorage.getItem(STORAGE_KEY);
-      if (!saved) return;
-
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed.username) document.getElementById('username').value = parsed.username;
-        if (parsed.password) document.getElementById('password').value = parsed.password;
-        document.getElementById('rememberMe').checked = Boolean(parsed.rememberMe);
-      } catch {
-        localStorage.removeItem(STORAGE_KEY);
-        sessionStorage.removeItem(STORAGE_KEY);
+        errorMsg.textContent = 'Network error. Please check your connection and try again.';
+        errorMsg.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Sign In';
       }
     });
   </script>

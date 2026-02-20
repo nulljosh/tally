@@ -1,27 +1,35 @@
 :root {
-  /* Primary Palette (Tryalcove-inspired) */
-  --color-primary: #431407;
-  --color-secondary: #d8b4fe;
-  --color-accent-1: #431407;
-  --color-accent-2: #d8b4fe;
-  --color-accent-3: #fff0df;
-  --color-accent-4: #f5e5d5;
-  --color-accent-5: #fffaf4;
+  /* BC Government Blue Palette */
+  --color-primary: #1a5a96;      /* BC gov blue */
+  --color-mid: #2472b2;          /* mid blue */
+  --color-light: #4e9cd7;        /* light blue */
+  --color-accent: #d4a843;       /* amber accent */
+  --color-bg: #0c1220;           /* navy background */
+  --color-bg-2: #111828;         /* slightly lighter navy */
+
+  /* Legacy aliases (keep for compatibility with unified.html) */
+  --color-secondary: #4e9cd7;
+  --color-accent-1: #1a5a96;
+  --color-accent-2: #2472b2;
+  --color-accent-3: #d4a843;
+  --color-accent-4: #111828;
+  --color-accent-5: #0c1220;
 
   /* Neutrals */
-  --color-neutral-1: #292524;
-  --color-neutral-2: #1c1917;
-  --color-neutral-3: #000000;
-  --color-neutral-4: #d6d3d1;
-  --color-neutral-5: #57534e;
+  --color-neutral-1: #1c2333;
+  --color-neutral-2: #141c2b;
+  --color-neutral-3: #0c1220;
+  --color-neutral-4: #8a9eb8;
+  --color-neutral-5: #4a6080;
 
   /* Text Colors */
-  --text-primary: #1d1d1f;
-  --text-secondary: #6e6e73;
+  --text-primary: #e8e4da;
+  --text-secondary: #8a9eb8;
+  --text-muted: #5a7090;
 
   /* Typography */
-  --font-primary: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', sans-serif;
-  --font-secondary: 'SF Pro Rounded', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-primary: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-secondary: 'Fraunces', Georgia, serif;
 
   /* Font Weights */
   --font-weight-1: 300;
@@ -69,28 +77,33 @@
   --radius-2xl: 2rem;
   --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-xs: 0 1px 2px 0 rgba(67, 20, 7, 0.05);
-  --shadow-sm: 0 1px 3px 0 rgba(67, 20, 7, 0.1), 0 1px 2px -1px rgba(67, 20, 7, 0.1);
-  --shadow-md: 0 4px 6px -1px rgba(67, 20, 7, 0.1), 0 2px 4px -2px rgba(67, 20, 7, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(67, 20, 7, 0.1), 0 4px 6px -4px rgba(67, 20, 7, 0.1);
-  --shadow-xl: 0 20px 25px -5px rgba(67, 20, 7, 0.1), 0 8px 10px -6px rgba(67, 20, 7, 0.1);
+  /* Shadows — max 0 4px 16px rgba(0,0,0,0.2) per design rules */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.12);
+  --shadow-sm: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.18);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 4px 16px rgba(0, 0, 0, 0.2);
 
   /* Glass Morphism */
-  --glass-bg-light: rgba(255, 255, 255, 0.7);
-  --glass-bg-dark: rgba(0, 0, 0, 0.5);
-  --glass-blur: blur(20px);
-  --glass-border-light: rgba(255, 255, 255, 0.3);
-  --glass-border-dark: rgba(255, 255, 255, 0.1);
+  --glass-bg-light: rgba(26, 90, 150, 0.08);
+  --glass-bg-dark: rgba(12, 18, 32, 0.7);
+  --glass-blur: blur(16px);
+  --glass-border-light: rgba(78, 156, 215, 0.2);
+  --glass-border-dark: rgba(78, 156, 215, 0.12);
 
   /* Transitions */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Spring hover (per design rules) */
+  --transition-spring: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Dark mode overrides */
-body.dark-mode {
-  --text-primary: #f5f5f7;
-  --text-secondary: #a1a1a6;
+/* Unified dashboard dark theme (BC gov navy) */
+body, [data-theme="dark"] {
+  --text-primary: #e8e4da;
+  --text-secondary: #8a9eb8;
+  background-color: var(--color-bg);
+  color: var(--text-primary);
 }
