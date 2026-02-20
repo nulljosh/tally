@@ -354,8 +354,28 @@ app.get('/api/info', requireAuth, async (req, res) => {
   }
 });
 
-// Root always starts at login page
+// Root: auto-login on localhost if .env creds available, otherwise landing/login
 app.get('/', async (req, res) => {
+  // Already authenticated
+  if (req.session && req.session.authenticated) {
+    return res.redirect('/app');
+  }
+
+  // Local dev: auto-authenticate with .env credentials (skip browser validation)
+  if (!process.env.VERCEL) {
+    const username = process.env.BCEID_USERNAME;
+    const password = process.env.BCEID_PASSWORD;
+    if (username && password) {
+      req.session.authenticated = true;
+      req.session.bceidUsername = username;
+      req.session.bceidPassword = encrypt(password);
+      req.session.userId = crypto.createHash('sha256').update(username).digest('hex').slice(0, 16);
+      req.session.lastActivity = Date.now();
+      console.log('[AUTO-LOGIN] Local dev: authenticated with .env credentials');
+      return req.session.save(() => res.redirect('/app'));
+    }
+  }
+
   return res.redirect('/login.html');
 });
 
