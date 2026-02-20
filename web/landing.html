@@ -58,7 +58,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: linear-gradient(to bottom, rgba(12,18,32,0.95), transparent);
+      background: rgba(12,18,32,0.92);
     }
 
     .nav-logo {
@@ -97,16 +97,16 @@
       z-index: 1;
     }
 
-    /* Radial glow behind hero */
+    /* Subtle glow behind hero — muted, no gradient */
     .hero::after {
       content: '';
       position: absolute;
       top: 30%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(26,90,150,0.18) 0%, transparent 70%);
+      width: 480px;
+      height: 480px;
+      background: radial-gradient(circle, rgba(26,90,150,0.08) 0%, transparent 65%);
       pointer-events: none;
     }
 
@@ -188,7 +188,7 @@
     .btn-primary:hover {
       background: var(--amber);
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(212,168,67,0.25);
+      box-shadow: none;
     }
 
     .btn-secondary {
@@ -216,7 +216,7 @@
       border-radius: 16px;
       padding: 28px;
       text-align: left;
-      box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
     }
 
     .preview-header {

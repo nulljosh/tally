@@ -3,6 +3,8 @@
 ## Design Rules
 - **NO EMOJIS** — strictly none anywhere in UI or code
 - **Color palette**: BC government blue (#1a5a96 primary, #2472b2 mid, #4e9cd7 light), navy bg (#0c1220), amber accents (#d4a843). No green.
+- **No heavy shadows** — max `box-shadow: 0 4px 16px rgba(0,0,0,0.2)`. No `box-shadow` glow on hover.
+- **No gradients on backgrounds** — use solid colors or ultra-subtle radial (opacity 0.08 max). Nav background: flat semi-transparent, not gradient.
 - **Animations**: Spring hover on all buttons/cards — `transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)`
 
 ## Project Overview
