@@ -12,6 +12,10 @@ const chromium = require('@sparticuz/chromium');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const ENCRYPTION_KEY = process.env.SESSION_SECRET || 'chequecheck-secret-key-change-me';
+const DEBUG = process.env.DEBUG === 'true' || process.env.NODE_ENV === 'development';
+
+// Debug logging helper
+const log = (...args) => DEBUG && console.log(...args);
 
 // Encryption helpers for session credential storage
 function encrypt(text) {
@@ -209,20 +213,20 @@ app.post('/api/login', loginLimiter, async (req, res) => {
   try {
     if (!process.env.VERCEL && !usedLocalEnvFallback) {
       // Local dev: validate explicit credentials against BC Self-Serve.
-      console.log('[LOGIN] Local: Validating credentials with BC Self-Serve...');
+      log('[LOGIN] Local: Validating credentials with BC Self-Serve...');
       const result = await attemptBCLogin(username, password);
 
       if (!result.success) {
-        console.log('[LOGIN] Invalid credentials');
+        log('[LOGIN] Invalid credentials');
         return res.status(401).json({
           success: false,
           error: 'Invalid BC Self-Serve credentials'
         });
       }
     } else if (!process.env.VERCEL && usedLocalEnvFallback) {
-      console.log('[LOGIN] Local: Using .env credentials fallback (no live validation)');
+      log('[LOGIN] Local: Using .env credentials fallback (no live validation)');
     } else {
-      console.log('[LOGIN] Vercel: Using submitted credentials (session-scoped)');
+      log('[LOGIN] Vercel: Using submitted credentials (session-scoped)');
     }
 
     // Store encrypted credentials in session
@@ -237,10 +241,10 @@ app.post('/api/login', loginLimiter, async (req, res) => {
     // If "Remember Me" checked, extend session to 30 days
     if (rememberMe) {
       req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
-      console.log('[LOGIN] Remember Me enabled - session extended to 30 days');
+      log('[LOGIN] Remember Me enabled - session extended to 30 days');
     }
 
-    console.log('[LOGIN] Login successful');
+    log('[LOGIN] Login successful');
     res.json({ success: true });
   } catch (error) {
     console.error('[LOGIN] Error:', error);
@@ -294,7 +298,7 @@ app.get('/api/info', requireAuth, async (req, res) => {
           data = (await response.json()).data || await response.json();
         }
       } catch (err) {
-        console.log('[INFO] Blob read failed:', err.message);
+        log('[INFO] Blob read failed:', err.message);
       }
     }
 
@@ -392,7 +396,7 @@ app.get('/', async (req, res) => {
       req.session.userId = crypto.createHash('sha256').update(username).digest('hex').slice(0, 16);
       req.session.lastActivity = Date.now();
       req.session.uaHash = crypto.createHash('sha256').update(req.headers['user-agent'] || '').digest('hex');
-      console.log('[AUTO-LOGIN] Local dev: authenticated with .env credentials');
+      log('[AUTO-LOGIN] Local dev: authenticated with .env credentials');
       return req.session.save(() => res.redirect('/app'));
     }
   }
@@ -466,7 +470,7 @@ app.get('/api/summary', async (req, res) => {
           data = await response.json();
         }
       } catch (err) {
-        console.log('[SUMMARY] Blob read failed:', err.message);
+        log('[SUMMARY] Blob read failed:', err.message);
       }
     }
 
@@ -562,7 +566,7 @@ app.get('/api/summary', async (req, res) => {
 
 app.get('/api/latest', requireAuth, async (req, res) => {
   try {
-    console.log('[API] /api/latest called');
+    log('[API] /api/latest called');
     const userId = req.session?.userId;
 
     // On Vercel: try to read from Blob first
@@ -582,7 +586,7 @@ app.get('/api/latest', requireAuth, async (req, res) => {
           const response = await fetch(blobUrl);
           const data = await response.json();
 
-          console.log(`[API] Returning data from Vercel Blob: ${targetBlob.pathname}`);
+          log(`[API] Returning data from Vercel Blob: ${targetBlob.pathname}`);
           return res.json({ file: 'vercel-blob', data });
         }
 
@@ -591,7 +595,7 @@ app.get('/api/latest', requireAuth, async (req, res) => {
           message: 'No cached results for this user. Run a scrape and upload first.',
         });
       } catch (blobError) {
-        console.log('[API] Blob read failed:', blobError.message);
+        log('[API] Blob read failed:', blobError.message);
         return res.status(500).json({
           cached: false,
           error: 'Failed to read user cache from Blob',
@@ -603,13 +607,13 @@ app.get('/api/latest', requireAuth, async (req, res) => {
 
     // Return in-memory result if it's good data
     if (lastCheckResult && lastCheckResult.success && !hasErrors(lastCheckResult)) {
-      console.log('[API] Returning cached in-memory result');
+      log('[API] Returning cached in-memory result');
       return res.json({ file: 'in-memory', data: lastCheckResult });
     }
 
     // If in-memory data has errors, log it
     if (lastCheckResult && hasErrors(lastCheckResult)) {
-      console.log('[API] WARNING: In-memory result has errors, falling back to file');
+      log('[API] WARNING: In-memory result has errors, falling back to file');
     }
 
     // Fall back to latest GOOD results file on disk (local dev only)
@@ -628,13 +632,13 @@ app.get('/api/latest', requireAuth, async (req, res) => {
       try {
         const data = JSON.parse(fs.readFileSync(file.path, 'utf8'));
         if (!hasErrors(data)) {
-          console.log(`[API] Returning good file: ${file.name}`);
+          log(`[API] Returning good file: ${file.name}`);
           return res.json({ file: file.name, data });
         } else {
-          console.log(`[API] Skipping ${file.name} (has errors)`);
+          log(`[API] Skipping ${file.name} (has errors)`);
         }
       } catch (e) {
-        console.log(`[API] Failed to read ${file.name}:`, e.message);
+        log(`[API] Failed to read ${file.name}:`, e.message);
       }
     }
 
@@ -642,12 +646,12 @@ app.get('/api/latest', requireAuth, async (req, res) => {
     const samplePath = path.join(dataDir, 'sample-data.json');
     if (fs.existsSync(samplePath)) {
       const data = JSON.parse(fs.readFileSync(samplePath, 'utf8'));
-      console.log('[API] No good results, returning sample-data.json');
+      log('[API] No good results, returning sample-data.json');
       return res.json({ file: 'sample-data.json', data });
     }
 
     // No data found anywhere - return demo data
-    console.log('[API] No data found, returning hardcoded demo data');
+    log('[API] No data found, returning hardcoded demo data');
     const sampleData = {
       success: true,
       timestamp: new Date().toISOString(),
@@ -843,7 +847,7 @@ app.get('/api/check', requireAuth, async (req, res) => {
   isChecking = true;
 
   try {
-    console.log('[API] Starting check for all sections...');
+    log('[API] Starting check for all sections...');
 
     let username;
     let password;
@@ -902,7 +906,7 @@ app.get('/api/check', requireAuth, async (req, res) => {
           contentType: 'application/json',
           addRandomSuffix: false
         });
-        console.log(`[API] Saved scrape result to Blob: ${blobPath}`);
+        log(`[API] Saved scrape result to Blob: ${blobPath}`);
       } catch (blobWriteError) {
         console.error('[API] Failed to write scrape result to Blob:', blobWriteError.message);
       }
@@ -963,14 +967,14 @@ if (process.env.VERCEL) {
   module.exports = app;
 } else {
   app.listen(PORT, () => {
-    console.log(`[API] Server running on http://localhost:${PORT}`);
-    console.log(`[API] Endpoints:`);
-    console.log(`  GET /                - Dashboard`);
-    console.log(`  POST /api/login      - Login`);
-    console.log(`  GET /api/check       - Run scraper`);
-    console.log(`  GET /api/latest      - Get latest data`);
-    console.log(`  GET /api/status      - Get scrape status`);
-    console.log(`  GET /api/health      - Health check`);
-    console.log(`[API] Dashboard will load data from latest good file`);
+    log(`[API] Server running on http://localhost:${PORT}`);
+    log(`[API] Endpoints:`);
+    log(`  GET /                - Dashboard`);
+    log(`  POST /api/login      - Login`);
+    log(`  GET /api/check       - Run scraper`);
+    log(`  GET /api/latest      - Get latest data`);
+    log(`  GET /api/status      - Get scrape status`);
+    log(`  GET /api/health      - Health check`);
+    log(`[API] Dashboard will load data from latest good file`);
   });
 }
