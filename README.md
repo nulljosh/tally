@@ -3,7 +3,7 @@
 Track BC Self-Serve benefits with a secure login, per-user cache, and fast dashboard reads.
 
 **Live:** https://tally-production.vercel.app
-**Version:** 1.4.0-beta
+**Version:** 1.4.0
 
 ## What It Does
 
@@ -123,13 +123,16 @@ tally/
 
 ## Changelog
 
-### v1.4.0-beta — 2026-02-19
+### v1.4.0 — 2026-02-19
 - Add benefits screener at `/screen` (public, no auth) — retirement + disability programs
 - Add `/api/info` endpoint (auth required) — structured payment summary JSON
 - Add `npm run info` + `scripts/tally-info.sh` local test shortcut
 - Add bouncy spring hover animations to screener cards and buttons
 - Add MIT License footer to landing page and screener
-- Bump version 1.3.0 → 1.4.0-beta
+- BC government blue color palette (#1a5a96 / #2472b2 / #4e9cd7), navy bg (#0c1220)
+- Remove emojis, heavy shadows, gradient backgrounds
+- Auto-login on localhost when .env credentials present
+- Bump version 1.3.0 → 1.4.0
 
 ### v1.3.0 — 2026-02-19
 - Add public landing page (`web/landing.html`) at `/`
