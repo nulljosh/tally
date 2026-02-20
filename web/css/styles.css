@@ -30,7 +30,7 @@ body {
 }
 
 .hero {
-  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   color: white;
   padding: 3rem 2rem;
   margin-bottom: 2.5rem;
@@ -182,7 +182,7 @@ p {
   top: 0;
   left: 0;
   height: 4px;
-  background: linear-gradient(90deg, #2d7d2d, #4caf50);
+  background: linear-gradient(90deg, #1d4ed8, #2563eb);
   width: 0%;
   transition: width 0.1s ease;
   z-index: 9999;
@@ -361,7 +361,7 @@ body.dark-mode .box {
 }
 
 body.dark-mode .hero {
-  background: linear-gradient(135deg, #1e7e34 0%, #155724 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
 }
 
 body.dark-mode .container p,
