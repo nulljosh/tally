@@ -252,6 +252,108 @@ app.get('/api/me', (req, res) => {
 let lastCheckResult = null;
 let isChecking = false;
 
+// Benefits screener (public, no auth)
+app.get('/screen', (req, res) => {
+  res.sendFile(path.join(__dirname, '../web/screen.html'));
+});
+
+// Public info summary endpoint — reads from Blob cache (auth required)
+app.get('/api/info', requireAuth, async (req, res) => {
+  try {
+    const userId = req.session?.userId;
+    let data = null;
+
+    if (process.env.VERCEL) {
+      if (!userId) return res.status(401).json({ error: 'Missing user session' });
+      try {
+        const { list } = require('@vercel/blob');
+        const prefix = `tally-cache/${userId}/`;
+        const { blobs } = await list({ prefix });
+        if (blobs && blobs.length > 0) {
+          const targetBlob = blobs.find(b => b.pathname === `${prefix}results.json`) || blobs[0];
+          const response = await fetch(targetBlob.url);
+          data = (await response.json()).data || await response.json();
+        }
+      } catch (err) {
+        console.log('[INFO] Blob read failed:', err.message);
+      }
+    }
+
+    // Local: use in-memory or file fallback
+    if (!data && lastCheckResult && lastCheckResult.success) {
+      data = lastCheckResult;
+    }
+
+    if (!data) {
+      const dataDir = path.join(__dirname, '../data');
+      try {
+        const files = fs.readdirSync(dataDir)
+          .filter(f => f.startsWith('results-') && f.endsWith('.json'))
+          .map(f => ({ name: f, path: path.join(dataDir, f), time: fs.statSync(path.join(dataDir, f)).mtime.getTime() }))
+          .sort((a, b) => b.time - a.time);
+        for (const file of files) {
+          const d = JSON.parse(fs.readFileSync(file.path, 'utf8'));
+          if (!hasErrors(d)) { data = d; break; }
+        }
+      } catch (_) {}
+    }
+
+    if (!data || !data.sections) {
+      return res.status(404).json({ error: 'No cached data available. Run a scrape first.' });
+    }
+
+    // Extract payment info
+    const paymentSection = data.sections['Payment Info'];
+    let nextAmount = null;
+    let nextDate = null;
+
+    if (paymentSection && paymentSection.tableData) {
+      for (const row of paymentSection.tableData) {
+        const amtMatch = row.match(/Amount:\s*(\$[\d,]+\.\d{2})/i);
+        if (amtMatch) nextAmount = amtMatch[1];
+        const dateMatch = row.match(/(\d{4}\s*\/\s*[A-Z]{3}\s*\/\s*\d{2})/);
+        if (dateMatch && !nextDate) nextDate = dateMatch[1];
+      }
+      // Also check allText for date
+      if (!nextDate && paymentSection.allText) {
+        for (const line of paymentSection.allText) {
+          const m = line.match(/(\d{4}\s*\/\s*[A-Z]{3}\s*\/\s*\d{2})/);
+          if (m) { nextDate = m[1]; break; }
+        }
+      }
+    }
+
+    // Extract message count
+    const messagesSection = data.sections['Messages'];
+    const unreadCount = messagesSection && messagesSection.allText
+      ? messagesSection.allText.filter(msg => msg.match(/^\d{4}\s*\/\s*[A-Z]{3}\s*\/\s*\d{2}/)).length
+      : 0;
+
+    // Extract active benefits from payment section
+    const activeBenefits = [];
+    if (paymentSection && paymentSection.allText) {
+      for (const line of paymentSection.allText) {
+        if (line.match(/income assistance/i)) activeBenefits.push('Income Assistance');
+        if (line.match(/disability/i)) activeBenefits.push('Disability Assistance');
+      }
+    }
+    if (activeBenefits.length === 0) activeBenefits.push('Income Assistance');
+
+    res.json({
+      nextPayment: {
+        amount: nextAmount || 'Unknown',
+        date: nextDate || 'Unknown'
+      },
+      unreadMessages: unreadCount,
+      activeBenefits: [...new Set(activeBenefits)],
+      lastUpdated: data.timestamp || data.checkedAt || new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('[INFO] Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Root always starts at login page
 app.get('/', async (req, res) => {
   return res.redirect('/login.html');

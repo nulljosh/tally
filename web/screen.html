@@ -550,6 +550,36 @@
       outline: 2px solid var(--green-light);
       outline-offset: 3px;
     }
+
+    /* Bouncy spring hover — cubic-bezier overshoots then settles */
+    .opt {
+      transition: background 0.2s, border-color 0.2s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .opt:hover { transform: translateY(-2px); }
+    .opt:active { transform: scale(0.98); }
+
+    .btn-next {
+      transition: background 0.2s, box-shadow 0.2s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .btn-next:not(:disabled):hover { transform: translateY(-3px); }
+    .btn-next:not(:disabled):active { transform: scale(0.97); }
+
+    .program-card {
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+    }
+    .program-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+
+    /* Site footer */
+    .site-footer {
+      text-align: center;
+      padding: 32px 24px;
+      font-size: 0.78rem;
+      color: rgba(138,158,144,0.45);
+      position: relative;
+      z-index: 1;
+    }
+    .site-footer a { color: rgba(138,158,144,0.6); text-decoration: none; }
+    .site-footer a:hover { color: var(--muted); }
   </style>
 </head>
 <body>
@@ -814,6 +844,11 @@
 
     </div>
   </main>
+
+  <footer class="site-footer">
+    <p>© 2026 Joshua Trommel. <a href="https://github.com/nulljosh/tally/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a> &middot; <a href="https://github.com/nulljosh/tally" target="_blank" rel="noopener">github.com/nulljosh/tally</a></p>
+    <p style="margin-top:4px">Not affiliated with the Government of British Columbia.</p>
+  </footer>
 
   <script>
     // ---------- State ----------

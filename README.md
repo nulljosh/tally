@@ -3,7 +3,7 @@
 Track BC Self-Serve benefits with a secure login, per-user cache, and fast dashboard reads.
 
 **Live:** https://tally-production.vercel.app
-**Version:** 1.3.0
+**Version:** 1.4.0-beta
 
 ## What It Does
 
@@ -41,10 +41,14 @@ Built for BC residents. Not affiliated with the Government of British Columbia.
 | `POST /api/upload` | Upload data to Blob | Token |
 | `POST /api/logout` | Clear session | Required |
 | `GET /api/me` | Auth state | No |
+| `GET /screen` | Benefits screener | No |
+| `GET /api/info` | Structured payment summary | Required |
 | `POST /api/dtc/screen` | DTC eligibility | No |
 
 ## Core Features
 
+- Benefits screener at `/screen` (public, no auth) — OAS, GIS, CPP, BC PWD, DTC, SAFER
+- Structured `/api/info` endpoint — payment amount, next date, unread count, active benefits
 - Public landing page with product explainer
 - Secure login with rate limiting (5 attempts / 15 min)
 - Session-based auth (httpOnly, secure cookies)
@@ -65,6 +69,16 @@ npm start         # node src/api.js
 Open http://localhost:3000.
 
 Copy `.env.example` to `.env` and fill in your credentials.
+
+## Local Test Shortcut
+
+Print your latest payment data from the terminal:
+
+```bash
+npm run info      # runs scripts/tally-info.sh
+```
+
+Reads `.env` for credentials, hits the local server, prints payment amount, next date, and message count. Requires `npm start` running first.
 
 ## Scrape + Upload
 
@@ -108,6 +122,14 @@ tally/
 ```
 
 ## Changelog
+
+### v1.4.0-beta — 2026-02-19
+- Add benefits screener at `/screen` (public, no auth) — retirement + disability programs
+- Add `/api/info` endpoint (auth required) — structured payment summary JSON
+- Add `npm run info` + `scripts/tally-info.sh` local test shortcut
+- Add bouncy spring hover animations to screener cards and buttons
+- Add MIT License footer to landing page and screener
+- Bump version 1.3.0 → 1.4.0-beta
 
 ### v1.3.0 — 2026-02-19
 - Add public landing page (`web/landing.html`) at `/`

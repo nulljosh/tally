@@ -1,6 +1,6 @@
 {
   "name": "tally",
-  "version": "1.3.0",
+  "version": "1.4.0-beta",
   "description": "Tally - BC Self-Serve Portal Scraper - Automated scraping of notifications, messages, payment info, and service requests",
   "main": "src/scraper.js",
   "scripts": {
@@ -12,6 +12,7 @@
     "watch": "concurrently \"nodemon src/api.js\" \"browser-sync start --proxy localhost:3000 --files 'web/**/*.html' --no-open\"",
     "start": "node src/api.js",
     "upload-blob": "node scripts/upload-to-blob.js",
+    "info": "bash scripts/tally-info.sh",
     "brute": "nodemon brute/tools/brute-force-web.js",
     "mock-server": "nodemon brute/mock-targets/mock-server.js"
   },

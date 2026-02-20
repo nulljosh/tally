@@ -30,6 +30,7 @@
   ],
   "routes": [
     { "src": "/api/upload", "dest": "/api/upload.js" },
+    { "src": "^/screen$", "dest": "/src/api.js" },
     { "src": "/api/(.*)", "dest": "/src/api.js" },
     { "src": "/data/(.*)", "dest": "/src/api.js" },
     { "src": "^/$", "dest": "/web/landing.html" },
