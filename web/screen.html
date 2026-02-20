@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Benefits Checker — Tally</title>
+  <meta name="description" content="Find out which BC and Canadian government benefits you may be eligible for. Takes 3 minutes.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #1a5c3a;
+      --green-mid: #2d7a52;
+      --green-light: #3d9e6a;
+      --cream: #f5f0e8;
+      --cream-dark: #e8e0d0;
+      --amber: #d4a843;
+      --bg: #0c1a12;
+      --bg-2: #111f16;
+      --bg-3: #162b1e;
+      --text: #e8e4da;
+      --muted: #8a9e90;
+      --red: #e05252;
+      --blue: #4a9eca;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      font-size: 20px;
+      line-height: 1.65;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(to bottom, rgba(12,26,18,0.95), transparent);
+    }
+
+    .nav-logo {
+      font-family: 'Fraunces', serif;
+      font-size: 1.4rem;
+      font-weight: 400;
+      color: var(--cream);
+      letter-spacing: -0.02em;
+      text-decoration: none;
+    }
+
+    .nav-link {
+      font-size: 0.875rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--text); }
+
+    /* WRAPPER */
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 24px 60px;
+    }
+
+    /* CARD */
+    .card {
+      background: var(--bg-2);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 20px;
+      padding: 52px;
+      width: 100%;
+      max-width: 660px;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+    }
+
+    /* PROGRESS */
+    .progress-bar-wrap {
+      width: 100%;
+      max-width: 660px;
+      margin-bottom: 24px;
+    }
+
+    .progress-track {
+      height: 3px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--green-light);
+      border-radius: 100px;
+      transition: width 0.4s ease;
+    }
+
+    .progress-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    /* STEP */
+    .step { display: none; }
+    .step.active { display: block; animation: fadeUp 0.35s ease both; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-tag {
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--green-light);
+      margin-bottom: 18px;
+    }
+
+    h1, h2 {
+      font-family: 'Fraunces', serif;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      color: var(--cream);
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+
+    h1 { font-size: clamp(2rem, 5vw, 2.8rem); }
+    h2 { font-size: clamp(1.5rem, 3vw, 2rem); }
+
+    h1 em, h2 em {
+      font-style: italic;
+      color: var(--amber);
+    }
+
+    .step-desc {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-bottom: 36px;
+      line-height: 1.6;
+      max-width: 520px;
+    }
+
+    /* OPTION BUTTONS */
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .opt {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 24px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      background: transparent;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 400;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+      text-align: left;
+      width: 100%;
+      min-height: 60px;
+    }
+
+    .opt:hover {
+      background: rgba(45,122,82,0.1);
+      border-color: rgba(61,158,106,0.3);
+    }
+
+    .opt.selected {
+      background: rgba(45,122,82,0.18);
+      border-color: var(--green-mid);
+    }
+
+    .opt-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.2);
+      flex-shrink: 0;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .opt.selected .opt-dot {
+      background: var(--green-light);
+      border-color: var(--green-light);
+    }
+
+    /* CHECKBOX OPTIONS (multi-select) */
+    .opt-check {
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      border: 2px solid rgba(255,255,255,0.2);
+      flex-shrink: 0;
+      transition: background 0.2s, border-color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .opt.selected .opt-check {
+      background: var(--green-light);
+      border-color: var(--green-light);
+    }
+
+    .opt.selected .opt-check::after {
+      content: '';
+      width: 5px;
+      height: 9px;
+      border-right: 2px solid var(--bg);
+      border-bottom: 2px solid var(--bg);
+      transform: rotate(45deg) translate(-1px, -1px);
+      display: block;
+    }
+
+    /* INCOME INPUT */
+    .income-wrap {
+      margin-bottom: 32px;
+    }
+
+    .income-label {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .income-input {
+      background: var(--bg-3);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      color: var(--cream);
+      font-family: 'Fraunces', serif;
+      font-size: 2.2rem;
+      font-weight: 300;
+      padding: 16px 20px;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.2s;
+      letter-spacing: -0.02em;
+    }
+
+    .income-input:focus {
+      border-color: var(--green-light);
+    }
+
+    .income-input::placeholder { color: rgba(232,228,218,0.2); }
+
+    /* NAV BUTTONS */
+    .nav-btns {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn-next {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--bg);
+      background: var(--cream);
+      padding: 0 32px;
+      height: 56px;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-next:hover {
+      background: var(--amber);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(212,168,67,0.25);
+    }
+
+    .btn-next:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-back {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0 16px;
+      height: 56px;
+      border-radius: 100px;
+      transition: color 0.2s;
+    }
+
+    .btn-back:hover { color: var(--text); }
+
+    /* SKIP LINK */
+    .skip-link {
+      font-size: 0.875rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+      margin-left: auto;
+    }
+    .skip-link:hover { color: var(--text); }
+
+    /* RESULTS */
+    .results-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .results-summary {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .summary-chip {
+      padding: 8px 18px;
+      border-radius: 100px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .chip-green { color: var(--green-light); border-color: rgba(61,158,106,0.3); background: rgba(45,122,82,0.1); }
+    .chip-amber { color: var(--amber); border-color: rgba(212,168,67,0.3); background: rgba(212,168,67,0.08); }
+    .chip-muted { color: var(--muted); }
+
+    .programs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .program-card {
+      padding: 28px 28px 24px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: var(--bg-3);
+    }
+
+    .program-card.eligible {
+      border-color: rgba(61,158,106,0.25);
+      background: rgba(45,122,82,0.06);
+    }
+
+    .program-card.possible {
+      border-color: rgba(212,168,67,0.2);
+      background: rgba(212,168,67,0.04);
+    }
+
+    .program-card.ineligible {
+      opacity: 0.45;
+    }
+
+    .program-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .program-name {
+      font-family: 'Fraunces', serif;
+      font-size: 1.15rem;
+      font-weight: 400;
+      color: var(--cream);
+      letter-spacing: -0.01em;
+    }
+
+    .program-badge {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 100px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .badge-eligible { background: rgba(61,158,106,0.2); color: var(--green-light); }
+    .badge-possible { background: rgba(212,168,67,0.15); color: var(--amber); }
+    .badge-no { background: rgba(255,255,255,0.05); color: var(--muted); }
+
+    .program-amount {
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: var(--green-light);
+      font-family: 'Fraunces', serif;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .program-amount.amber { color: var(--amber); }
+
+    .program-desc {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .program-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: var(--green-light);
+      text-decoration: none;
+      transition: color 0.2s;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      padding: 0;
+    }
+
+    .program-action:hover { color: var(--cream); }
+
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green-light);
+      margin-bottom: 16px;
+    }
+
+    .divider {
+      height: 1px;
+      background: rgba(255,255,255,0.06);
+      margin: 32px 0;
+    }
+
+    /* TOTAL BAR */
+    .total-bar {
+      padding: 24px 28px;
+      border-radius: 14px;
+      border: 1px solid rgba(61,158,106,0.3);
+      background: rgba(45,122,82,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+
+    .total-label { font-size: 1rem; color: var(--muted); }
+
+    .total-amount {
+      font-family: 'Fraunces', serif;
+      font-size: 2.5rem;
+      font-weight: 300;
+      color: var(--cream);
+      letter-spacing: -0.03em;
+    }
+
+    .total-amount span {
+      font-size: 1rem;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+    }
+
+    .total-note {
+      font-size: 0.8rem;
+      color: var(--muted);
+      width: 100%;
+    }
+
+    /* FOOTNOTE */
+    .footnote {
+      font-size: 0.8rem;
+      color: rgba(138,158,144,0.5);
+      text-align: center;
+      margin-top: 24px;
+      line-height: 1.5;
+    }
+
+    /* ACCESSIBILITY */
+    @media (prefers-reduced-motion: reduce) {
+      *, .step.active { animation: none !important; transition: none !important; }
+    }
+
+    @media (max-width: 600px) {
+      nav { padding: 16px 20px; }
+      .wrapper { padding: 80px 16px 40px; }
+      .card { padding: 32px 24px; }
+      .income-input { font-size: 1.8rem; }
+      .total-amount { font-size: 1.8rem; }
+      .program-header { flex-direction: column; gap: 6px; }
+    }
+
+    /* Focus styles for keyboard nav */
+    .opt:focus-visible, .btn-next:focus-visible, .btn-back:focus-visible {
+      outline: 2px solid var(--green-light);
+      outline-offset: 3px;
+    }
+  </style>
+</head>
+<body>
+
+  <nav aria-label="Site navigation">
+    <a href="/" class="nav-logo">Tally</a>
+    <a href="/login" class="nav-link">Sign in</a>
+  </nav>
+
+  <main class="wrapper">
+
+    <div class="progress-bar-wrap" id="progressWrap" style="display:none">
+      <p class="progress-label" id="progressLabel">Question 1 of 8</p>
+      <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressBar">
+        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <div class="card" role="main" aria-live="polite">
+
+      <!-- STEP 0: Welcome -->
+      <div class="step active" id="step-0" data-step="0">
+        <p class="step-tag">Benefits Checker — Beta</p>
+        <h1>Find out what<br><em>you're owed.</em></h1>
+        <p class="step-desc">
+          Answer a few simple questions and Tally will show you every BC and Canadian government benefit you may qualify for — retirement, disability, housing support, and more.
+        </p>
+        <p class="step-desc" style="font-size: 0.9rem; color: rgba(138,158,144,0.6);">
+          Takes about 3 minutes. Nothing is stored or sent anywhere.
+        </p>
+        <div class="nav-btns">
+          <button class="btn-next" onclick="nextStep()">
+            Start &rarr;
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 1: Age -->
+      <div class="step" id="step-1" data-step="1">
+        <p class="step-tag">Step 1</p>
+        <h2>How old are you?</h2>
+        <p class="step-desc">Your age determines which programs you qualify for.</p>
+        <div class="income-wrap">
+          <label class="income-label" for="ageInput">Your age</label>
+          <input
+            type="number"
+            id="ageInput"
+            class="income-input"
+            placeholder="65"
+            min="18"
+            max="110"
+            inputmode="numeric"
+            aria-label="Your age in years"
+            oninput="validateAge()"
+          >
+        </div>
+        <div class="nav-btns">
+          <button class="btn-back" onclick="prevStep()">Back</button>
+          <button class="btn-next" id="ageBtn" onclick="nextStep()" disabled>Next &rarr;</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Province -->
+      <div class="step" id="step-2" data-step="2">
+        <p class="step-tag">Step 2</p>
+        <h2>Which province do<br>you live in?</h2>
+        <p class="step-desc">Some programs are BC-only. Others are available across Canada.</p>
+        <div class="options" role="radiogroup" aria-label="Province selection">
+          <button class="opt" onclick="selectOpt(this, 'province', 'BC')" role="radio" aria-checked="false">
+            <span class="opt-dot" aria-hidden="true"></span>
+            British Columbia
+          </button>
+          <button class="opt" onclick="selectOpt(this, 'province', 'other')" role="radio" aria-checked="false">
+            <span class="opt-dot" aria-hidden="true"></span>
+            Another province or territory
+          </button>
+        </div>
+        <div class="nav-btns">
+          <button class="btn-back" onclick="prevStep()">Back</button>
+          <button class="btn-next" id="provinceBtn" onclick="nextStep()" disabled>Next &rarr;</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Marital status -->
+      <div class="step" id="step-3" data-step="3">
+        <p class="step-tag">Step 3</p>
+        <h2>What is your<br>relationship status?</h2>
+        <p class="step-desc">This affects how your income is assessed for some programs.</p>
+        <div class="options" role="radiogroup" aria-label="Relationship status">
+          <button class="opt" onclick="selectOpt(this, 'marital', 'single')" role="radio" aria-checked="false">
+            <span class="opt-dot" aria-hidden="true"></span>
+            Single, widowed, or divorced
+          </button>
+          <button class="opt" onclick="selectOpt(this, 'marital', 'couple')" role="radio" aria-checked="false">
+            <span class="opt-dot" aria-hidden="true"></span>
+            Married or common-law partner
+          </button>
+        </div>
+        <div class="nav-btns">
+          <button class="btn-back" onclick="prevStep()">Back</button>
+          <button class="btn-next" id="maritalBtn" onclick="nextStep()" disabled>Next &rarr;</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Housing -->
+      <div class="step" id="step-4" data-step="4">
+        <p class="step-tag">Step 4</p>
+        <h2>Where do you live?</h2>
+        <p class="step-desc">Some housing and tax programs depend on whether you rent or own.</p>
+        <div class="options" role="radiogroup" aria-label="Housing situation">
+          <button class="opt" onclick="selectOpt(this, 'housing', 'own')" role="radio" aria-checked="false">
+            <span class="opt-dot" aria-hidden="true"></span>
+            I own my home
+          </button>
+          <button class="opt" onclick="selectOpt(this, 'housing', 'rent')" role="radio" aria-checked="false">
+            <span class="opt-dot" aria-hidden="true"></span>
+            I rent
+          </button>
+          <button class="opt" onclick="selectOpt(this, 'housing', 'other')" role="radio" aria-checked="false">
+            <span class="opt-dot" aria-hidden="true"></span>
+            I live with family or in a care home
+          </button>
+        </div>
+        <div class="nav-btns">
+          <button class="btn-back" onclick="prevStep()">Back</button>
+          <button class="btn-next" id="housingBtn" onclick="nextStep()" disabled>Next &rarr;</button>
+        </div>
+      </div>
+
+      <!-- STEP 5: Annual income -->
+      <div class="step" id="step-5" data-step="5">
+        <p class="step-tag">Step 5</p>
+        <h2>What is your approximate <em>annual income?</em></h2>
+        <p class="step-desc">Include all income: pensions, investments, OAS, CPP. Before taxes. An estimate is fine.</p>
+        <div class="income-wrap">
+          <label class="income-label" for="incomeInput">Annual income (CAD)</label>
+          <input
+            type="number"
+            id="incomeInput"
+            class="income-input"
+            placeholder="$20,000"
+            min="0"
+            inputmode="numeric"
+            aria-label="Annual income in Canadian dollars"
+            oninput="validateIncome()"
+          >
+        </div>
+        <div class="nav-btns">
+          <button class="btn-back" onclick="prevStep()">Back</button>
+          <button class="btn-next" id="incomeBtn" onclick="nextStep()" disabled>Next &rarr;</button>
+          <a class="skip-link" onclick="skipIncome()" href="#" aria-label="Skip income question">Skip</a>
+        </div>
+      </div>
+
+      <!-- STEP 6: CPP contributions -->
+      <div class="step" id="step-6" data-step="6">
+        <p class="step-tag">Step 6</p>
+        <h2>Did you ever work in Canada and pay into CPP?</h2>
+        <p class="step-desc">CPP stands for Canada Pension Plan. It was deducted from your paycheque if you worked for an employer in Canada. Self-employed people also contribute.</p>
+        <div class="options" role="radiogroup" aria-label="CPP contributions">
+          <button class="opt" onclick="selectOpt(this, 'cpp', 'yes')" role="radio" aria-checked="false">
+            <span class="opt-dot" aria-hidden="true"></span>
+            Yes — I worked in Canada
+          </button>
+          <button class="opt" onclick="selectOpt(this, 'cpp', 'no')" role="radio" aria-checked="false">
+            <span class="opt-dot" aria-hidden="true"></span>
+            No — I never worked in Canada
+          </button>
+          <button class="opt" onclick="selectOpt(this, 'cpp', 'unsure')" role="radio" aria-checked="false">
+            <span class="opt-dot" aria-hidden="true"></span>
+            I'm not sure
+          </button>
+        </div>
+        <div class="nav-btns">
+          <button class="btn-back" onclick="prevStep()">Back</button>
+          <button class="btn-next" id="cppBtn" onclick="nextStep()" disabled>Next &rarr;</button>
+        </div>
+      </div>
+
+      <!-- STEP 7: Disability -->
+      <div class="step" id="step-7" data-step="7">
+        <p class="step-tag">Step 7</p>
+        <h2>Do you have a disability or long-term health condition?</h2>
+        <p class="step-desc">This includes physical conditions, mental health conditions, vision or hearing loss, and cognitive conditions. It must significantly limit your daily activities.</p>
+        <div class="options" role="radiogroup" aria-label="Disability status">
+          <button class="opt" onclick="selectOpt(this, 'disability', 'yes'); showDisabilityDetail(true)" role="radio" aria-checked="false">
+            <span class="opt-dot" aria-hidden="true"></span>
+            Yes — it affects my daily life
+          </button>
+          <button class="opt" onclick="selectOpt(this, 'disability', 'mild'); showDisabilityDetail(false)" role="radio" aria-checked="false">
+            <span class="opt-dot" aria-hidden="true"></span>
+            Somewhat — but I manage most things
+          </button>
+          <button class="opt" onclick="selectOpt(this, 'disability', 'no'); showDisabilityDetail(false)" role="radio" aria-checked="false">
+            <span class="opt-dot" aria-hidden="true"></span>
+            No — no major health conditions
+          </button>
+        </div>
+        <div class="nav-btns">
+          <button class="btn-back" onclick="prevStep()">Back</button>
+          <button class="btn-next" id="disabilityBtn" onclick="nextStep()" disabled>Next &rarr;</button>
+        </div>
+      </div>
+
+      <!-- STEP 8: Disability conditions (shown only if disability = yes) -->
+      <div class="step" id="step-8" data-step="8">
+        <p class="step-tag">Step 8</p>
+        <h2>What kind of condition do you have?</h2>
+        <p class="step-desc">Select all that apply. This helps determine which programs fit.</p>
+        <div class="options" id="conditionOptions" role="group" aria-label="Condition types">
+          <button class="opt" onclick="toggleOpt(this, 'conditions', 'physical')" role="checkbox" aria-checked="false">
+            <span class="opt-check" aria-hidden="true"></span>
+            Physical (mobility, chronic pain, heart, lungs)
+          </button>
+          <button class="opt" onclick="toggleOpt(this, 'conditions', 'mental')" role="checkbox" aria-checked="false">
+            <span class="opt-check" aria-hidden="true"></span>
+            Mental health (depression, anxiety, PTSD)
+          </button>
+          <button class="opt" onclick="toggleOpt(this, 'conditions', 'cognitive')" role="checkbox" aria-checked="false">
+            <span class="opt-check" aria-hidden="true"></span>
+            Cognitive (dementia, brain injury, autism, ADHD)
+          </button>
+          <button class="opt" onclick="toggleOpt(this, 'conditions', 'sensory')" role="checkbox" aria-checked="false">
+            <span class="opt-check" aria-hidden="true"></span>
+            Sensory (vision loss, hearing loss)
+          </button>
+        </div>
+        <div class="nav-btns">
+          <button class="btn-back" onclick="prevStep()">Back</button>
+          <button class="btn-next" id="conditionsBtn" onclick="nextStep()">See my results &rarr;</button>
+        </div>
+      </div>
+
+      <!-- RESULTS -->
+      <div class="step" id="step-results" data-step="results">
+        <div class="results-header">
+          <p class="step-tag">Your Results</p>
+          <h2>Benefits you may<br><em>qualify for</em></h2>
+        </div>
+
+        <div id="totalBar" class="total-bar" style="display:none">
+          <div>
+            <p class="total-label">Estimated monthly benefit</p>
+            <p class="total-amount" id="totalAmount">$0 <span>/mo</span></p>
+          </div>
+          <p class="total-note" id="totalNote"></p>
+        </div>
+
+        <div id="resultsList" class="programs-list"></div>
+
+        <div class="divider"></div>
+
+        <p class="section-title">What to do next</p>
+        <div id="nextStepsList" class="programs-list"></div>
+
+        <div class="footnote">
+          <p>Amounts shown are approximate 2025/2026 rates. Eligibility depends on your full financial and residency history.</p>
+          <p style="margin-top:6px">This tool is for informational purposes only — not legal or financial advice.</p>
+          <p style="margin-top: 16px"><a href="/" style="color: var(--muted); text-decoration:none;">Return to Tally &rarr;</a></p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // ---------- State ----------
+    const answers = {
+      age: null,
+      province: null,
+      marital: null,
+      housing: null,
+      income: null,
+      cpp: null,
+      disability: null,
+      conditions: []
+    };
+
+    const TOTAL_STEPS = 8;
+    let current = 0;
+    let skipDisabilityDetail = false;
+
+    // ---------- Navigation ----------
+    function nextStep() {
+      const steps = getStepOrder();
+      const idx = steps.indexOf(current);
+      if (idx === -1 || idx >= steps.length - 1) return;
+      showStep(steps[idx + 1]);
+    }
+
+    function prevStep() {
+      const steps = getStepOrder();
+      const idx = steps.indexOf(current);
+      if (idx <= 0) return;
+      showStep(steps[idx - 1]);
+    }
+
+    function getStepOrder() {
+      // Build dynamic step order based on answers
+      const base = [0, 1, 2, 3, 4, 5, 6, 7];
+      if (answers.disability === 'yes') base.push(8);
+      base.push('results');
+      return base;
+    }
+
+    function showStep(n) {
+      document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+      const el = n === 'results'
+        ? document.getElementById('step-results')
+        : document.getElementById('step-' + n);
+      if (!el) return;
+      el.classList.add('active');
+      current = n;
+
+      // Progress bar
+      const steps = getStepOrder();
+      const idx = steps.indexOf(n);
+      const progressWrap = document.getElementById('progressWrap');
+      if (n === 0 || n === 'results') {
+        progressWrap.style.display = 'none';
+      } else {
+        progressWrap.style.display = 'block';
+        const pct = Math.round((idx / (steps.length - 1)) * 100);
+        document.getElementById('progressFill').style.width = pct + '%';
+        document.getElementById('progressBar').setAttribute('aria-valuenow', pct);
+        const questionN = idx;
+        const questionTotal = steps.length - 2; // exclude welcome + results
+        document.getElementById('progressLabel').textContent = `Question ${questionN} of ${questionTotal}`;
+      }
+
+      if (n === 'results') buildResults();
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ---------- Single select ----------
+    function selectOpt(btn, key, val) {
+      // Deselect all in group
+      btn.closest('.options').querySelectorAll('.opt').forEach(b => {
+        b.classList.remove('selected');
+        b.setAttribute('aria-checked', 'false');
+      });
+      btn.classList.add('selected');
+      btn.setAttribute('aria-checked', 'true');
+      answers[key] = val;
+
+      // Enable next button
+      const map = { province: 'provinceBtn', marital: 'maritalBtn', housing: 'housingBtn', cpp: 'cppBtn', disability: 'disabilityBtn' };
+      const btnId = map[key];
+      if (btnId) document.getElementById(btnId).disabled = false;
+    }
+
+    // ---------- Multi select ----------
+    function toggleOpt(btn, key, val) {
+      const checked = btn.classList.toggle('selected');
+      btn.setAttribute('aria-checked', checked ? 'true' : 'false');
+      if (checked) {
+        if (!answers[key]) answers[key] = [];
+        if (!answers[key].includes(val)) answers[key].push(val);
+      } else {
+        answers[key] = answers[key].filter(v => v !== val);
+      }
+    }
+
+    // ---------- Age input ----------
+    function validateAge() {
+      const val = parseInt(document.getElementById('ageInput').value);
+      const ok = !isNaN(val) && val >= 18 && val <= 110;
+      document.getElementById('ageBtn').disabled = !ok;
+      if (ok) answers.age = val;
+    }
+
+    // ---------- Income input ----------
+    function validateIncome() {
+      const val = parseInt(document.getElementById('incomeInput').value);
+      const ok = !isNaN(val) && val >= 0;
+      document.getElementById('incomeBtn').disabled = !ok;
+      if (ok) answers.income = val;
+    }
+
+    function skipIncome() {
+      answers.income = null;
+      nextStep();
+      return false;
+    }
+
+    // ---------- Show/hide disability detail step ----------
+    function showDisabilityDetail(show) {
+      skipDisabilityDetail = !show;
+    }
+
+    // ---------- Results ----------
+    function buildResults() {
+      const age = answers.age || 65;
+      const province = answers.province;
+      const marital = answers.marital;
+      const housing = answers.housing;
+      const income = answers.income;
+      const cpp = answers.cpp;
+      const disability = answers.disability;
+      const conditions = answers.conditions || [];
+
+      const programs = [];
+      const nextSteps = [];
+      let totalMin = 0;
+      let totalMax = 0;
+
+      // ---- OAS ----
+      const oasAge = age >= 75 ? 800.44 : 727.67;
+      const oasFmt = age >= 75 ? '$800.44' : '$727.67';
+      if (age >= 65) {
+        programs.push({
+          name: 'Old Age Security (OAS)',
+          type: 'federal',
+          status: 'eligible',
+          amount: oasFmt + '/mo',
+          desc: 'A monthly payment from the federal government for most Canadians 65 and older. You don\'t need to have worked to receive it. If you\'re 75+, you receive 10% more.',
+          action: 'Apply on My Service Canada Account',
+          link: 'https://www.canada.ca/en/services/benefits/publicpensions/cpp/old-age-security/apply.html'
+        });
+        totalMin += oasAge; totalMax += oasAge;
+        nextSteps.push({ title: 'Apply for OAS', desc: 'If you haven\'t already, apply online through My Service Canada Account or call 1-800-277-9914.', priority: 1 });
+      } else if (age >= 60) {
+        programs.push({
+          name: 'Old Age Security (OAS)',
+          type: 'federal',
+          status: 'possible',
+          amount: '$727.67/mo at age 65',
+          desc: 'You\'ll be eligible when you turn 65. You can also delay until 70 to receive up to 36% more per month.',
+          action: null
+        });
+      }
+
+      // ---- GIS ----
+      const gisMax = marital === 'couple' ? 478.70 : 1,086.88;
+      const gisFmt = marital === 'couple' ? 'up to $478.70/mo each' : 'up to $1,086.88/mo';
+      const gisThreshold = marital === 'couple' ? 28656 : 22056;
+      const gisEligible = age >= 65 && (income === null || income < gisThreshold);
+      if (gisEligible) {
+        programs.push({
+          name: 'Guaranteed Income Supplement (GIS)',
+          type: 'federal',
+          status: income === null ? 'possible' : 'eligible',
+          amount: gisFmt,
+          desc: 'A non-taxable monthly payment for low-income OAS recipients. It\'s automatic when you apply for OAS and file your taxes. If your income is low, this could be significant.',
+          action: 'Automatic with OAS application and annual tax filing',
+          link: 'https://www.canada.ca/en/services/benefits/publicpensions/cpp/old-age-security/guaranteed-income-supplement/apply.html'
+        });
+        if (income !== null && income < gisThreshold) {
+          const gisAmount = marital === 'couple' ? 478.70 : 1086.88;
+          totalMin += gisAmount * 0.3; totalMax += gisAmount;
+        }
+        nextSteps.push({ title: 'File your taxes every year', desc: 'GIS is renewed annually based on your tax return. Even if you owe nothing, you must file to keep receiving it.', priority: 2 });
+      }
+
+      // ---- CPP ----
+      if (cpp === 'yes' || cpp === 'unsure') {
+        programs.push({
+          name: 'Canada Pension Plan (CPP)',
+          type: 'federal',
+          status: cpp === 'yes' ? 'eligible' : 'possible',
+          amount: 'avg $831/mo — max $1,433/mo',
+          desc: 'Based on how much you contributed during your working years. You can start as early as 60 (reduced) or delay until 70 (increased). Check your estimated amount on My Service Canada Account.',
+          action: 'Check your CPP estimate on My Service Canada',
+          link: 'https://www.canada.ca/en/services/benefits/publicpensions/cpp/cpp-benefit/apply.html'
+        });
+        if (cpp === 'yes') {
+          totalMin += 400; totalMax += 831;
+        }
+        nextSteps.push({ title: 'Check your CPP statement', desc: 'Log into My Service Canada Account to see your CPP contribution history and estimated monthly payment.', priority: 2 });
+      }
+
+      // ---- BC Senior's Supplement ----
+      if (province === 'BC' && age >= 65 && gisEligible) {
+        programs.push({
+          name: "BC Senior's Supplement",
+          type: 'provincial',
+          status: 'eligible',
+          amount: '$49.30/mo',
+          desc: 'An extra monthly payment from the BC government for seniors who receive the Guaranteed Income Supplement. No separate application needed — it\'s automatic once GIS is approved.',
+          action: 'Automatic once GIS is approved',
+          link: null
+        });
+        totalMin += 49.30; totalMax += 49.30;
+      }
+
+      // ---- SAFER (BC renters) ----
+      if (province === 'BC' && age >= 60 && housing === 'rent') {
+        const saferThreshold = marital === 'couple' ? 45480 : 37240;
+        const saferEligible = income === null || income < saferThreshold;
+        if (saferEligible) {
+          programs.push({
+            name: 'SAFER — Shelter Aid For Elderly Renters',
+            type: 'provincial',
+            status: income === null ? 'possible' : 'eligible',
+            amount: 'up to $771/mo housing subsidy',
+            desc: 'A BC provincial subsidy that reduces how much of your income goes toward rent. Available to BC renters 60+ with low-to-moderate income. The amount depends on your rent and income.',
+            action: 'Apply through BC Housing',
+            link: 'https://www.bchousing.org/housing-assistance/rental-housing-subsidy-programs/safer'
+          });
+          if (income !== null && income < saferThreshold) {
+            totalMin += 150; totalMax += 771;
+          }
+          nextSteps.push({ title: 'Apply for SAFER', desc: 'Contact BC Housing at 604-433-2218 or 1-800-257-7756 to apply for the SAFER rent subsidy.', priority: 3 });
+        }
+      }
+
+      // ---- BC Property Tax Deferment ----
+      if (province === 'BC' && age >= 55 && housing === 'own') {
+        programs.push({
+          name: 'BC Property Tax Deferment',
+          type: 'provincial',
+          status: 'eligible',
+          amount: 'Defer property taxes at 0.7% interest',
+          desc: 'BC homeowners 55+ can defer property taxes until they sell or transfer their home. Interest is charged at 0.7% (2024 rate) — much less than borrowing elsewhere. Preserves cash flow.',
+          action: 'Apply through the Province of BC',
+          link: 'https://www2.gov.bc.ca/gov/content/taxes/property-taxes/annual-property-tax/defer-taxes'
+        });
+        nextSteps.push({ title: 'Consider property tax deferment', desc: 'If cash flow is tight, BC\'s property tax deferment lets you delay paying taxes until you sell your home.', priority: 4 });
+      }
+
+      // ---- BC Seniors Home Renovation Tax Credit ----
+      if (province === 'BC' && age >= 65) {
+        programs.push({
+          name: 'BC Seniors Home Renovation Tax Credit',
+          type: 'provincial',
+          status: 'eligible',
+          amount: 'up to $1,000/yr tax credit',
+          desc: 'A 10% non-refundable tax credit on up to $10,000 of eligible home renovations that help you stay in your home — grab bars, ramps, walk-in tub, stair lift, and more.',
+          action: 'Claim on your BC tax return (Schedule BC(S12))',
+          link: 'https://www2.gov.bc.ca/gov/content/taxes/income-taxes/personal/credits/seniors-home-renovation'
+        });
+      }
+
+      // ---- DTC (Disability Tax Credit) ----
+      if (disability === 'yes') {
+        programs.push({
+          name: 'Disability Tax Credit (DTC)',
+          type: 'federal',
+          status: 'possible',
+          amount: '$1,521–$2,616/yr in tax savings',
+          desc: 'A federal non-refundable tax credit for people with significant, long-term physical or mental impairments. Requires a medical professional to complete Form T2201. Can be claimed retroactively up to 10 years.',
+          action: 'Download CRA Form T2201',
+          link: 'https://www.canada.ca/en/revenue-agency/services/forms-publications/forms/t2201.html'
+        });
+        nextSteps.push({ title: 'Apply for the Disability Tax Credit', desc: 'Ask your doctor to complete Form T2201 from CRA. Submit it — CRA will tell you if you\'re approved. Can be backdated up to 10 years.', priority: 1 });
+      }
+
+      // ---- CDB (Canada Disability Benefit) ----
+      if (disability === 'yes' && age >= 18 && age < 65) {
+        programs.push({
+          name: 'Canada Disability Benefit (CDB)',
+          type: 'federal',
+          status: 'possible',
+          amount: 'up to $200/mo',
+          desc: 'A new monthly federal benefit (launched July 2025) for working-age Canadians with disabilities. You must first have the Disability Tax Credit approved. BC will not claw this back from provincial assistance.',
+          action: 'Requires DTC approval first',
+          link: 'https://www.canada.ca/en/employment-social-development/programs/canada-disability-benefit.html'
+        });
+      }
+
+      // ---- BC PWD ----
+      if (disability === 'yes' && province === 'BC' && age >= 18 && age < 65) {
+        programs.push({
+          name: 'BC Persons with Disabilities (PWD)',
+          type: 'provincial',
+          status: 'possible',
+          amount: '$1,483.50–$1,728.50/mo',
+          desc: 'A higher tier of BC income assistance for people with significant, long-term disabilities. Includes extended health benefits and a BC Transit bus pass. Requires a medical assessment by your doctor.',
+          action: 'Contact your Employment Assistance Worker',
+          link: 'https://www2.gov.bc.ca/gov/content/family-social-supports/income-assistance/applying-for-income-assistance/pwd'
+        });
+        nextSteps.push({ title: 'Apply for BC PWD', desc: 'Contact BC\'s Employment Assistance line at 1-866-866-0800. Your doctor will need to complete a Physician Report and a Self-Report form.', priority: 2 });
+      }
+
+      // ---- CPP Disability ----
+      if (disability === 'yes' && age < 65 && (cpp === 'yes' || cpp === 'unsure')) {
+        programs.push({
+          name: 'CPP Disability Benefit',
+          type: 'federal',
+          status: cpp === 'yes' ? 'possible' : 'possible',
+          amount: 'avg $1,133/mo — max $1,673/mo',
+          desc: 'If you\'re under 65, have contributed to CPP, and your disability prevents you from working regularly, you may qualify. It converts to regular CPP at 65 automatically.',
+          action: 'Apply through My Service Canada Account',
+          link: 'https://www.canada.ca/en/services/benefits/publicpensions/cpp/cpp-disability-benefit/apply.html'
+        });
+      }
+
+      // ---- RDSP ----
+      if (disability === 'yes' && age < 60) {
+        programs.push({
+          name: 'Registered Disability Savings Plan (RDSP)',
+          type: 'federal',
+          status: 'possible',
+          amount: 'up to $3,500/yr in government grants',
+          desc: 'A savings plan where the government matches your contributions with grants (up to $3,500/yr) and bonds (up to $1,000/yr for low income). Requires DTC approval. Savings grow tax-free.',
+          action: 'Requires DTC approval — open at any major bank',
+          link: 'https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/registered-disability-savings-plan-rdsp.html'
+        });
+      }
+
+      // Default next step
+      nextSteps.push({ title: 'Check MyServiceCanada account', desc: 'Create or log in to your My Service Canada Account to see your OAS, CPP, and GIS status in one place. Call 1-800-277-9914 if you need help.', priority: 5 });
+
+      // Sort next steps
+      nextSteps.sort((a, b) => a.priority - b.priority);
+
+      // Render programs
+      const list = document.getElementById('resultsList');
+      list.innerHTML = '';
+
+      const eligible = programs.filter(p => p.status === 'eligible');
+      const possible = programs.filter(p => p.status === 'possible');
+      const other = programs.filter(p => p.status !== 'eligible' && p.status !== 'possible');
+
+      if (eligible.length) {
+        const lbl = document.createElement('p');
+        lbl.className = 'section-title';
+        lbl.textContent = 'You likely qualify';
+        list.appendChild(lbl);
+        eligible.forEach(p => list.appendChild(renderProgram(p)));
+      }
+
+      if (possible.length) {
+        const lbl = document.createElement('p');
+        lbl.className = 'section-title';
+        lbl.style.marginTop = '32px';
+        lbl.textContent = 'You may qualify — check these too';
+        list.appendChild(lbl);
+        possible.forEach(p => list.appendChild(renderProgram(p)));
+      }
+
+      // Total bar
+      if (totalMin > 0 || totalMax > 0) {
+        const bar = document.getElementById('totalBar');
+        bar.style.display = '';
+        const avg = Math.round((totalMin + totalMax) / 2);
+        document.getElementById('totalAmount').innerHTML = '$' + avg.toLocaleString() + ' <span>/mo</span>';
+        document.getElementById('totalNote').textContent = 'Estimated based on your answers. Actual amounts depend on your full income, contribution history, and residency.';
+      }
+
+      // Next steps
+      const stepsList = document.getElementById('nextStepsList');
+      stepsList.innerHTML = '';
+      nextSteps.slice(0, 5).forEach((s, i) => {
+        const card = document.createElement('div');
+        card.className = 'program-card';
+        card.innerHTML = `
+          <div class="program-header">
+            <p class="program-name">${i + 1}. ${s.title}</p>
+          </div>
+          <p class="program-desc">${s.desc}</p>
+        `;
+        stepsList.appendChild(card);
+      });
+    }
+
+    function renderProgram(p) {
+      const card = document.createElement('div');
+      card.className = 'program-card ' + p.status;
+
+      const badgeClass = p.status === 'eligible' ? 'badge-eligible' : p.status === 'possible' ? 'badge-possible' : 'badge-no';
+      const badgeText = p.status === 'eligible' ? 'Likely eligible' : p.status === 'possible' ? 'Check eligibility' : 'Not eligible';
+      const amountClass = p.status === 'possible' ? 'amber' : '';
+      const typeLabel = p.type === 'federal' ? 'Federal' : 'BC Provincial';
+
+      let actionHtml = '';
+      if (p.link) {
+        actionHtml = `<a class="program-action" href="${p.link}" target="_blank" rel="noopener noreferrer">How to apply &rarr;</a>`;
+      } else if (p.action) {
+        actionHtml = `<span class="program-action" style="cursor:default; color: var(--muted)">${p.action}</span>`;
+      }
+
+      card.innerHTML = `
+        <div class="program-header">
+          <p class="program-name">${p.name}</p>
+          <span class="program-badge ${badgeClass}">${badgeText}</span>
+        </div>
+        <p class="program-amount ${amountClass}">${p.amount}</p>
+        <p class="program-desc">${p.desc}</p>
+        ${actionHtml}
+      `;
+      return card;
+    }
+  </script>
+
+</body>
+</html>
