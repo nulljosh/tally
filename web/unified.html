@@ -880,7 +880,7 @@
 
       } catch (err) {
         console.error('Error loading data:', err);
-        showWaitingForData();
+        showNoData('Data unavailable — try refreshing.');
         isLoadingData = false;
       }
     }

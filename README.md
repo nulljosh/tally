@@ -3,7 +3,7 @@
 Track BC Self-Serve benefits with a secure login, per-user cache, and fast dashboard reads.
 
 **Live:** https://tally-production.vercel.app
-**Version:** 1.4.0
+**Version:** 1.4.1
 
 ## What It Does
 
@@ -122,6 +122,15 @@ tally/
 ```
 
 ## Changelog
+
+### v1.4.1 — 2026-02-19
+- Security: session fingerprinting (UA hash) — detects token theft
+- Security: input validation on `/api/login` — reject malformed credentials before Puppeteer
+- Add: styled 404 handler matching BC gov blue design
+- Add: `Cache-Control: private, max-age=300` on `/api/info`
+- Fix: dashboard error boundary shows "data unavailable" instead of loading spinner on network failure
+- Fix: screener nav green gradient removed (now flat navy `rgba(12,18,32,0.95)`)
+- Bump version 1.4.0 → 1.4.1
 
 ### v1.4.0 — 2026-02-19
 - Add benefits screener at `/screen` (public, no auth) — retirement + disability programs

@@ -163,6 +163,14 @@ app.use((req, res, next) => {
 // Auth middleware
 const requireAuth = (req, res, next) => {
   if (req.session.authenticated) {
+    // Session fingerprint check — detect token theft
+    if (req.session.uaHash) {
+      const currentUaHash = crypto.createHash('sha256').update(req.headers['user-agent'] || '').digest('hex');
+      if (currentUaHash !== req.session.uaHash) {
+        req.session.destroy();
+        return res.status(401).json({ error: 'Session invalid' });
+      }
+    }
     next();
   } else {
     res.status(401).sendFile(path.join(__dirname, '../web/login.html'));
@@ -173,6 +181,16 @@ const requireAuth = (req, res, next) => {
 app.post('/api/login', loginLimiter, async (req, res) => {
   let { username, password, rememberMe } = req.body;
   let usedLocalEnvFallback = false;
+
+  // Input validation
+  if (username && (typeof username !== 'string' || username.length > 200)) {
+    return res.status(400).json({ success: false, error: 'Invalid credentials' });
+  }
+  if (password && (typeof password !== 'string' || password.length > 200)) {
+    return res.status(400).json({ success: false, error: 'Invalid credentials' });
+  }
+  if (username) username = username.trim();
+  if (password) password = password.trim();
 
   // Local-only convenience: allow empty login to use .env credentials
   if ((!username || !password) && !process.env.VERCEL) {
@@ -214,6 +232,7 @@ app.post('/api/login', loginLimiter, async (req, res) => {
     const userId = crypto.createHash('sha256').update(username).digest('hex').slice(0, 16);
     req.session.userId = userId;
     req.session.lastActivity = Date.now();
+    req.session.uaHash = crypto.createHash('sha256').update(req.headers['user-agent'] || '').digest('hex');
 
     // If "Remember Me" checked, extend session to 30 days
     if (rememberMe) {
@@ -339,6 +358,7 @@ app.get('/api/info', requireAuth, async (req, res) => {
     }
     if (activeBenefits.length === 0) activeBenefits.push('Income Assistance');
 
+    res.set('Cache-Control', 'private, max-age=300');
     res.json({
       nextPayment: {
         amount: nextAmount || 'Unknown',
@@ -371,6 +391,7 @@ app.get('/', async (req, res) => {
       req.session.bceidPassword = encrypt(password);
       req.session.userId = crypto.createHash('sha256').update(username).digest('hex').slice(0, 16);
       req.session.lastActivity = Date.now();
+      req.session.uaHash = crypto.createHash('sha256').update(req.headers['user-agent'] || '').digest('hex');
       console.log('[AUTO-LOGIN] Local dev: authenticated with .env credentials');
       return req.session.save(() => res.redirect('/app'));
     }
@@ -906,6 +927,34 @@ app.get('/api/check', requireAuth, async (req, res) => {
 
     res.status(500).json(errorResult);
   }
+});
+
+// 404 handler — must be last
+app.use((req, res) => {
+  res.status(404).send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>404 — Tally</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0c1220; color: #e8e4da; font-family: -apple-system, BlinkMacSystemFont, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .wrap { text-align: center; }
+    h1 { font-size: 5rem; color: #4e9cd7; font-weight: 700; letter-spacing: -0.04em; }
+    p { color: #8a9e90; margin: 1rem 0 2rem; font-size: 1rem; }
+    a { display: inline-block; padding: 0.6rem 1.6rem; background: #1a5a96; color: #e8e4da; text-decoration: none; border-radius: 100px; font-size: 0.9rem; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s; }
+    a:hover { background: #2472b2; transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>404</h1>
+    <p>Page not found.</p>
+    <a href="/">Go home</a>
+  </div>
+</body>
+</html>`);
 });
 
 // Vercel: export the Express app as a serverless function

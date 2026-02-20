@@ -1,6 +1,6 @@
 {
   "name": "tally",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Tally - BC Self-Serve Portal Scraper - Automated scraping of notifications, messages, payment info, and service requests",
   "main": "src/scraper.js",
   "scripts": {
