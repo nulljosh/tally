@@ -11,19 +11,18 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --green: #1a5c3a;
-      --green-mid: #2d7a52;
-      --green-light: #3d9e6a;
+      --blue: #1a5a96;
+      --blue-mid: #2472b2;
+      --blue-light: #4e9cd7;
       --cream: #f5f0e8;
       --cream-dark: #e8e0d0;
       --amber: #d4a843;
-      --bg: #0c1a12;
-      --bg-2: #111f16;
-      --bg-3: #162b1e;
+      --bg: #0c1220;
+      --bg-2: #111828;
+      --bg-3: #162036;
       --text: #e8e4da;
-      --muted: #8a9e90;
+      --muted: #8a9eb8;
       --red: #e05252;
-      --blue: #4a9eca;
     }
 
     html { scroll-behavior: smooth; }
@@ -120,7 +119,7 @@
 
     .progress-fill {
       height: 100%;
-      background: var(--green-light);
+      background: var(--blue-light);
       border-radius: 100px;
       transition: width 0.4s ease;
     }
@@ -147,7 +146,7 @@
       font-weight: 500;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: var(--green-light);
+      color: var(--blue-light);
       margin-bottom: 18px;
     }
 
@@ -204,13 +203,13 @@
     }
 
     .opt:hover {
-      background: rgba(45,122,82,0.1);
-      border-color: rgba(61,158,106,0.3);
+      background: rgba(26,90,150,0.1);
+      border-color: rgba(78,156,215,0.3);
     }
 
     .opt.selected {
-      background: rgba(45,122,82,0.18);
-      border-color: var(--green-mid);
+      background: rgba(26,90,150,0.18);
+      border-color: var(--blue-mid);
     }
 
     .opt-dot {
@@ -223,8 +222,8 @@
     }
 
     .opt.selected .opt-dot {
-      background: var(--green-light);
-      border-color: var(--green-light);
+      background: var(--blue-light);
+      border-color: var(--blue-light);
     }
 
     /* CHECKBOX OPTIONS (multi-select) */
@@ -241,8 +240,8 @@
     }
 
     .opt.selected .opt-check {
-      background: var(--green-light);
-      border-color: var(--green-light);
+      background: var(--blue-light);
+      border-color: var(--blue-light);
     }
 
     .opt.selected .opt-check::after {
@@ -283,7 +282,7 @@
     }
 
     .income-input:focus {
-      border-color: var(--green-light);
+      border-color: var(--blue-light);
     }
 
     .income-input::placeholder { color: rgba(232,228,218,0.2); }
@@ -372,7 +371,7 @@
       border: 1px solid rgba(255,255,255,0.08);
     }
 
-    .chip-green { color: var(--green-light); border-color: rgba(61,158,106,0.3); background: rgba(45,122,82,0.1); }
+    .chip-green { color: var(--blue-light); border-color: rgba(78,156,215,0.3); background: rgba(26,90,150,0.1); }
     .chip-amber { color: var(--amber); border-color: rgba(212,168,67,0.3); background: rgba(212,168,67,0.08); }
     .chip-muted { color: var(--muted); }
 
@@ -391,7 +390,7 @@
     }
 
     .program-card.eligible {
-      border-color: rgba(61,158,106,0.25);
+      border-color: rgba(78,156,215,0.25);
       background: rgba(45,122,82,0.06);
     }
 
@@ -431,14 +430,14 @@
       margin-top: 2px;
     }
 
-    .badge-eligible { background: rgba(61,158,106,0.2); color: var(--green-light); }
+    .badge-eligible { background: rgba(78,156,215,0.2); color: var(--blue-light); }
     .badge-possible { background: rgba(212,168,67,0.15); color: var(--amber); }
     .badge-no { background: rgba(255,255,255,0.05); color: var(--muted); }
 
     .program-amount {
       font-size: 1.5rem;
       font-weight: 500;
-      color: var(--green-light);
+      color: var(--blue-light);
       font-family: 'Fraunces', serif;
       letter-spacing: -0.02em;
       margin-bottom: 8px;
@@ -458,7 +457,7 @@
       align-items: center;
       gap: 6px;
       font-size: 0.85rem;
-      color: var(--green-light);
+      color: var(--blue-light);
       text-decoration: none;
       transition: color 0.2s;
       cursor: pointer;
@@ -475,7 +474,7 @@
       font-weight: 500;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--green-light);
+      color: var(--blue-light);
       margin-bottom: 16px;
     }
 
@@ -489,8 +488,8 @@
     .total-bar {
       padding: 24px 28px;
       border-radius: 14px;
-      border: 1px solid rgba(61,158,106,0.3);
-      background: rgba(45,122,82,0.1);
+      border: 1px solid rgba(78,156,215,0.3);
+      background: rgba(26,90,150,0.1);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -547,7 +546,7 @@
 
     /* Focus styles for keyboard nav */
     .opt:focus-visible, .btn-next:focus-visible, .btn-back:focus-visible {
-      outline: 2px solid var(--green-light);
+      outline: 2px solid var(--blue-light);
       outline-offset: 3px;
     }
 

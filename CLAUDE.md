@@ -1,5 +1,10 @@
 # Tally - Claude Development Guide
 
+## Design Rules
+- **NO EMOJIS** — strictly none anywhere in UI or code
+- **Color palette**: BC government blue (#1a5a96 primary, #2472b2 mid, #4e9cd7 light), navy bg (#0c1220), amber accents (#d4a843). No green.
+- **Animations**: Spring hover on all buttons/cards — `transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)`
+
 ## Project Overview
 Multi-user BC Self-Serve scraper with DTC Navigator. Each user logs in with their own BC Self-Serve credentials to view their benefits data.
 
