@@ -904,12 +904,10 @@
           const paydayDate = nextPayday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
           if (totalAmount) {
-            html += `<div style="padding: 16px; background: rgba(0, 122, 255, 0.08); border-radius: 10px; border: 1px solid rgba(0, 122, 255, 0.2); margin-bottom: 12px;">
-              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
-                <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-secondary);">Total Payment</div>
-                <div style="font-size: 12px; font-weight: 500; color: var(--text-secondary);">Next: ${paydayDate} (${paydayLabel})</div>
-              </div>
-              <div style="font-size: 28px; font-weight: 700; color: var(--accent);">${totalAmount}</div>
+            html += `<div style="padding: 48px 32px; background: rgba(0, 122, 255, 0.06); border-radius: 16px; border: 1px solid rgba(0, 122, 255, 0.15); margin-bottom: 24px; text-align: center;">
+              <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-secondary); margin-bottom: 12px;">Total Payment</div>
+              <div style="font-size: 56px; font-weight: 700; color: var(--accent); letter-spacing: -2px; line-height: 1;">${totalAmount}</div>
+              <div style="font-size: 14px; font-weight: 500; color: var(--text-secondary); margin-top: 16px;">Next: ${paydayDate} (${paydayLabel})</div>
             </div>`;
           }
 
@@ -918,11 +916,11 @@
           if (shelter) breakdown.push({ label: 'Shelter (Rent)', value: shelter });
 
           if (breakdown.length) {
-            html += `<div style="display: grid; grid-template-columns: repeat(${breakdown.length}, 1fr); gap: 8px; margin-bottom: 12px;">`;
+            html += `<div style="display: grid; grid-template-columns: repeat(${breakdown.length}, 1fr); gap: 12px; margin-bottom: 24px;">`;
             breakdown.forEach(item => {
-              html += `<div style="padding: 12px; background: var(--bg-primary); border-radius: 8px; border: 1px solid var(--glass-border);">
-                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); margin-bottom: 4px;">${item.label}</div>
-                <div style="font-size: 18px; font-weight: 600; color: var(--text-primary);">${item.value}</div>
+              html += `<div style="padding: 20px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--glass-border); text-align: center;">
+                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-secondary); margin-bottom: 8px;">${item.label}</div>
+                <div style="font-size: 24px; font-weight: 600; color: var(--text-primary);">${item.value}</div>
               </div>`;
             });
             html += `</div>`;
@@ -935,11 +933,11 @@
           if (distribution) details.push({ label: 'Distribution', value: titleCase(distribution) });
 
           if (details.length) {
-            html += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; padding: 12px; background: var(--bg-primary); border-radius: 8px; border: 1px solid var(--glass-border);">`;
+            html += `<div style="display: grid; grid-template-columns: repeat(${details.length}, 1fr); gap: 12px;">`;
             details.forEach(item => {
-              html += `<div>
-                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary);">${item.label}</div>
-                <div style="font-size: 14px; font-weight: 500; color: var(--text-primary);">${item.value}</div>
+              html += `<div style="padding: 16px; background: var(--card-bg); border-radius: 10px; border: 1px solid var(--glass-border); text-align: center;">
+                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); margin-bottom: 4px;">${item.label}</div>
+                <div style="font-size: 15px; font-weight: 500; color: var(--text-primary);">${item.value}</div>
               </div>`;
             });
             html += `</div>`;
@@ -1080,24 +1078,16 @@
 
     async function runCheck(silent = false) {
       const btn = document.getElementById('check-btn');
-      if (!silent) {
-        btn.disabled = true;
-        btn.textContent = 'Checking...';
-      }
 
       try {
         const response = await fetch('/api/check', { credentials: 'include' });
         const result = await response.json();
 
         if (response.ok) {
-          // Success - reload the data
           await loadData();
-          if (!silent) {
+          if (btn && !silent) {
             btn.textContent = 'Check Complete!';
-            setTimeout(() => {
-              btn.textContent = 'Check Now';
-              btn.disabled = false;
-            }, 2000);
+            setTimeout(() => { btn.textContent = 'Check Now'; btn.disabled = false; }, 2000);
           }
         } else {
           throw new Error(result.error || 'Check failed');
@@ -1105,12 +1095,9 @@
       } catch (err) {
         console.error('Error running check:', err);
         showNoData(err.message || 'Check failed');
-        if (!silent) {
+        if (btn && !silent) {
           btn.textContent = 'Error - Try Again';
-          setTimeout(() => {
-            btn.textContent = 'Check Now';
-            btn.disabled = false;
-          }, 2000);
+          setTimeout(() => { btn.textContent = 'Check Now'; btn.disabled = false; }, 2000);
         }
       }
     }
