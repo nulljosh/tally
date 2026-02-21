@@ -478,11 +478,11 @@
 <body>
   <nav>
     <div class="logo" id="nav-username">tally</div>
-    <div class="tabs">
+    <div class="tabs dev-only">
       <div class="tab active" onclick="switchTab('dashboard')">Dashboard</div>
       <div class="tab" onclick="switchTab('dtc')">DTC Navigator</div>
-      <div class="tab dev-only" onclick="switchTab('bruteforce')">Security Testing</div>
-      <div class="tab dev-only" onclick="switchTab('tools')">Tools</div>
+      <div class="tab" onclick="switchTab('bruteforce')">Security Testing</div>
+      <div class="tab" onclick="switchTab('tools')">Tools</div>
     </div>
     <button class="nav-dropdown-trigger" onclick="logout()">Logout</button>
     <div class="theme-toggle" onclick="toggleTheme()"></div>
@@ -719,6 +719,14 @@
       </div>
     </div>
   </div>
+
+  <footer style="text-align: center; padding: 24px 32px; font-size: 12px; color: var(--text-secondary); border-top: 1px solid var(--glass-border);">
+    MIT License 2026 Joshua Trommel
+    <span style="margin: 0 8px;">|</span>
+    <a href="https://github.com/nulljosh/tally" target="_blank" style="color: var(--text-secondary); text-decoration: none;">GitHub</a>
+    <span style="margin: 0 8px;">|</span>
+    <a href="https://heyitsmejosh.com" target="_blank" style="color: var(--text-secondary); text-decoration: none;">heyitsmejosh.com</a>
+  </footer>
 
   <script>
     let attackId = null;

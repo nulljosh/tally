@@ -109,12 +109,12 @@ UPLOAD_SECRET=random_string
 - Security fix: rotated UPLOAD_SECRET after accidental exposure
 - OpenClaw can now query "how much am I getting?" and receive payment data
 
-### 2026-02-21 — v1.5.0 (Dashboard overhaul)
-- Payment hero: 56px amount, next payday (25th each month), support/shelter grid, details grid
-- Parsed pipe-delimited tableData into structured layout, title-cased ALL CAPS, skip empty fields
-- Messages/notifications moved to nav dropdowns (removed card tiles)
-- Removed stat grid, Check Now/Refresh buttons, Payment Information card wrapper
-- Hidden Security Testing and Tools tabs (dev-only CSS class)
+### 2026-02-21 — v1.5.0 (Minimal dashboard)
+- Single large income number centered in viewport (clamp 64-120px)
+- Next payment date with weekday + countdown (25th each month)
+- Messages/notifications as dropdown menus below nav bar
+- Parsed pipe-delimited tableData, title-cased ALL CAPS, skip empty fields
+- Hidden Security Testing/Tools tabs, removed stat grid/card wrappers/buttons
 - Cache-Control: no-cache for HTML files
 
 ### Key Learnings

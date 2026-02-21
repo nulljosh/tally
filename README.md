@@ -125,16 +125,13 @@ tally/
 ## Changelog
 
 ### v1.5.0 — 2026-02-21
-- Dashboard overhaul: payment hero with 56px amount, next payday countdown (25th each month)
-- Structured payment card: parsed pipe-delimited data into support/shelter breakdown + details grid
-- Title-case all-caps values (TROMMEL, JOSHUA -> Trommel, Joshua; CHEQUE -> Cheque)
-- Skip empty-value fields (Name of Bank:, Bank Account Number:, etc.)
-- Messages and notifications moved to nav dropdown menus
-- Removed stat grid, Check Now/Refresh buttons, Payment Information card wrapper
+- Minimal dashboard: single large income number centered in viewport (clamp 64-120px)
+- Next payment date with day-of-week countdown (25th each month)
+- Messages and notifications as dropdown menus below nav
+- Parsed pipe-delimited payment data, title-cased ALL CAPS, skip empty fields
 - Hidden Security Testing and Tools tabs (dev-only)
-- Message dates parsed from "2026 / JAN / 21" into "Jan 21, 2026" subtitle
-- Cache-Control: no-cache for HTML files to prevent stale browser cache
-- Reverted dead payment code from index.html (dashboard serves unified.html)
+- Cache-Control: no-cache for HTML files
+- Removed stat grid, card wrappers, Check Now/Refresh buttons
 
 ### v1.4.2 — 2026-02-21
 - Add monthly productivity check-in panel on `/app` with 1-tap presets (Strong/Steady/Recovering), 1-5 Mood/Focus/Energy selectors, and optional reflection note
