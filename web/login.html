@@ -233,6 +233,28 @@
     const errorMsg = document.getElementById('error-msg');
     const successMsg = document.getElementById('success-msg');
 
+    // Auto-login on localhost — backend uses .env credentials
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span>Signing in...';
+      fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: '', password: '' }),
+      }).then(r => r.json()).then(data => {
+        if (data.success) {
+          successMsg.style.display = 'block';
+          setTimeout(() => { window.location.href = '/app'; }, 400);
+        } else {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Sign In';
+        }
+      }).catch(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Sign In';
+      });
+    }
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
