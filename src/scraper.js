@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer-core');
 const fs = require('fs').promises;
 const path = require('path');
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 
 const IS_VERCEL = !!process.env.VERCEL;
 const DATA_DIR = IS_VERCEL ? '/tmp' : path.join(__dirname, '../data');
