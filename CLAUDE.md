@@ -116,6 +116,13 @@ UPLOAD_SECRET=random_string
 - `@sparticuz/chromium` is the correct way to run Puppeteer on Vercel — detect with `!!process.env.VERCEL`
 - Git mmap EDEADLK on macOS: don't waste time fixing it, just push via GitHub API and re-clone
 
+## Token Efficiency
+- Don't re-read files you just wrote/edited unless a write failed or something external changed.
+- Don't re-run deterministic commands just to "double-check."
+- Don't paste large code/file dumps unless asked; summarize diffs + outcomes.
+- Batch related reads/commands; avoid redundant tool calls.
+- Keep updates tight: what changed, why, what's left.
+
 ## Naming
 Project name: **tally**
 - **check** = American spelling (verify/review)
