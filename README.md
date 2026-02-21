@@ -3,7 +3,7 @@
 Track BC Self-Serve benefits with a secure login, per-user cache, and fast dashboard reads.
 
 **Live:** https://tally-production.vercel.app
-**Version:** 1.4.1
+**Version:** 1.4.2
 
 ## What It Does
 
@@ -122,6 +122,13 @@ tally/
 ```
 
 ## Changelog
+
+### v1.4.2 — 2026-02-21
+- Add monthly productivity check-in panel on `/app` with 1-tap presets (Strong/Steady/Recovering), 1-5 Mood/Focus/Energy selectors, and optional reflection note
+- Add friction reducers: autosaved monthly draft, `Cmd/Ctrl + Enter` save shortcut, and "Reuse Last Month" copy action
+- Add month-over-month delta visualization for Mood/Focus/Energy with clear positive/negative/flat badges and average trend summary
+- Improve responsive behavior and style consistency for the new check-in + delta card (desktop split layout, mobile single-column)
+- Add unit tests for monthly check-in logic and delta calculations in `tools/test-productivity.js`
 
 ### v1.4.1 — 2026-02-19
 - Security: session fingerprinting (UA hash) — detects token theft

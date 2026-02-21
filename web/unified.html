@@ -414,6 +414,173 @@
     .status-success { background: var(--success); color: white; }
     .status-error { background: var(--error); color: white; }
     .status-warning { background: var(--warning); color: white; }
+
+    /* Monthly check-in */
+    .checkin-wrap {
+      display: grid;
+      grid-template-columns: minmax(320px, 1.3fr) minmax(280px, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 920px) {
+      .checkin-wrap {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .checkin-row {
+      margin-bottom: 14px;
+    }
+
+    .checkin-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .rating-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .rating-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      min-width: 56px;
+    }
+
+    .rating-buttons {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(34px, 1fr));
+      gap: 8px;
+      width: 100%;
+    }
+
+    .rating-btn {
+      border: 1px solid var(--glass-border);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      border-radius: 8px;
+      padding: 7px 0;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .rating-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .rating-btn.selected {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .preset-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .preset-btn {
+      border: 1px solid var(--glass-border);
+      background: transparent;
+      color: var(--text-primary);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .preset-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .checkin-note {
+      min-height: 84px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .checkin-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .checkin-status {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .delta-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .delta-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      background: var(--glass-bg);
+      gap: 10px;
+    }
+
+    .delta-metric {
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-transform: capitalize;
+      margin-bottom: 3px;
+    }
+
+    .delta-score {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .delta-badge {
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      min-width: 58px;
+      text-align: center;
+    }
+
+    .delta-up {
+      color: #0c6f39;
+      background: rgba(52, 199, 89, 0.16);
+    }
+
+    .delta-down {
+      color: #b42318;
+      background: rgba(255, 69, 58, 0.16);
+    }
+
+    .delta-flat {
+      color: var(--text-secondary);
+      background: var(--bg-primary);
+    }
+
+    .delta-help {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
   </style>
 </head>
 <body>
@@ -449,6 +616,56 @@
         <div class="stat">
           <div class="stat-label">Requests</div>
           <div class="stat-value" id="request-count">-</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Monthly Productivity Check-in</div>
+          <span class="badge" id="checkin-month-label">This month</span>
+        </div>
+        <div class="checkin-wrap">
+          <div>
+            <div class="preset-row">
+              <button class="preset-btn" type="button" onclick="applyCheckinPreset('strong')">Strong month</button>
+              <button class="preset-btn" type="button" onclick="applyCheckinPreset('steady')">Steady month</button>
+              <button class="preset-btn" type="button" onclick="applyCheckinPreset('recovering')">Recovering month</button>
+            </div>
+
+            <div class="checkin-row">
+              <div class="rating-line">
+                <span class="rating-label">Mood</span>
+                <div class="rating-buttons" id="rating-mood"></div>
+              </div>
+            </div>
+            <div class="checkin-row">
+              <div class="rating-line">
+                <span class="rating-label">Focus</span>
+                <div class="rating-buttons" id="rating-focus"></div>
+              </div>
+            </div>
+            <div class="checkin-row">
+              <div class="rating-line">
+                <span class="rating-label">Energy</span>
+                <div class="rating-buttons" id="rating-energy"></div>
+              </div>
+            </div>
+
+            <label for="checkin-note">One-line reflection (optional)</label>
+            <textarea id="checkin-note" class="checkin-note" placeholder="What changed this month?"></textarea>
+
+            <div class="checkin-actions">
+              <button class="btn" type="button" onclick="saveMonthlyCheckin()">Save Check-in</button>
+              <button class="btn btn-secondary btn-small" type="button" onclick="loadPreviousCheckinIntoForm()">Reuse Last Month</button>
+              <button class="btn btn-secondary btn-small" type="button" onclick="resetCheckinForm()">Clear</button>
+              <span class="checkin-status" id="checkin-status">Draft autosaves locally</span>
+            </div>
+          </div>
+
+          <div>
+            <div class="delta-grid" id="checkin-delta-grid"></div>
+            <div class="delta-help" id="checkin-delta-help">Save this month and last month to compare deltas.</div>
+          </div>
         </div>
       </div>
 
@@ -692,9 +909,16 @@
     </div>
   </div>
 
+  <script src="js/productivity.js"></script>
   <script>
     let attackId = null;
     let statusInterval = null;
+    const productivity = window.TallyProductivity;
+    const monthlyStorageKey = 'tally.monthlyCheckins.v1';
+    const monthlyDraftKey = 'tally.monthlyCheckinDraft.v1';
+    let monthlyCheckins = [];
+    let monthlyRatings = { mood: 0, focus: 0, energy: 0 };
+    const currentMonthKey = productivity.monthKeyFromDate(new Date());
 
     // Logout
     async function logout() {
@@ -1130,9 +1354,245 @@
       }
     }
 
+    function monthLabel(monthKey) {
+      const parts = monthKey.split('-');
+      if (parts.length !== 2) return 'This month';
+      const date = new Date(Number(parts[0]), Number(parts[1]) - 1, 1);
+      return date.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+    }
+
+    function setCheckinStatus(text, tone) {
+      const statusEl = document.getElementById('checkin-status');
+      statusEl.textContent = text;
+      if (tone === 'success') statusEl.style.color = 'var(--success)';
+      else if (tone === 'error') statusEl.style.color = 'var(--error)';
+      else statusEl.style.color = 'var(--text-secondary)';
+    }
+
+    function createRatingButtons(metric) {
+      const container = document.getElementById('rating-' + metric);
+      if (!container) return;
+      container.innerHTML = '';
+      for (let value = 1; value <= 5; value++) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'rating-btn';
+        button.textContent = String(value);
+        button.onclick = function () { setCheckinRating(metric, value); };
+        container.appendChild(button);
+      }
+      updateRatingButtons(metric);
+    }
+
+    function updateRatingButtons(metric) {
+      const container = document.getElementById('rating-' + metric);
+      if (!container) return;
+      const selected = productivity.normalizeRating(monthlyRatings[metric]);
+      Array.from(container.children).forEach(function (btn, index) {
+        btn.classList.toggle('selected', index + 1 === selected);
+      });
+    }
+
+    function setCheckinRating(metric, value) {
+      monthlyRatings[metric] = productivity.normalizeRating(value);
+      updateRatingButtons(metric);
+      saveCheckinDraft();
+    }
+
+    function applyCheckinPreset(preset) {
+      if (preset === 'strong') {
+        monthlyRatings = { mood: 5, focus: 4, energy: 4 };
+      } else if (preset === 'steady') {
+        monthlyRatings = { mood: 3, focus: 3, energy: 3 };
+      } else {
+        monthlyRatings = { mood: 2, focus: 2, energy: 3 };
+      }
+      ['mood', 'focus', 'energy'].forEach(updateRatingButtons);
+      saveCheckinDraft();
+      setCheckinStatus('Preset applied', 'neutral');
+    }
+
+    function saveCheckinDraft() {
+      const payload = {
+        monthKey: currentMonthKey,
+        ratings: monthlyRatings,
+        note: document.getElementById('checkin-note').value.trim()
+      };
+      localStorage.setItem(monthlyDraftKey, JSON.stringify(payload));
+    }
+
+    function loadCheckinDraft() {
+      const raw = localStorage.getItem(monthlyDraftKey);
+      if (!raw) return false;
+      try {
+        const draft = JSON.parse(raw);
+        if (!draft || draft.monthKey !== currentMonthKey) return false;
+        monthlyRatings = {
+          mood: productivity.normalizeRating(draft.ratings && draft.ratings.mood),
+          focus: productivity.normalizeRating(draft.ratings && draft.ratings.focus),
+          energy: productivity.normalizeRating(draft.ratings && draft.ratings.energy)
+        };
+        document.getElementById('checkin-note').value = String(draft.note || '');
+        ['mood', 'focus', 'energy'].forEach(updateRatingButtons);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function loadStoredCheckins() {
+      const raw = localStorage.getItem(monthlyStorageKey);
+      if (!raw) return [];
+      try {
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+        return parsed.map(productivity.sanitizeEntry);
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function persistCheckins() {
+      localStorage.setItem(monthlyStorageKey, JSON.stringify(monthlyCheckins));
+    }
+
+    function loadCurrentMonthIntoForm() {
+      const current = productivity.findByMonth(monthlyCheckins, currentMonthKey);
+      if (!current) return false;
+      monthlyRatings = {
+        mood: productivity.normalizeRating(current.ratings.mood),
+        focus: productivity.normalizeRating(current.ratings.focus),
+        energy: productivity.normalizeRating(current.ratings.energy)
+      };
+      document.getElementById('checkin-note').value = current.note || '';
+      ['mood', 'focus', 'energy'].forEach(updateRatingButtons);
+      setCheckinStatus('Loaded saved check-in for this month', 'neutral');
+      return true;
+    }
+
+    function resetCheckinForm() {
+      monthlyRatings = { mood: 0, focus: 0, energy: 0 };
+      document.getElementById('checkin-note').value = '';
+      ['mood', 'focus', 'energy'].forEach(updateRatingButtons);
+      saveCheckinDraft();
+      setCheckinStatus('Cleared draft', 'neutral');
+    }
+
+    function loadPreviousCheckinIntoForm() {
+      const current = productivity.findByMonth(monthlyCheckins, currentMonthKey);
+      const previous = current
+        ? productivity.findPrevious(monthlyCheckins, currentMonthKey)
+        : monthlyCheckins[0] || null;
+
+      if (!previous) {
+        setCheckinStatus('No previous check-in found yet', 'error');
+        return;
+      }
+
+      monthlyRatings = {
+        mood: productivity.normalizeRating(previous.ratings.mood),
+        focus: productivity.normalizeRating(previous.ratings.focus),
+        energy: productivity.normalizeRating(previous.ratings.energy)
+      };
+      document.getElementById('checkin-note').value = previous.note || '';
+      ['mood', 'focus', 'energy'].forEach(updateRatingButtons);
+      saveCheckinDraft();
+      setCheckinStatus('Copied values from ' + monthLabel(previous.monthKey), 'success');
+    }
+
+    function deltaClass(direction) {
+      if (direction === 'up') return 'delta-up';
+      if (direction === 'down') return 'delta-down';
+      return 'delta-flat';
+    }
+
+    function renderCheckinDelta() {
+      const grid = document.getElementById('checkin-delta-grid');
+      const help = document.getElementById('checkin-delta-help');
+      const current = productivity.findByMonth(monthlyCheckins, currentMonthKey);
+      if (!current) {
+        grid.innerHTML = '';
+        help.textContent = 'Save this month and last month to compare deltas.';
+        return;
+      }
+
+      const previous = productivity.findPrevious(monthlyCheckins, currentMonthKey);
+      const delta = productivity.calculateCheckinDelta(current, previous);
+
+      const metrics = ['mood', 'focus', 'energy'];
+      grid.innerHTML = metrics.map(function (metric) {
+        const currentScore = current.ratings[metric] || 0;
+        const item = delta.metrics[metric];
+        const label = item.hasBaseline ? item.formatted : 'n/a';
+        return `
+          <div class="delta-item">
+            <div>
+              <div class="delta-metric">${metric}</div>
+              <div class="delta-score">${currentScore}/5</div>
+            </div>
+            <div class="delta-badge ${deltaClass(item.direction)}">${label}</div>
+          </div>
+        `;
+      }).join('');
+
+      if (!previous) {
+        help.textContent = 'Saved for ' + monthLabel(current.monthKey) + '. Add one earlier month for MoM deltas.';
+      } else {
+        const avg = delta.average;
+        const trendText = avg.trend === 'up' ? 'up' : avg.trend === 'down' ? 'down' : 'flat';
+        help.textContent = 'MoM average is ' + avg.formatted + ' (' + trendText + ') vs ' + monthLabel(previous.monthKey) + '.';
+      }
+    }
+
+    function saveMonthlyCheckin() {
+      const note = document.getElementById('checkin-note').value.trim();
+      const metrics = ['mood', 'focus', 'energy'];
+      const missing = metrics.some(function (key) {
+        return !productivity.normalizeRating(monthlyRatings[key]);
+      });
+
+      if (missing) {
+        setCheckinStatus('Select Mood, Focus, and Energy before saving', 'error');
+        return;
+      }
+
+      monthlyCheckins = productivity.upsertCheckin(monthlyCheckins, {
+        monthKey: currentMonthKey,
+        ratings: monthlyRatings,
+        note: note,
+        savedAt: new Date().toISOString()
+      });
+      persistCheckins();
+      localStorage.removeItem(monthlyDraftKey);
+      renderCheckinDelta();
+      setCheckinStatus('Saved for ' + monthLabel(currentMonthKey), 'success');
+    }
+
+    function initMonthlyCheckin() {
+      document.getElementById('checkin-month-label').textContent = monthLabel(currentMonthKey);
+      ['mood', 'focus', 'energy'].forEach(createRatingButtons);
+      monthlyCheckins = loadStoredCheckins();
+
+      if (!loadCurrentMonthIntoForm()) {
+        const hasDraft = loadCheckinDraft();
+        if (hasDraft) setCheckinStatus('Draft restored for ' + monthLabel(currentMonthKey), 'neutral');
+      }
+
+      const noteInput = document.getElementById('checkin-note');
+      noteInput.addEventListener('input', saveCheckinDraft);
+      noteInput.addEventListener('keydown', function (event) {
+        if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+          saveMonthlyCheckin();
+        }
+      });
+
+      renderCheckinDelta();
+    }
+
     // Auto-load on page load
     loadCurrentUser();
     loadData();
+    initMonthlyCheckin();
     setInterval(loadData, 30000); // Auto-refresh every 30s
 
     // ==========================================

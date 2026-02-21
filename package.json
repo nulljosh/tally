@@ -1,11 +1,12 @@
 {
   "name": "tally",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Tally - BC Self-Serve Portal Scraper - Automated scraping of notifications, messages, payment info, and service requests",
   "main": "src/scraper.js",
   "scripts": {
     "check": "node src/scraper.js",
     "test": "node tools/test.js",
+    "test:productivity": "node tools/test-productivity.js",
     "test:scraper": "node src/scraper.js",
     "api": "node src/api.js",
     "dev": "nodemon src/api.js",
