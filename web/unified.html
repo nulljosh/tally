@@ -414,6 +414,29 @@
     .status-success { background: var(--success); color: white; }
     .status-error { background: var(--error); color: white; }
     .status-warning { background: var(--warning); color: white; }
+
+    /* Dev-only tabs: hidden in production */
+    .dev-only { display: none; }
+
+    /* Notification badge in nav */
+    .nav-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      padding: 4px 10px;
+      border-radius: 8px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      cursor: default;
+    }
+    .nav-badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--warning);
+    }
   </style>
 </head>
 <body>
@@ -422,9 +445,10 @@
     <div class="tabs">
       <div class="tab active" onclick="switchTab('dashboard')">Dashboard</div>
       <div class="tab" onclick="switchTab('dtc')">DTC Navigator</div>
-      <div class="tab" onclick="switchTab('bruteforce')">Security Testing</div>
-      <div class="tab" onclick="switchTab('tools')">Tools</div>
+      <div class="tab dev-only" onclick="switchTab('bruteforce')">Security Testing</div>
+      <div class="tab dev-only" onclick="switchTab('tools')">Tools</div>
     </div>
+    <span id="nav-notif-badge" class="nav-badge" style="display: none;"><span class="nav-badge-dot"></span><span id="nav-notif-text"></span></span>
     <button class="btn btn-secondary" onclick="logout()" style="font-size: 13px; padding: 6px 12px;">Logout</button>
     <div class="theme-toggle" onclick="toggleTheme()"></div>
   </nav>
@@ -442,7 +466,7 @@
           <div class="stat-label">Messages</div>
           <div class="stat-value" id="msg-count">-</div>
         </div>
-        <div class="stat">
+        <div class="stat" id="notif-stat">
           <div class="stat-label">Notifications</div>
           <div class="stat-value" id="notif-count">-</div>
         </div>
