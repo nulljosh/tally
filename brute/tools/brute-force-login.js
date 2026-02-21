@@ -17,6 +17,7 @@
 const http = require('http');
 const https = require('https');
 const fs = require('fs');
+const path = require('path');
 const { URL } = require('url');
 
 // Configuration
@@ -50,10 +51,23 @@ const stats = {
   totalPasswords: 0
 };
 
+// Resolve and constrain wordlist path to prevent traversal
+function resolveWordlistPath(file) {
+  const baseDir = path.resolve(__dirname, '../wordlists');
+  const candidate = path.resolve(__dirname, file);
+
+  if (!candidate.startsWith(baseDir + path.sep)) {
+    throw new Error(`Wordlist must be inside ${baseDir}`);
+  }
+
+  return candidate;
+}
+
 // Load wordlist
 function loadWordlist(file) {
   try {
-    const content = fs.readFileSync(file, 'utf8');
+    const safePath = resolveWordlistPath(file);
+    const content = fs.readFileSync(safePath, 'utf8');
     return content.split('\n').filter(line => line.trim().length > 0);
   } catch (err) {
     console.error(`[ERROR] Failed to load wordlist: ${err.message}`);

@@ -217,10 +217,11 @@ app.post('/api/attack/:id/stop', (req, res) => {
   res.json({ success: true });
 });
 
+const WORDLISTS_DIR = path.resolve(__dirname, '../wordlists');
+
 // Load wordlist
 app.get('/api/wordlists', (req, res) => {
-  const wordlistsDir = path.join(__dirname, '../wordlists');
-  const files = fs.readdirSync(wordlistsDir);
+  const files = fs.readdirSync(WORDLISTS_DIR);
 
   res.json(files.map(file => ({
     name: file,
@@ -230,7 +231,12 @@ app.get('/api/wordlists', (req, res) => {
 
 // Get wordlist content
 app.get('/api/wordlist/:filename', (req, res) => {
-  const wordlistPath = path.join(__dirname, '../wordlists', req.params.filename);
+  const filename = path.basename(req.params.filename || '');
+  const wordlistPath = path.resolve(WORDLISTS_DIR, filename);
+
+  if (!wordlistPath.startsWith(WORDLISTS_DIR + path.sep)) {
+    return res.status(400).json({ error: 'Invalid filename' });
+  }
 
   if (!fs.existsSync(wordlistPath)) {
     return res.status(404).json({ error: 'Wordlist not found' });

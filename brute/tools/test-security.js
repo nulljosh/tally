@@ -7,6 +7,7 @@
 const http = require('http');
 
 const BASE_URL = 'http://localhost:3000';
+const VALID_TEST_PASSWORD = process.env.TEST_VALID_PASSWORD || 'changeme-for-local-testing';
 const tests = [];
 let passed = 0;
 let failed = 0;
@@ -97,7 +98,7 @@ test('Accepts valid password', async () => {
   const res = await request('/api/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ password: 'hunter2' })
+    body: JSON.stringify({ password: VALID_TEST_PASSWORD })
   });
   if (res.status === 200) return;
   throw new Error(`Expected 200, got ${res.status}`);

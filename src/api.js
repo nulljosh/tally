@@ -11,7 +11,7 @@ const chromium = require('@sparticuz/chromium');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const ENCRYPTION_KEY = process.env.SESSION_SECRET || 'chequecheck-secret-key-change-me';
+const ENCRYPTION_KEY = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
 const DEBUG = process.env.DEBUG === 'true' || process.env.NODE_ENV === 'development';
 
 // Debug logging helper
@@ -121,7 +121,19 @@ async function attemptBCLogin(username, password) {
   }
 }
 
-app.use(cors());
+const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000,http://127.0.0.1:3000')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('CORS origin not allowed'));
+  }
+}));
 app.use(express.json());
 app.set('trust proxy', 1);
 
@@ -463,7 +475,11 @@ app.get('/api/summary', async (req, res) => {
   try {
     // Check for API token (optional - for security)
     const apiToken = req.headers['x-api-token'] || req.query.token;
-    const expectedToken = process.env.API_TOKEN || 'dev-token';
+    const expectedToken = process.env.API_TOKEN;
+
+    if (!expectedToken) {
+      return res.status(503).json({ error: 'API token not configured on server' });
+    }
 
     if (apiToken !== expectedToken) {
       return res.status(401).json({ error: 'Invalid API token' });
