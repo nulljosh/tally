@@ -222,42 +222,6 @@
       }
     }
 
-    .stat-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-    }
-
-    @media (max-width: 768px) {
-      .stat-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    .stat {
-      background: var(--glass-bg);
-      padding: 20px;
-      border-radius: 10px;
-      border: 1px solid var(--glass-border);
-      text-align: center;
-    }
-
-    .stat-label {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      color: var(--text-secondary);
-      margin-bottom: 8px;
-    }
-
-    .stat-value {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--accent);
-      line-height: 1;
-    }
-
     /* Form elements */
     input, textarea, select {
       width: 100%;
@@ -456,26 +420,6 @@
   <div class="container">
     <!-- Dashboard Tab -->
     <div id="dashboard-tab" class="tab-content active">
-      <!-- Stats Overview -->
-      <div class="stat-grid" style="margin-bottom: 24px;">
-        <div class="stat">
-          <div class="stat-label">Payment</div>
-          <div class="stat-value" id="payment-amount">$0</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Messages</div>
-          <div class="stat-value" id="msg-count">-</div>
-        </div>
-        <div class="stat" id="notif-stat">
-          <div class="stat-label">Notifications</div>
-          <div class="stat-value" id="notif-count">-</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Requests</div>
-          <div class="stat-value" id="request-count">-</div>
-        </div>
-      </div>
-
       <div class="card">
         <div class="card-header">
           <div class="card-title">Payment Information</div>
@@ -778,30 +722,6 @@
     }
 
     // Parse payment amounts from scraped table/keyword data
-    function parsePaymentTotal(paymentSection) {
-      if (!paymentSection || paymentSection.error) return 0;
-
-      // Combine all text sources to find dollar amounts
-      const allText = [
-        ...(paymentSection.tableData || []),
-        ...(paymentSection.keywords || []),
-        ...(paymentSection.allText || [])
-      ].join(' ');
-
-      // Find all dollar amounts in the text
-      const amounts = [];
-      const regex = /\$\s*([\d,]+(?:\.\d{2})?)/g;
-      let match;
-      while ((match = regex.exec(allText)) !== null) {
-        const val = parseFloat(match[1].replace(/,/g, ''));
-        if (val > 0) amounts.push(val);
-      }
-
-      // Return the largest amount (total payment), or sum if context suggests components
-      if (amounts.length === 0) return 0;
-      return Math.max(...amounts);
-    }
-
     let isLoadingData = false;
     let dataLoaded = false;
     let pollTimer = null;
@@ -862,34 +782,46 @@
         const notifications = filterNavItems((sections.Notifications && sections.Notifications.allText) || []);
         const requests = (sections['Service Requests'] && sections['Service Requests'].tableData) || [];
 
-        document.getElementById('notif-count').textContent = notifications.length || '0';
-        document.getElementById('msg-count').textContent = messages.length || '0';
-        document.getElementById('request-count').textContent = requests.length || '0';
+        // Notifications: show in nav badge
+        const navBadge = document.getElementById('nav-notif-badge');
+        if (notifications.length > 0) {
+          navBadge.style.display = 'inline-flex';
+          document.getElementById('nav-notif-text').textContent = notifications.length + ' notification' + (notifications.length > 1 ? 's' : '');
+        } else {
+          navBadge.style.display = 'none';
+        }
 
-        // Parse payment total from table data
-        const paymentTotal = parsePaymentTotal(sections['Payment Info']);
-        document.getElementById('payment-amount').textContent = paymentTotal ? `$${paymentTotal.toLocaleString()}` : '$0';
-
+        // Messages: parse out "YYYY / MMM / DD" prefix into date + title
         const messagesList = document.getElementById('messages-list');
         if (messages.length > 0) {
-          messagesList.innerHTML = messages.map(msg => `
-            <div class="list-item">
-              <div class="list-item-title">${msg}</div>
-            </div>
-          `).join('');
+          messagesList.innerHTML = messages.map(msg => {
+            const dateMatch = msg.match(/^(\d{4})\s*\/\s*([A-Z]{3})\s*\/\s*(\d{2})\s+(.*)/);
+            if (dateMatch) {
+              const [, year, month, day, title] = dateMatch;
+              const dateStr = month.charAt(0) + month.slice(1).toLowerCase() + ' ' + parseInt(day);
+              return `<div class="list-item">
+                <div class="list-item-title">${title}</div>
+                <div class="list-item-meta">${dateStr}, ${year}</div>
+              </div>`;
+            }
+            return `<div class="list-item"><div class="list-item-title">${msg}</div></div>`;
+          }).join('');
         } else {
           messagesList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No messages</div>';
         }
 
+        // Notifications: show in card only if present
         const notifList = document.getElementById('notifications-list');
+        const notifCard = notifList.closest('.card');
         if (notifications.length > 0) {
+          notifCard.style.display = '';
           notifList.innerHTML = notifications.map(notif => `
             <div class="list-item">
               <div class="list-item-title">${notif}</div>
             </div>
           `).join('');
         } else {
-          notifList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No notifications</div>';
+          notifCard.style.display = 'none';
         }
 
         const paymentInfo = document.getElementById('payment-info');
@@ -908,9 +840,20 @@
 
           let html = '';
 
+          // Calculate next payday (25th of each month)
+          const now = new Date();
+          let nextPayday = new Date(now.getFullYear(), now.getMonth(), 25);
+          if (now > nextPayday) nextPayday = new Date(now.getFullYear(), now.getMonth() + 1, 25);
+          const daysUntil = Math.ceil((nextPayday - now) / (1000 * 60 * 60 * 24));
+          const paydayLabel = daysUntil === 0 ? 'Today' : daysUntil === 1 ? 'Tomorrow' : 'in ' + daysUntil + ' days';
+          const paydayDate = nextPayday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
           if (totalAmount) {
             html += `<div style="padding: 16px; background: rgba(0, 122, 255, 0.08); border-radius: 10px; border: 1px solid rgba(0, 122, 255, 0.2); margin-bottom: 12px;">
-              <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-secondary); margin-bottom: 6px;">Total Payment</div>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+                <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-secondary);">Total Payment</div>
+                <div style="font-size: 12px; font-weight: 500; color: var(--text-secondary);">Next: ${paydayDate} (${paydayLabel})</div>
+              </div>
               <div style="font-size: 28px; font-weight: 700; color: var(--accent);">${totalAmount}</div>
             </div>`;
           }
