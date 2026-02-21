@@ -477,37 +477,44 @@
 </head>
 <body>
   <nav>
-    <div class="logo" id="nav-username">Control Panel</div>
+    <div class="logo" id="nav-username">tally</div>
     <div class="tabs">
       <div class="tab active" onclick="switchTab('dashboard')">Dashboard</div>
       <div class="tab" onclick="switchTab('dtc')">DTC Navigator</div>
       <div class="tab dev-only" onclick="switchTab('bruteforce')">Security Testing</div>
       <div class="tab dev-only" onclick="switchTab('tools')">Tools</div>
     </div>
-    <div class="nav-dropdown-wrap">
-      <button class="nav-dropdown-trigger" onclick="toggleDropdown('messages-dropdown')">Messages <span class="badge-count" id="msg-badge">0</span></button>
-      <div class="nav-dropdown" id="messages-dropdown">
-        <div class="nav-dropdown-header">Messages</div>
-        <div id="messages-list"></div>
-      </div>
-    </div>
-    <div class="nav-dropdown-wrap">
-      <button class="nav-dropdown-trigger" onclick="toggleDropdown('notif-dropdown')">Notifications <span id="notif-badge-indicator" style="display:none;"><span class="badge-dot"></span></span><span class="badge-count" id="notif-badge">0</span></button>
-      <div class="nav-dropdown" id="notif-dropdown">
-        <div class="nav-dropdown-header">Notifications</div>
-        <div id="notifications-list"></div>
-      </div>
-    </div>
-    <button class="btn btn-secondary" onclick="logout()" style="font-size: 13px; padding: 6px 12px;">Logout</button>
+    <button class="nav-dropdown-trigger" onclick="logout()">Logout</button>
     <div class="theme-toggle" onclick="toggleTheme()"></div>
   </nav>
 
   <div class="container">
     <!-- Dashboard Tab -->
     <div id="dashboard-tab" class="tab-content active">
-      <div id="payment-info" class="loading" style="padding: 20px 0;">
-        <div class="spinner"></div>
-        Loading...
+      <!-- Messages/Notifications bar -->
+      <div id="inbox-bar" style="display: flex; gap: 16px; margin-bottom: 8px;">
+        <div class="nav-dropdown-wrap">
+          <button class="nav-dropdown-trigger" onclick="toggleDropdown('messages-dropdown')">Messages <span class="badge-count" id="msg-badge">0</span></button>
+          <div class="nav-dropdown" id="messages-dropdown">
+            <div class="nav-dropdown-header">Messages</div>
+            <div id="messages-list"></div>
+          </div>
+        </div>
+        <div class="nav-dropdown-wrap">
+          <button class="nav-dropdown-trigger" onclick="toggleDropdown('notif-dropdown')">Notifications <span class="badge-count" id="notif-badge">0</span></button>
+          <div class="nav-dropdown" id="notif-dropdown">
+            <div class="nav-dropdown-header">Notifications</div>
+            <div id="notifications-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment: the whole page -->
+      <div id="payment-info" style="display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 160px);">
+        <div class="loading">
+          <div class="spinner"></div>
+          Loading...
+        </div>
       </div>
 
 
@@ -893,59 +900,24 @@
           const distribution = get(/Payment Distribution:\s*(\S+)/);
           const titleCase = (s) => s.trim().toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 
-          let html = '';
-
-          // Calculate next payday (25th of each month)
+          // Next payday (25th of each month)
           const now = new Date();
           let nextPayday = new Date(now.getFullYear(), now.getMonth(), 25);
           if (now > nextPayday) nextPayday = new Date(now.getFullYear(), now.getMonth() + 1, 25);
           const daysUntil = Math.ceil((nextPayday - now) / (1000 * 60 * 60 * 24));
-          const paydayLabel = daysUntil === 0 ? 'Today' : daysUntil === 1 ? 'Tomorrow' : 'in ' + daysUntil + ' days';
-          const paydayDate = nextPayday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          const paydayLabel = daysUntil === 0 ? 'Today' : daysUntil === 1 ? 'Tomorrow' : daysUntil + ' days';
+          const paydayDate = nextPayday.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
           if (totalAmount) {
-            html += `<div style="padding: 48px 32px; background: rgba(0, 122, 255, 0.06); border-radius: 16px; border: 1px solid rgba(0, 122, 255, 0.15); margin-bottom: 24px; text-align: center;">
-              <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-secondary); margin-bottom: 12px;">Total Payment</div>
-              <div style="font-size: 56px; font-weight: 700; color: var(--accent); letter-spacing: -2px; line-height: 1;">${totalAmount}</div>
-              <div style="font-size: 14px; font-weight: 500; color: var(--text-secondary); margin-top: 16px;">Next: ${paydayDate} (${paydayLabel})</div>
+            paymentInfo.innerHTML = `<div style="text-align: center;">
+              <div style="font-size: clamp(64px, 12vw, 120px); font-weight: 700; color: var(--text-primary); letter-spacing: -3px; line-height: 1;">${totalAmount}</div>
+              <div style="font-size: 16px; font-weight: 400; color: var(--text-secondary); margin-top: 24px;">Next payment: ${paydayDate} (${paydayLabel})</div>
             </div>`;
+          } else {
+            paymentInfo.innerHTML = '<div style="text-align: center; color: var(--text-secondary);">No payment data</div>';
           }
-
-          const breakdown = [];
-          if (support) breakdown.push({ label: 'Support', value: support });
-          if (shelter) breakdown.push({ label: 'Shelter (Rent)', value: shelter });
-
-          if (breakdown.length) {
-            html += `<div style="display: grid; grid-template-columns: repeat(${breakdown.length}, 1fr); gap: 12px; margin-bottom: 24px;">`;
-            breakdown.forEach(item => {
-              html += `<div style="padding: 20px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--glass-border); text-align: center;">
-                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-secondary); margin-bottom: 8px;">${item.label}</div>
-                <div style="font-size: 24px; font-weight: 600; color: var(--text-primary);">${item.value}</div>
-              </div>`;
-            });
-            html += `</div>`;
-          }
-
-          const details = [];
-          if (paidTo) details.push({ label: 'Paid To', value: titleCase(paidTo) });
-          if (method) details.push({ label: 'Method', value: titleCase(method) });
-          if (chequeNum) details.push({ label: 'Cheque #', value: chequeNum });
-          if (distribution) details.push({ label: 'Distribution', value: titleCase(distribution) });
-
-          if (details.length) {
-            html += `<div style="display: grid; grid-template-columns: repeat(${details.length}, 1fr); gap: 12px;">`;
-            details.forEach(item => {
-              html += `<div style="padding: 16px; background: var(--card-bg); border-radius: 10px; border: 1px solid var(--glass-border); text-align: center;">
-                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); margin-bottom: 4px;">${item.label}</div>
-                <div style="font-size: 15px; font-weight: 500; color: var(--text-primary);">${item.value}</div>
-              </div>`;
-            });
-            html += `</div>`;
-          }
-
-          paymentInfo.innerHTML = html || '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No payment info</div>';
         } else {
-          paymentInfo.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No payment info</div>';
+          paymentInfo.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 20px;">No payment data</div>';
         }
 
       } catch (err) {
