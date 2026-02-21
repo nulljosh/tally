@@ -212,16 +212,21 @@ app.post('/api/login', loginLimiter, async (req, res) => {
 
   try {
     if (!process.env.VERCEL && !usedLocalEnvFallback) {
-      // Local dev: validate explicit credentials against BC Self-Serve.
-      log('[LOGIN] Local: Validating credentials with BC Self-Serve...');
-      const result = await attemptBCLogin(username, password);
-
-      if (!result.success) {
-        log('[LOGIN] Invalid credentials');
-        return res.status(401).json({
-          success: false,
-          error: 'Invalid BC Self-Serve credentials'
-        });
+      // Local dev: if creds match .env, skip live validation
+      const envUser = process.env.BCEID_USERNAME;
+      const envPass = process.env.BCEID_PASSWORD;
+      if (envUser && envPass && username === envUser && password === envPass) {
+        log('[LOGIN] Local: Credentials match .env, skipping live validation');
+      } else {
+        log('[LOGIN] Local: Validating credentials with BC Self-Serve...');
+        const result = await attemptBCLogin(username, password);
+        if (!result.success) {
+          log('[LOGIN] Invalid credentials');
+          return res.status(401).json({
+            success: false,
+            error: 'Invalid BC Self-Serve credentials'
+          });
+        }
       }
     } else if (!process.env.VERCEL && usedLocalEnvFallback) {
       log('[LOGIN] Local: Using .env credentials fallback (no live validation)');
