@@ -1,4 +1,4 @@
-const { checkAllSections } = require('./scraper');
+const { checkAllSections } = require('../src/scraper');
 
 async function runTests() {
   console.log('═══════════════════════════════════════');
