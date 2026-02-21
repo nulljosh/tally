@@ -221,76 +221,74 @@
           const paymentData = data.sections['Payment Info'];
           const paymentList = document.getElementById('payment-list');
 
-          // Check if we have table data (the actual payment amounts)
+          // Parse payment table data into structured display
           if (paymentData.tableData && paymentData.tableData.length > 0) {
-            const tableRows = paymentData.tableData;
+            const raw = paymentData.tableData.join('\n');
 
-            // Find the total amount
-            const totalRow = tableRows.find(row => row.includes('Amount:'));
-            const total = totalRow ? totalRow.match(/\$[\d,]+\.\d{2}/)?.[0] : null;
+            // Extract values with regex
+            const get = (pattern) => (raw.match(pattern) || [])[1] || '';
+            const totalAmount = get(/Amount:\s*(\$[\d,]+\.\d{2})/);
+            const support = get(/Support\s*\|\s*(\$[\d,]+\.\d{2})/);
+            const shelter = get(/SHELTER:\s*RENT\s*\|\s*(\$[\d,]+\.\d{2})/);
+            const paidTo = get(/Paid to:\s*([^|]+)/);
+            const method = get(/Payment Method:\s*(\S+)/);
+            const chequeNum = get(/Cheque Number:\s*(\d+)/);
+            const distribution = get(/Payment Distribution:\s*(\S+)/);
 
-            document.getElementById('payment-count').textContent = total ? '1 payment' : tableRows.length + ' items';
+            // Title case helper
+            const titleCase = (s) => s.trim().toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 
-            // Clean and format payment details
-            const paymentHTML = tableRows
-              .filter(row => {
-                // Skip header row
-                if (row.trim() === 'Assistance') return false;
-                // Skip rows with empty values (e.g., "Name of Bank:" with no value)
-                if (row.match(/:\s*\|?\s*$/)) return false;
-                return true;
-              })
-              .map(row => {
-                // Clean up the row
-                let cleaned = row
-                  .replace(/\|\s*$/g, '')  // Remove trailing pipes
-                  .replace(/\s*\|\s*/g, ' • ')  // Replace pipes with bullets
-                  .replace(/\s+/g, ' ')  // Normalize whitespace
-                  .trim();
+            document.getElementById('payment-count').textContent = '1 payment';
 
-                // Highlight dollar amounts
-                const hasDollar = cleaned.includes('$');
-                const isTotal = cleaned.includes('Amount:');
+            let html = '';
 
-                // Format the row with proper styling
-                if (isTotal) {
-                  // Total amount - make it prominent
-                  const amount = cleaned.match(/\$[\d,]+\.\d{2}/)?.[0];
-                  return `<div class="p-4 bg-green-100 dark:bg-green-950 rounded border-2 border-green-500 dark:border-green-600 text-gray-900 dark:text-gray-100">
-                    <div class="text-sm text-gray-600 dark:text-gray-400">Total Payment</div>
-                    <div class="text-2xl font-bold text-green-700 dark:text-green-400">${amount}</div>
-                  </div>`;
-                } else if (hasDollar) {
-                  // Payment breakdown items
-                  return `<div class="p-3 bg-gray-100 dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-800 text-green-700 dark:text-green-400 font-medium">${cleaned}</div>`;
-                } else {
-                  // Other info
-                  return `<div class="p-3 bg-gray-100 dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100">${cleaned}</div>`;
-                }
-              })
-              .join('');
-
-            paymentList.innerHTML = paymentHTML;
-          } else {
-            // Fallback to allText if no tableData
-            const payment = (paymentData.allText || []).filter(msg =>
-              !msg.includes('Skip to') &&
-              !msg.includes('Accessibility') &&
-              !msg.includes('Terms of Use') &&
-              !msg.includes('logged out') &&
-              msg.trim().length > 0 &&
-              !msg.match(/^(Notifications|Service Requests|Monthly Reports|Payment Info|Employment Plans|Account Info)$/)
-            );
-
-            document.getElementById('payment-count').textContent = payment.length + ' items';
-
-            if (payment.length === 0) {
-              paymentList.innerHTML = '<p class="text-gray-500 dark:text-gray-500">No payment information</p>';
-            } else {
-              paymentList.innerHTML = payment.map(msg =>
-                `<div class="p-3 bg-gray-100 dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100">${msg}</div>`
-              ).join('');
+            // Total amount hero
+            if (totalAmount) {
+              html += `<div class="p-4 bg-blue-50 dark:bg-blue-950/40 rounded-lg border border-blue-200 dark:border-blue-800 mb-3">
+                <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Total Payment</div>
+                <div class="text-3xl font-bold text-blue-700 dark:text-blue-400">${totalAmount}</div>
+              </div>`;
             }
+
+            // Breakdown
+            const breakdown = [];
+            if (support) breakdown.push({ label: 'Support', value: support });
+            if (shelter) breakdown.push({ label: 'Shelter (Rent)', value: shelter });
+
+            if (breakdown.length) {
+              html += `<div class="grid grid-cols-2 gap-2 mb-3">`;
+              breakdown.forEach(item => {
+                html += `<div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800">
+                  <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-0.5">${item.label}</div>
+                  <div class="text-lg font-semibold text-gray-800 dark:text-gray-200">${item.value}</div>
+                </div>`;
+              });
+              html += `</div>`;
+            }
+
+            // Details grid
+            const details = [];
+            if (paidTo) details.push({ label: 'Paid To', value: titleCase(paidTo) });
+            if (method) details.push({ label: 'Method', value: titleCase(method) });
+            if (chequeNum) details.push({ label: 'Cheque #', value: chequeNum });
+            if (distribution) details.push({ label: 'Distribution', value: titleCase(distribution) });
+
+            if (details.length) {
+              html += `<div class="grid grid-cols-2 gap-x-4 gap-y-2 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800">`;
+              details.forEach(item => {
+                html += `<div>
+                  <div class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider">${item.label}</div>
+                  <div class="text-sm font-medium text-gray-700 dark:text-gray-300">${item.value}</div>
+                </div>`;
+              });
+              html += `</div>`;
+            }
+
+            paymentList.innerHTML = html;
+          } else {
+            // Fallback: no tableData
+            document.getElementById('payment-count').textContent = '0 items';
+            paymentList.innerHTML = '<p class="text-gray-500 dark:text-gray-500">No payment information</p>';
           }
         }
 
