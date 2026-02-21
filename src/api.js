@@ -430,9 +430,8 @@ app.use('/data', express.static(path.join(__dirname, '../data')));
 app.use(express.static(path.join(__dirname, '../web'), {
   index: false, // Don't serve index.html as default
   setHeaders: (res, filePath) => {
-    // Allow specific files through
-    if (filePath.endsWith('login.html')) {
-      return;
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache');
     }
   }
 }));

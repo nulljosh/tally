@@ -871,9 +871,59 @@
         const paymentInfo = document.getElementById('payment-info');
         const paymentData = (sections['Payment Info'] && sections['Payment Info'].tableData) || [];
         if (paymentData.length > 0) {
-          paymentInfo.innerHTML = paymentData.map(info => `
-            <div class="list-item"><div class="list-item-title">${info}</div></div>
-          `).join('');
+          const raw = paymentData.join('\n');
+          const get = (pattern) => (raw.match(pattern) || [])[1] || '';
+          const totalAmount = get(/Amount:\s*(\$[\d,]+\.\d{2})/);
+          const support = get(/Support\s*\|\s*(\$[\d,]+\.\d{2})/);
+          const shelter = get(/SHELTER:\s*RENT\s*\|\s*(\$[\d,]+\.\d{2})/);
+          const paidTo = get(/Paid to:\s*([^|]+)/);
+          const method = get(/Payment Method:\s*(\S+)/);
+          const chequeNum = get(/Cheque Number:\s*(\d+)/);
+          const distribution = get(/Payment Distribution:\s*(\S+)/);
+          const titleCase = (s) => s.trim().toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+
+          let html = '';
+
+          if (totalAmount) {
+            html += `<div style="padding: 16px; background: rgba(0, 122, 255, 0.08); border-radius: 10px; border: 1px solid rgba(0, 122, 255, 0.2); margin-bottom: 12px;">
+              <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-secondary); margin-bottom: 6px;">Total Payment</div>
+              <div style="font-size: 28px; font-weight: 700; color: var(--accent);">${totalAmount}</div>
+            </div>`;
+          }
+
+          const breakdown = [];
+          if (support) breakdown.push({ label: 'Support', value: support });
+          if (shelter) breakdown.push({ label: 'Shelter (Rent)', value: shelter });
+
+          if (breakdown.length) {
+            html += `<div style="display: grid; grid-template-columns: repeat(${breakdown.length}, 1fr); gap: 8px; margin-bottom: 12px;">`;
+            breakdown.forEach(item => {
+              html += `<div style="padding: 12px; background: var(--bg-primary); border-radius: 8px; border: 1px solid var(--glass-border);">
+                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); margin-bottom: 4px;">${item.label}</div>
+                <div style="font-size: 18px; font-weight: 600; color: var(--text-primary);">${item.value}</div>
+              </div>`;
+            });
+            html += `</div>`;
+          }
+
+          const details = [];
+          if (paidTo) details.push({ label: 'Paid To', value: titleCase(paidTo) });
+          if (method) details.push({ label: 'Method', value: titleCase(method) });
+          if (chequeNum) details.push({ label: 'Cheque #', value: chequeNum });
+          if (distribution) details.push({ label: 'Distribution', value: titleCase(distribution) });
+
+          if (details.length) {
+            html += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; padding: 12px; background: var(--bg-primary); border-radius: 8px; border: 1px solid var(--glass-border);">`;
+            details.forEach(item => {
+              html += `<div>
+                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary);">${item.label}</div>
+                <div style="font-size: 14px; font-weight: 500; color: var(--text-primary);">${item.value}</div>
+              </div>`;
+            });
+            html += `</div>`;
+          }
+
+          paymentInfo.innerHTML = html || '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No payment info</div>';
         } else {
           paymentInfo.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No payment info</div>';
         }
