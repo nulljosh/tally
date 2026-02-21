@@ -51,7 +51,8 @@ npm run upload-blob  # Upload to Vercel Blob
 - `src/scraper.js` - Puppeteer BC Self-Serve scraper
 - `web/landing.html` - Public landing page (served at `/`)
 - `web/login.html` - Login page (BC Self-Serve credentials)
-- `web/index.html` - Dashboard UI (served at `/app`, auth required)
+- `web/unified.html` - Dashboard UI (served at `/app`, auth required)
+- `web/index.html` - Legacy dashboard (not served)
 - `api/upload.js` - Vercel Blob upload endpoint
 - `api/latest.js` - Vercel Blob read endpoint
 - `scripts/upload-to-blob.js` - Local upload script
@@ -107,6 +108,14 @@ UPLOAD_SECRET=random_string
 - Added `/api/summary` endpoint for OpenClaw integration (token-authenticated)
 - Security fix: rotated UPLOAD_SECRET after accidental exposure
 - OpenClaw can now query "how much am I getting?" and receive payment data
+
+### 2026-02-21 — v1.5.0 (Dashboard overhaul)
+- Payment hero: 56px amount, next payday (25th each month), support/shelter grid, details grid
+- Parsed pipe-delimited tableData into structured layout, title-cased ALL CAPS, skip empty fields
+- Messages/notifications moved to nav dropdowns (removed card tiles)
+- Removed stat grid, Check Now/Refresh buttons, Payment Information card wrapper
+- Hidden Security Testing and Tools tabs (dev-only CSS class)
+- Cache-Control: no-cache for HTML files
 
 ### Key Learnings
 - Server-side auth checks happen before client JS loads
