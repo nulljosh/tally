@@ -139,7 +139,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: true, // Always use HTTPS (Vercel enforces this)
+    secure: !!process.env.VERCEL, // HTTPS-only on Vercel, HTTP OK on localhost
     httpOnly: true,
     sameSite: 'strict',
     maxAge: 2 * 60 * 60 * 1000 // 2 hours
