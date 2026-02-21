@@ -383,6 +383,14 @@ app.get('/api/info', requireAuth, async (req, res) => {
   }
 });
 
+// Dev-only: serve .env credentials for auto-fill on localhost
+app.get('/api/dev-creds', (req, res) => {
+  if (process.env.VERCEL) return res.status(404).json({ error: 'Not found' });
+  const username = process.env.BCEID_USERNAME || '';
+  const password = process.env.BCEID_PASSWORD || '';
+  res.json({ username, password });
+});
+
 // Root: auto-login on localhost if .env creds available, otherwise landing/login
 app.get('/', async (req, res) => {
   // Already authenticated

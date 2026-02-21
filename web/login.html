@@ -233,26 +233,24 @@
     const errorMsg = document.getElementById('error-msg');
     const successMsg = document.getElementById('success-msg');
 
-    // Auto-login on localhost — fill fields + submit using .env credentials
-    const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-    if (isLocal) {
-      const u = document.getElementById('username');
-      const p = document.getElementById('password');
-      u.value = 'dev';
-      p.value = 'env-credentials';
-      setTimeout(() => {
-        submitBtn.click();
-      }, 300);
+    // Auto-login on localhost — fetch .env creds, fill fields, submit
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      fetch('/api/dev-creds').then(r => r.json()).then(data => {
+        if (data.username && data.password) {
+          document.getElementById('username').value = data.username;
+          document.getElementById('password').value = data.password;
+          setTimeout(() => submitBtn.click(), 300);
+        }
+      }).catch(() => {});
     }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      // On localhost, send empty creds — backend uses .env fallback
-      const username = isLocal ? '' : document.getElementById('username').value.trim();
-      const password = isLocal ? '' : document.getElementById('password').value;
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
 
-      if (!isLocal && (!username || !password)) return;
+      if (!username || !password) return;
 
       // Reset state
       errorMsg.style.display = 'none';
