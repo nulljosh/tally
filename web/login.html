@@ -264,8 +264,20 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password }),
         });
-
-        const data = await res.json();
+        const contentType = (res.headers.get('content-type') || '').toLowerCase();
+        const bodyText = await res.text();
+        let data = {};
+        if (bodyText) {
+          if (contentType.includes('application/json')) {
+            try {
+              data = JSON.parse(bodyText);
+            } catch (_) {
+              data = {};
+            }
+          } else {
+            data = { error: bodyText.slice(0, 140) };
+          }
+        }
 
         if (res.ok && data.success) {
           successMsg.style.display = 'block';

@@ -6,6 +6,7 @@ const session = require('express-session');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 const { checkAllSections } = require('./scraper');
+const { createCorsOptionsDelegate, parseAllowedOrigins } = require('./cors-utils');
 const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium');
 
@@ -121,19 +122,12 @@ async function attemptBCLogin(username, password) {
   }
 }
 
-const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000,http://127.0.0.1:3000')
-  .split(',')
-  .map(o => o.trim())
-  .filter(Boolean);
+const allowedOrigins = parseAllowedOrigins(
+  process.env.CORS_ORIGINS,
+  'http://localhost:3000,http://127.0.0.1:3000,https://tally-production.vercel.app'
+);
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(new Error('CORS origin not allowed'));
-  }
-}));
+app.use(cors(createCorsOptionsDelegate(allowedOrigins)));
 app.use(express.json());
 app.set('trust proxy', 1);
 
