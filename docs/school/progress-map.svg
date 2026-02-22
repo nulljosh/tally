@@ -1,0 +1,110 @@
+<svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg">
+  <!-- Style -->
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+      .title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 24px; fill: #1c1c1e; }
+      .node-text { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px; fill: #1c1c1e; }
+      .status-text { font-family: 'Inter', sans-serif; font-weight: 400; font-size: 12px; fill: #8e8e93; }
+      .complete { stroke: #30d158; fill: #e8f5e8; }
+      .in-progress { stroke: #ff9f0a; fill: #fff4e5; }
+      .not-started { stroke: #d1d1d6; fill: #f5f7fa; }
+      .center-node { stroke: #007AFF; fill: #e3f2ff; }
+    </style>
+    
+    <!-- Arrow marker -->
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#d1d1d6" />
+    </marker>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="800" fill="#f5f7fa"/>
+  
+  <!-- Title -->
+  <text x="600" y="40" text-anchor="middle" class="title">School Progress Map - 2025/26</text>
+  <text x="600" y="65" text-anchor="middle" class="status-text">Current GPA: 2.39 → Projected: 2.53 (82/90 credits)</text>
+  
+  <!-- Center Node: You -->
+  <circle cx="600" cy="400" r="60" class="center-node" stroke-width="3"/>
+  <text x="600" y="395" text-anchor="middle" class="node-text">Joshua</text>
+  <text x="600" y="415" text-anchor="middle" class="status-text">Grade 12</text>
+  
+  <!-- Connections -->
+  <line x1="660" y1="400" x2="820" y2="250" stroke="#d1d1d6" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="660" y1="400" x2="820" y2="400" stroke="#d1d1d6" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="660" y1="400" x2="820" y2="550" stroke="#d1d1d6" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="540" y1="400" x2="380" y2="250" stroke="#d1d1d6" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="540" y1="400" x2="380" y2="400" stroke="#d1d1d6" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="540" y1="400" x2="380" y2="550" stroke="#d1d1d6" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- Completed Courses (Green) -->
+  <g>
+    <!-- English AP 12 -->
+    <rect x="840" y="220" width="180" height="60" rx="12" class="complete" stroke-width="2"/>
+    <text x="930" y="245" text-anchor="middle" class="node-text">English AP 12</text>
+    <text x="930" y="265" text-anchor="middle" class="status-text">100% Complete</text>
+  </g>
+  
+  <!-- In Progress Courses (Orange) -->
+  <g>
+    <!-- Pre-Calculus 12 -->
+    <rect x="840" y="370" width="180" height="60" rx="12" class="in-progress" stroke-width="2"/>
+    <text x="930" y="395" text-anchor="middle" class="node-text">Pre-Calc 12</text>
+    <text x="930" y="415" text-anchor="middle" class="status-text">In Progress</text>
+    
+    <!-- Chemistry 12 -->
+    <rect x="840" y="520" width="180" height="60" rx="12" class="in-progress" stroke-width="2"/>
+    <text x="930" y="545" text-anchor="middle" class="node-text">Chemistry 12</text>
+    <text x="930" y="565" text-anchor="middle" class="status-text">In Progress</text>
+  </g>
+  
+  <!-- Completed Last Semester (Green) -->
+  <g>
+    <!-- Computer Science 11 -->
+    <rect x="180" y="220" width="180" height="60" rx="12" class="complete" stroke-width="2"/>
+    <text x="270" y="245" text-anchor="middle" class="node-text">Comp Sci 11</text>
+    <text x="270" y="265" text-anchor="middle" class="status-text">A (85%)</text>
+    
+    <!-- Social Studies 11 -->
+    <rect x="180" y="370" width="180" height="60" rx="12" class="complete" stroke-width="2"/>
+    <text x="270" y="395" text-anchor="middle" class="node-text">Social Studies 11</text>
+    <text x="270" y="415" text-anchor="middle" class="status-text">B (77%)</text>
+    
+    <!-- Physics 11 -->
+    <rect x="180" y="520" width="180" height="60" rx="12" class="complete" stroke-width="2"/>
+    <text x="270" y="545" text-anchor="middle" class="node-text">Physics 11</text>
+    <text x="270" y="565" text-anchor="middle" class="status-text">C+ (70%)</text>
+  </g>
+  
+  <!-- Stats Box -->
+  <g>
+    <rect x="50" y="650" width="280" height="120" rx="12" fill="white" stroke="#d1d1d6" stroke-width="2"/>
+    <text x="190" y="680" text-anchor="middle" class="node-text">Overall Progress</text>
+    
+    <rect x="70" y="695" width="240" height="8" rx="4" fill="#f2f2f7"/>
+    <rect x="70" y="695" width="218" height="8" rx="4" fill="#ff6b35"/>
+    
+    <text x="70" y="725" class="status-text">Credits: 82/90 (91%)</text>
+    <text x="70" y="745" class="status-text">Current GPA: 2.39</text>
+    <text x="70" y="765" class="status-text">→ Projected: 2.53</text>
+  </g>
+  
+  <!-- Legend -->
+  <g>
+    <rect x="870" y="650" width="280" height="120" rx="12" fill="white" stroke="#d1d1d6" stroke-width="2"/>
+    <text x="1010" y="680" text-anchor="middle" class="node-text">Status</text>
+    
+    <rect x="890" y="695" width="60" height="20" rx="6" class="complete" stroke-width="2"/>
+    <text x="960" y="710" class="status-text">Completed</text>
+    
+    <rect x="890" y="725" width="60" height="20" rx="6" class="in-progress" stroke-width="2"/>
+    <text x="960" y="740" class="status-text">In Progress</text>
+    
+    <rect x="890" y="755" width="60" height="20" rx="6" class="not-started" stroke-width="2"/>
+    <text x="960" y="770" class="status-text">Not Started</text>
+  </g>
+  
+  <!-- Footer -->
+  <text x="600" y="790" text-anchor="middle" class="status-text">Last Updated: Feb 13, 2026 | Downtown Vancouver Study Session Tomorrow</text>
+</svg>

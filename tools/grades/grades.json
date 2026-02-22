@@ -1,0 +1,732 @@
+{
+  "retrieved_at": "2026-02-15T20:20:30.057677",
+  "courses": [
+    {
+      "course": "LEC Pre-Calculus 12 25-26 JR, PREC12 OL 25-26 RATCLIFFE - LEC",
+      "course_ou": "184298",
+      "retrieved_at": "2026-02-15T20:20:25.732053",
+      "categories": [
+        {
+          "category": "Learning Guides",
+          "grade_pct": null,
+          "items": [
+            {
+              "name": "U1 Learning Guide",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U2 Learning Guide",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U3 Learning Guide",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U4 Learning Guide",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U5 Learning Guide",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U6 Learning Guide",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U7 Learning Guide",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "FIN Review",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            }
+          ]
+        },
+        {
+          "category": "Projects",
+          "grade_pct": 88.0,
+          "items": [
+            {
+              "name": "U1 Projects",
+              "score": 88.0,
+              "out_of": 100.0,
+              "percentage": 88.0
+            },
+            {
+              "name": "U2 Projects",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U3 Projects",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U4 Projects",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U5 Projects",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U6 Projects",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U7 Projects",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            }
+          ]
+        },
+        {
+          "category": "Unit Tests",
+          "grade_pct": 100.0,
+          "items": [
+            {
+              "name": "U1-Quiz #1",
+              "score": 100.0,
+              "out_of": 100.0,
+              "percentage": 100.0
+            },
+            {
+              "name": "U1 Exam",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U2 Exam",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U3 Exam",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U4 Exam",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U5 Exam",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U6 Exam",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U7 Exam",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            }
+          ]
+        },
+        {
+          "category": "Module Exams",
+          "grade_pct": null,
+          "items": [
+            {
+              "name": "Module 1 Exam",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "Module 2 Exam",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "Module 3 Exam",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            }
+          ]
+        },
+        {
+          "category": "Final Exam",
+          "grade_pct": null,
+          "items": [
+            {
+              "name": "Final Exam",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            }
+          ]
+        },
+        {
+          "category": "Quizzes",
+          "grade_pct": 94.0,
+          "items": [
+            {
+              "name": "U1-Quiz #2",
+              "score": 83.0,
+              "out_of": 100.0,
+              "percentage": 83.0
+            },
+            {
+              "name": "U2-Quiz #1",
+              "score": 100.0,
+              "out_of": 100.0,
+              "percentage": 100.0
+            },
+            {
+              "name": "U2-Quiz #2",
+              "score": 100.0,
+              "out_of": 100.0,
+              "percentage": 100.0
+            },
+            {
+              "name": "U3-Quiz #1",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U3-Quiz #2",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U4-Quiz #1",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U4-Quiz #2",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U5-Quiz #1",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U5-Quiz #2",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U6-Quiz #1",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U6-Quiz #2",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U7-Quiz #1",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            },
+            {
+              "name": "U7-Quiz #2",
+              "score": null,
+              "out_of": 100.0,
+              "percentage": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "course": "LEC Anatomy & Physiology 12 25-26 AD, ATPH12 OL 25-26 DHIMAN - LEC",
+      "course_ou": "153403",
+      "retrieved_at": "2026-02-15T20:20:30.057422",
+      "categories": [
+        {
+          "category": "Course Plan",
+          "grade_pct": null,
+          "items": []
+        },
+        {
+          "category": "Learning Guides",
+          "grade_pct": 100.0,
+          "items": [
+            {
+              "name": "U1 Learning Guide",
+              "score": 3.0,
+              "out_of": 3.0,
+              "percentage": 100.0
+            },
+            {
+              "name": "U2 Learning Guide",
+              "score": 3.0,
+              "out_of": 3.0,
+              "percentage": 100.0
+            },
+            {
+              "name": "U3 Learning Guide",
+              "score": 3.0,
+              "out_of": 3.0,
+              "percentage": 100.0
+            },
+            {
+              "name": "U4 Learning Guide",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "U5 Learning Guide",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "U6 Learning Guide",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "U7 Learning Guide",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "U8 Learning Guide",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "U9 Learning Guide",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            }
+          ]
+        },
+        {
+          "category": "Projects",
+          "grade_pct": 100.0,
+          "items": [
+            {
+              "name": "Module 1 Project",
+              "score": 15.0,
+              "out_of": 15.0,
+              "percentage": 100.0
+            },
+            {
+              "name": "Module 2 Project",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "Module 3 Project",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            }
+          ]
+        },
+        {
+          "category": "Unit Exams",
+          "grade_pct": 97.0,
+          "items": [
+            {
+              "name": "1.1 Quiz",
+              "score": 2.0,
+              "out_of": 2.0,
+              "percentage": 100.0
+            },
+            {
+              "name": "U1 Test",
+              "score": 2.0,
+              "out_of": 2.0,
+              "percentage": 100.0
+            },
+            {
+              "name": "U2 Test",
+              "score": 2.0,
+              "out_of": 2.0,
+              "percentage": 90.0
+            },
+            {
+              "name": "U3 Test",
+              "score": 2.0,
+              "out_of": 2.0,
+              "percentage": 100.0
+            },
+            {
+              "name": "U4 Test",
+              "score": 2.0,
+              "out_of": 2.0,
+              "percentage": 95.0
+            },
+            {
+              "name": "U5 Test",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "U6 Test",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "U7 Test",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "U8 Test",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "U9 Test",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            }
+          ]
+        },
+        {
+          "category": "Module Exams",
+          "grade_pct": 27.0,
+          "items": [
+            {
+              "name": "Module 1 Exam",
+              "score": 6.0,
+              "out_of": 20.0,
+              "percentage": 31.0
+            },
+            {
+              "name": "Module 2 Exam",
+              "score": 4.0,
+              "out_of": 20.0,
+              "percentage": 22.0
+            }
+          ]
+        },
+        {
+          "category": "Final Exam",
+          "grade_pct": null,
+          "items": [
+            {
+              "name": "Final Exam",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            }
+          ]
+        },
+        {
+          "category": "Quizzes",
+          "grade_pct": 0.0,
+          "items": [
+            {
+              "name": "1.2 Quiz",
+              "score": 0.0,
+              "out_of": 0.0,
+              "percentage": 100.0
+            },
+            {
+              "name": "1.3 Quiz",
+              "score": 0.0,
+              "out_of": 0.0,
+              "percentage": 90.0
+            },
+            {
+              "name": "1.4 Quiz",
+              "score": 0.0,
+              "out_of": 0.0,
+              "percentage": 100.0
+            },
+            {
+              "name": "1.5 Quiz",
+              "score": 0.0,
+              "out_of": 0.0,
+              "percentage": 100.0
+            },
+            {
+              "name": "1.6 Quiz",
+              "score": 0.0,
+              "out_of": 0.0,
+              "percentage": 100.0
+            },
+            {
+              "name": "1.7 Quiz",
+              "score": 0.0,
+              "out_of": 0.0,
+              "percentage": 90.0
+            },
+            {
+              "name": "1.8 Quiz",
+              "score": 0.0,
+              "out_of": 0.0,
+              "percentage": 100.0
+            },
+            {
+              "name": "2.1 Quiz",
+              "score": 0.0,
+              "out_of": 0.0,
+              "percentage": 100.0
+            },
+            {
+              "name": "2.2 Quiz",
+              "score": 0.0,
+              "out_of": 0.0,
+              "percentage": 100.0
+            },
+            {
+              "name": "2.3-2.4 Quiz",
+              "score": 0.0,
+              "out_of": 0.0,
+              "percentage": 100.0
+            },
+            {
+              "name": "2.5 Quiz",
+              "score": 0.0,
+              "out_of": 0.0,
+              "percentage": 95.0
+            },
+            {
+              "name": "3.1 Quiz",
+              "score": 0.0,
+              "out_of": 0.0,
+              "percentage": 90.0
+            },
+            {
+              "name": "3.2-3.3 Quiz",
+              "score": 0.0,
+              "out_of": 0.0,
+              "percentage": 100.0
+            },
+            {
+              "name": "3.4-3.5 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "3.6 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "4.1-4.2 Quiz",
+              "score": 0.0,
+              "out_of": 0.0,
+              "percentage": 100.0
+            },
+            {
+              "name": "4.3-4.4 Quiz",
+              "score": 0.0,
+              "out_of": 0.0,
+              "percentage": 100.0
+            },
+            {
+              "name": "5.1 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "5.2 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "5.3 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "6.1 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "6.2 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "6.3 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "6.4 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "6.5 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "6.6 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "6.7 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "7.1 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "7.2 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "7.3 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "7.4 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "7.5 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "8.1 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "8.2 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "8.3 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "8.5 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "9.1 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "9.2 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "9.3 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "9.4 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "9.5 Quiz",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
