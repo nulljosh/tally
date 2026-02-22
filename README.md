@@ -3,7 +3,7 @@
 Track BC Self-Serve benefits with a secure login, per-user cache, and fast dashboard reads.
 
 **Live:** https://tally-production.vercel.app
-**Version:** 1.5.0
+**Version:** 1.6.0
 
 ## What It Does
 
@@ -93,6 +93,8 @@ npm run upload-blob   # Push results to Vercel Blob
 - `SESSION_SECRET` — encryption key for sessions
 - `UPLOAD_SECRET` — token for `/api/upload`
 - `BLOB_READ_WRITE_TOKEN` — auto-provided by Vercel
+- `UPSTASH_REDIS_REST_URL` — Upstash REST URL for persistent sessions
+- `UPSTASH_REDIS_REST_TOKEN` — Upstash REST token for persistent sessions
 
 **Optional (local .env):**
 - `BCEID_USERNAME` / `BCEID_PASSWORD` — default credentials

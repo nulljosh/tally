@@ -908,6 +908,10 @@
           const distribution = get(/Payment Distribution:\s*(\S+)/);
           const titleCase = (s) => s.trim().toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 
+          if (paidTo && document.getElementById('nav-username').dataset.fallback === 'true') {
+            setNavUsername(titleCase(paidTo), true);
+          }
+
           // Next payday (25th of each month)
           const now = new Date();
           let nextPayday = new Date(now.getFullYear(), now.getMonth(), 25);
@@ -1149,18 +1153,47 @@
       btn.disabled = false;
     }
 
+    function setNavUsername(label, isFallback = false) {
+      const el = document.getElementById('nav-username');
+      el.textContent = label;
+      el.style.opacity = isFallback ? '0.7' : '1';
+      el.dataset.fallback = isFallback ? 'true' : 'false';
+    }
+
     // Load current user info
-    async function loadCurrentUser() {
+    async function loadCurrentUser(attempt = 1) {
       try {
         const response = await fetch('/api/me', { credentials: 'include' });
-        if (response.ok) {
-          const data = await response.json();
-          if (data.authenticated) {
-            document.getElementById('nav-username').textContent = data.username || 'User';
+        if (!response.ok) {
+          if (response.status === 401) {
+            setNavUsername('Guest', true);
+            return false;
           }
+          throw new Error('HTTP ' + response.status);
         }
+
+        const data = await response.json();
+        if (!data || !data.authenticated) {
+          setNavUsername('Guest', true);
+          return false;
+        }
+
+        const username = typeof data.username === 'string' ? data.username.trim() : '';
+        if (!username) {
+          setNavUsername('Account', true);
+          return false;
+        }
+
+        setNavUsername(username, false);
+        return true;
       } catch (err) {
         console.error('Failed to load user info:', err);
+        if (attempt < 2) {
+          await new Promise(resolve => setTimeout(resolve, 600));
+          return loadCurrentUser(attempt + 1);
+        }
+        setNavUsername('Session issue', true);
+        return false;
       }
     }
 
@@ -1168,6 +1201,7 @@
     loadCurrentUser();
     loadData();
     setInterval(loadData, 30000); // Auto-refresh every 30s
+    setInterval(loadCurrentUser, 30000);
 
     // ==========================================
     // DTC NAVIGATOR - Eligibility Screener

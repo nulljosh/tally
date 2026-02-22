@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 const { checkAllSections } = require('./scraper');
 const { createCorsOptionsDelegate, parseAllowedOrigins } = require('./cors-utils');
+const { createSessionStore } = require('./session-store');
 const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium');
 
@@ -131,6 +132,11 @@ app.use(cors(createCorsOptionsDelegate(allowedOrigins)));
 app.use(express.json());
 app.set('trust proxy', 1);
 
+const sessionStore = createSessionStore(session);
+if (process.env.VERCEL && !sessionStore) {
+  console.warn('[SESSION] Upstash not configured. Sessions will not persist across serverless invocations.');
+}
+
 // Rate limiting for login attempts
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -141,6 +147,7 @@ const loginLimiter = rateLimit({
 });
 
 app.use(session({
+  ...(sessionStore ? { store: sessionStore } : {}),
   secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
   resave: false,
   saveUninitialized: false,
@@ -985,7 +992,8 @@ app.use((req, res) => {
 
 // Vercel: export the Express app as a serverless function
 // Local: start the server
-if (process.env.VERCEL) {
+const isServerlessRuntime = !!process.env.LAMBDA_TASK_ROOT;
+if (isServerlessRuntime) {
   module.exports = app;
 } else {
   app.listen(PORT, () => {
