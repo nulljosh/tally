@@ -7,7 +7,6 @@
     "check": "node src/scraper.js",
     "test": "node tools/test.js",
     "test:cors": "node tools/test-cors-utils.js",
-    "test:session": "node tools/test-session-store.js",
     "test:productivity": "node tools/test-productivity.js",
     "test:scraper": "node src/scraper.js",
     "api": "node src/api.js",
@@ -25,7 +24,6 @@
   "type": "commonjs",
   "dependencies": {
     "@sparticuz/chromium": "^143.0.4",
-    "@upstash/redis": "^1.35.6",
     "@vercel/blob": "^2.2.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
