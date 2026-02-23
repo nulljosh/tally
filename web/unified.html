@@ -64,12 +64,14 @@
       align-items: center;
       justify-content: space-between;
       gap: 24px;
+      padding-top: calc(14px + env(safe-area-inset-top, 0px));
     }
 
     @media (max-width: 768px) {
       nav {
         padding: 12px 16px;
         gap: 10px;
+        padding-top: calc(10px + env(safe-area-inset-top, 0px));
       }
     }
 
@@ -77,7 +79,12 @@
       font-size: 19px;
       font-weight: 600;
       letter-spacing: -0.6px;
-      flex-shrink: 0;
+      flex-shrink: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 42vw;
     }
 
     nav .tabs {
@@ -159,11 +166,13 @@
       max-width: 1600px;
       margin: 0 auto;
       padding: 68px 32px 32px;
+      padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px));
     }
 
     @media (max-width: 768px) {
       .container {
-        padding: 68px 16px 24px;
+        padding: 76px 16px 88px;
+        padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
       }
     }
 
@@ -495,8 +504,8 @@
     @media (max-width: 768px) {
       .logout-btn {
         position: fixed;
-        right: 16px;
-        bottom: 16px;
+        right: 14px;
+        bottom: calc(14px + env(safe-area-inset-bottom, 0px));
         z-index: 1200;
         padding: 10px 14px;
         border-radius: 12px;
@@ -507,7 +516,7 @@
         width: 40px;
         height: 24px;
         position: fixed;
-        top: 14px;
+        top: calc(12px + env(safe-area-inset-top, 0px));
         right: 14px;
         border: 1px solid var(--accent);
         background: var(--card-bg);
@@ -532,7 +541,7 @@
     <!-- Dashboard Tab -->
     <div id="dashboard-tab" class="tab-content active">
       <!-- Messages/Notifications bar -->
-      <div id="inbox-bar" style="display: flex; gap: 16px; margin-bottom: 8px;">
+      <div id="inbox-bar" style="display: flex; gap: 16px; margin-bottom: 8px; flex-wrap: wrap;">
         <div class="nav-dropdown-wrap">
           <button class="nav-dropdown-trigger" onclick="toggleDropdown('messages-dropdown')">Messages <span class="badge-count" id="msg-badge">0</span></button>
           <div class="nav-dropdown" id="messages-dropdown">
