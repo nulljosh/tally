@@ -69,7 +69,7 @@
     @media (max-width: 768px) {
       nav {
         padding: 12px 16px;
-        gap: 12px;
+        gap: 10px;
       }
     }
 
@@ -405,6 +405,18 @@
       background: var(--glass-border);
       color: var(--text-primary);
     }
+
+    .logout-btn {
+      color: var(--text-primary);
+      border: 1px solid var(--glass-border);
+      background: var(--card-bg);
+      font-weight: 600;
+      min-height: 36px;
+    }
+
+    .logout-btn:hover {
+      border-color: var(--accent);
+    }
     .nav-dropdown-trigger .badge-count {
       background: var(--accent);
       color: white;
@@ -473,6 +485,23 @@
       font-size: 13px;
       color: var(--text-secondary);
     }
+
+    @media (max-width: 768px) {
+      .logout-btn {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        z-index: 1200;
+        padding: 10px 14px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px var(--shadow);
+      }
+
+      .theme-toggle {
+        width: 40px;
+        height: 24px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -484,7 +513,7 @@
       <div class="tab" onclick="switchTab('bruteforce')">Security Testing</div>
       <div class="tab" onclick="switchTab('tools')">Tools</div>
     </div>
-    <button class="nav-dropdown-trigger" onclick="logout()">Logout</button>
+    <button class="nav-dropdown-trigger logout-btn" onclick="logout()">Logout</button>
     <div class="theme-toggle" onclick="toggleTheme()"></div>
   </nav>
 
