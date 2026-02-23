@@ -7,31 +7,31 @@
   <title>Tally Dashboard</title>
   <style>
     :root {
-      --glass-bg: rgba(255, 255, 255, 0.7);
-      --glass-border: rgba(255, 255, 255, 0.18);
-      --shadow: rgba(0, 0, 0, 0.1);
+      --glass-bg: rgba(255, 255, 255, 0.58);
+      --glass-border: rgba(255, 255, 255, 0.6);
+      --shadow: rgba(0, 0, 0, 0.08);
       --text-primary: #1d1d1f;
-      --text-secondary: #6e6e73;
-      --accent: var(--color-primary);
+      --text-secondary: #86868b;
+      --accent: #0071e3;
       --success: #34c759;
       --warning: #ff9500;
       --error: #ff3b30;
       --bg-primary: #f5f5f7;
-      --card-bg: rgba(255, 255, 255, 0.8);
+      --card-bg: rgba(255, 255, 255, 0.72);
     }
 
     [data-theme="dark"] {
-      --glass-bg: rgba(28, 28, 30, 0.7);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --shadow: rgba(0, 0, 0, 0.3);
+      --glass-bg: rgba(16, 18, 24, 0.68);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --shadow: rgba(0, 0, 0, 0.38);
       --text-primary: #f5f5f7;
-      --text-secondary: #8e8e93;
-      --accent: var(--color-secondary);
+      --text-secondary: #86868b;
+      --accent: #4ea1ff;
       --success: #30d158;
       --warning: #ff9f0a;
       --error: #ff453a;
-      --bg-primary: #000000;
-      --card-bg: rgba(28, 28, 30, 0.8);
+      --bg-primary: #0b1020;
+      --card-bg: rgba(20, 24, 34, 0.72);
     }
 
     * {
@@ -41,8 +41,8 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg-primary);
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      background: radial-gradient(1200px 600px at 10% -10%, rgba(0, 113, 227, 0.08), transparent 60%), var(--bg-primary);
       color: var(--text-primary);
       transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       min-height: 100vh;
@@ -76,9 +76,10 @@
     }
 
     nav .logo {
-      font-size: 19px;
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 21px;
       font-weight: 600;
-      letter-spacing: -0.6px;
+      letter-spacing: -0.3px;
       flex-shrink: 1;
       min-width: 0;
       overflow: hidden;
@@ -126,7 +127,7 @@
     }
 
     .tab.active {
-      background: var(--accent);
+      background: linear-gradient(135deg, var(--accent), #2f8cff);
       color: white;
     }
 
@@ -188,13 +189,13 @@
     /* Glass cards */
     .card {
       background: var(--card-bg);
-      backdrop-filter: saturate(180%) blur(20px);
-      -webkit-backdrop-filter: saturate(180%) blur(20px);
-      border-radius: 12px;
+      backdrop-filter: saturate(180%) blur(28px);
+      -webkit-backdrop-filter: saturate(180%) blur(28px);
+      border-radius: 16px;
       border: 1px solid var(--glass-border);
       padding: 24px;
       margin-bottom: 20px;
-      box-shadow: 0 2px 12px var(--shadow);
+      box-shadow: 0 8px 28px var(--shadow);
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
