@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 const { checkAllSections } = require('./scraper');
 const { createCorsOptionsDelegate, parseAllowedOrigins } = require('./cors-utils');
+const { parseCookies, unsealAuthPayload, setAuthCookie, clearAuthCookie } = require('./auth-cookie');
 const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium');
 
@@ -14,9 +15,61 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const ENCRYPTION_KEY = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
 const DEBUG = process.env.DEBUG === 'true' || process.env.NODE_ENV === 'development';
+const IS_PRODUCTION = !!process.env.VERCEL;
+const DEFAULT_SESSION_MAX_AGE_MS = 2 * 60 * 60 * 1000; // 2 hours
+const REMEMBER_ME_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+const SESSION_IDLE_TIMEOUT_MS = 60 * 60 * 1000; // 1 hour
 
 // Debug logging helper
 const log = (...args) => DEBUG && console.log(...args);
+
+function getUaHash(req) {
+  return crypto.createHash('sha256').update(req.headers['user-agent'] || '').digest('hex');
+}
+
+function getSessionMaxAgeMs(req) {
+  const maxAgeMs = Number(req?.session?.cookie?.maxAge);
+  if (Number.isFinite(maxAgeMs) && maxAgeMs > 0) return maxAgeMs;
+  return DEFAULT_SESSION_MAX_AGE_MS;
+}
+
+function persistAuthCookie(req, res) {
+  if (!req?.session?.authenticated || !process.env.SESSION_SECRET) return;
+  const maxAgeMs = getSessionMaxAgeMs(req);
+  const payload = {
+    authenticated: true,
+    bceidUsername: req.session.bceidUsername,
+    bceidPassword: req.session.bceidPassword,
+    userId: req.session.userId,
+    uaHash: req.session.uaHash,
+    lastActivity: req.session.lastActivity || Date.now(),
+    maxAgeMs,
+    exp: Date.now() + maxAgeMs
+  };
+  setAuthCookie(res, payload, ENCRYPTION_KEY, {
+    maxAgeMs,
+    secure: IS_PRODUCTION,
+    httpOnly: true,
+    sameSite: 'Strict',
+    path: '/'
+  });
+}
+
+function clearAllAuthState(req, res, done) {
+  clearAuthCookie(res, {
+    secure: IS_PRODUCTION,
+    httpOnly: true,
+    sameSite: 'Strict',
+    path: '/'
+  });
+  if (!req.session) {
+    if (typeof done === 'function') done();
+    return;
+  }
+  req.session.destroy((err) => {
+    if (typeof done === 'function') done(err);
+  });
+}
 
 // Encryption helpers for session credential storage
 function encrypt(text) {
@@ -145,27 +198,69 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: !!process.env.VERCEL, // HTTPS-only on Vercel, HTTP OK on localhost
+    secure: IS_PRODUCTION, // HTTPS-only on Vercel, HTTP OK on localhost
     httpOnly: true,
     sameSite: 'strict',
-    maxAge: 2 * 60 * 60 * 1000 // 2 hours
+    maxAge: DEFAULT_SESSION_MAX_AGE_MS
   }
   // No store needed - defaults to MemoryStore locally, cookies on Vercel serverless
 }));
+
+if (IS_PRODUCTION && !process.env.SESSION_SECRET) {
+  console.error('[SESSION] SESSION_SECRET is missing. Persistent auth cookie is disabled.');
+}
+
+// Rehydrate server session from encrypted auth cookie (serverless-safe fallback)
+app.use((req, res, next) => {
+  if (req.session?.authenticated) return next();
+  if (!process.env.SESSION_SECRET) return next();
+
+  const cookies = parseCookies(req.headers.cookie);
+  const authToken = cookies.tally_auth;
+  if (!authToken) return next();
+
+  const payload = unsealAuthPayload(authToken, ENCRYPTION_KEY);
+  if (!payload || !payload.authenticated) {
+    clearAuthCookie(res, { secure: IS_PRODUCTION, httpOnly: true, sameSite: 'Strict', path: '/' });
+    return next();
+  }
+
+  if (payload.exp && Date.now() > payload.exp) {
+    clearAuthCookie(res, { secure: IS_PRODUCTION, httpOnly: true, sameSite: 'Strict', path: '/' });
+    return next();
+  }
+
+  const currentUaHash = getUaHash(req);
+  if (payload.uaHash && payload.uaHash !== currentUaHash) {
+    clearAuthCookie(res, { secure: IS_PRODUCTION, httpOnly: true, sameSite: 'Strict', path: '/' });
+    return next();
+  }
+
+  req.session.authenticated = true;
+  req.session.bceidUsername = payload.bceidUsername;
+  req.session.bceidPassword = payload.bceidPassword;
+  req.session.userId = payload.userId;
+  req.session.lastActivity = payload.lastActivity || Date.now();
+  req.session.uaHash = payload.uaHash || currentUaHash;
+  req.session.cookie.maxAge = Number(payload.maxAgeMs) || DEFAULT_SESSION_MAX_AGE_MS;
+  return next();
+});
 
 // Session timeout middleware
 app.use((req, res, next) => {
   if (req.session && req.session.authenticated) {
     const lastActivity = req.session.lastActivity || Date.now();
     const now = Date.now();
-    const timeout = 60 * 60 * 1000; // 1 hour
+    const timeout = SESSION_IDLE_TIMEOUT_MS;
 
     if (now - lastActivity > timeout) {
-      req.session.destroy();
-      return res.status(401).json({ error: 'Session expired' });
+      return clearAllAuthState(req, res, () => {
+        return res.status(401).json({ error: 'Session expired. Please login again.' });
+      });
     }
 
     req.session.lastActivity = now;
+    persistAuthCookie(req, res);
   }
   next();
 });
@@ -175,10 +270,11 @@ const requireAuth = (req, res, next) => {
   if (req.session.authenticated) {
     // Session fingerprint check — detect token theft
     if (req.session.uaHash) {
-      const currentUaHash = crypto.createHash('sha256').update(req.headers['user-agent'] || '').digest('hex');
+      const currentUaHash = getUaHash(req);
       if (currentUaHash !== req.session.uaHash) {
-        req.session.destroy();
-        return res.status(401).json({ error: 'Session invalid' });
+        return clearAllAuthState(req, res, () => {
+          return res.status(401).json({ error: 'Session invalid. Please login again.' });
+        });
       }
     }
     next();
@@ -247,16 +343,28 @@ app.post('/api/login', loginLimiter, async (req, res) => {
     const userId = crypto.createHash('sha256').update(username).digest('hex').slice(0, 16);
     req.session.userId = userId;
     req.session.lastActivity = Date.now();
-    req.session.uaHash = crypto.createHash('sha256').update(req.headers['user-agent'] || '').digest('hex');
+    req.session.uaHash = getUaHash(req);
 
     // If "Remember Me" checked, extend session to 30 days
     if (rememberMe) {
-      req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+      req.session.cookie.maxAge = REMEMBER_ME_MAX_AGE_MS;
       log('[LOGIN] Remember Me enabled - session extended to 30 days');
+    } else {
+      req.session.cookie.maxAge = DEFAULT_SESSION_MAX_AGE_MS;
     }
 
-    log('[LOGIN] Login successful');
-    res.json({ success: true });
+    req.session.save((saveError) => {
+      if (saveError) {
+        console.error('[LOGIN] Session save error:', saveError);
+        return res.status(500).json({
+          success: false,
+          error: 'Failed to create session. Please try again.'
+        });
+      }
+      persistAuthCookie(req, res);
+      log('[LOGIN] Login successful');
+      res.json({ success: true });
+    });
   } catch (error) {
     console.error('[LOGIN] Error:', error);
     res.status(500).json({
@@ -268,8 +376,13 @@ app.post('/api/login', loginLimiter, async (req, res) => {
 
 // Logout endpoint
 app.post('/api/logout', (req, res) => {
-  req.session.destroy();
-  res.json({ success: true });
+  clearAllAuthState(req, res, (error) => {
+    if (error) {
+      console.error('[LOGOUT] Session destroy error:', error);
+      return res.status(500).json({ success: false, error: 'Logout failed. Please retry.' });
+    }
+    res.json({ success: true });
+  });
 });
 
 // Get current user info
@@ -414,9 +527,17 @@ app.get('/', async (req, res) => {
       req.session.bceidPassword = encrypt(password);
       req.session.userId = crypto.createHash('sha256').update(username).digest('hex').slice(0, 16);
       req.session.lastActivity = Date.now();
-      req.session.uaHash = crypto.createHash('sha256').update(req.headers['user-agent'] || '').digest('hex');
+      req.session.uaHash = getUaHash(req);
+      req.session.cookie.maxAge = DEFAULT_SESSION_MAX_AGE_MS;
       log('[AUTO-LOGIN] Local dev: authenticated with .env credentials');
-      return req.session.save(() => res.redirect('/app'));
+      return req.session.save((saveError) => {
+        if (saveError) {
+          console.error('[AUTO-LOGIN] Session save error:', saveError);
+          return res.redirect('/login.html');
+        }
+        persistAuthCookie(req, res);
+        return res.redirect('/app');
+      });
     }
   }
 

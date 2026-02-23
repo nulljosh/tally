@@ -3,7 +3,7 @@
 Track BC Self-Serve benefits with a secure login, per-user cache, and fast dashboard reads.
 
 **Live:** https://tally-production.vercel.app
-**Version:** 1.6.0
+**Version:** 1.6.1
 
 ## What It Does
 
@@ -11,7 +11,7 @@ Tally pulls your BC Self-Serve data — payments, messages, notifications — an
 
 Built for BC residents. Not affiliated with the Government of British Columbia.
 
-## Current Status (2026-02-19)
+## Current Status (2026-02-23)
 
 - Public landing page at `/` (static, no auth required)
 - Login-first flow enforced on `/app`
@@ -25,8 +25,9 @@ Built for BC residents. Not affiliated with the Government of British Columbia.
 2. User clicks "Get started" → `/login` with BCEID credentials
 3. Server validates credentials via Puppeteer against BC Self-Serve
 4. Session created, `userId` derived from SHA-256(username)
-5. Dashboard at `/app` reads latest data for that user scope
-6. Local scraper can upload fresh results to the same user blob
+5. Encrypted persistent auth cookie keeps login stable even when serverless memory resets
+6. Dashboard at `/app` reads latest data for that user scope
+7. Local scraper can upload fresh results to the same user blob
 
 ## Routes
 
@@ -51,7 +52,7 @@ Built for BC residents. Not affiliated with the Government of British Columbia.
 - Structured `/api/info` endpoint — payment amount, next date, unread count, active benefits
 - Public landing page with product explainer
 - Secure login with rate limiting (5 attempts / 15 min)
-- Session-based auth (httpOnly, secure cookies)
+- Session-based auth with encrypted persistent auth-cookie fallback (httpOnly, secure cookies)
 - Encrypted session credential storage (AES-256-CBC)
 - Puppeteer scraping via `@sparticuz/chromium` (works on Vercel)
 - Per-user Vercel Blob cache separation
@@ -93,12 +94,11 @@ npm run upload-blob   # Push results to Vercel Blob
 - `SESSION_SECRET` — encryption key for sessions
 - `UPLOAD_SECRET` — token for `/api/upload`
 - `BLOB_READ_WRITE_TOKEN` — auto-provided by Vercel
-- `UPSTASH_REDIS_REST_URL` — Upstash REST URL for persistent sessions
-- `UPSTASH_REDIS_REST_TOKEN` — Upstash REST token for persistent sessions
 
 **Optional (local .env):**
 - `BCEID_USERNAME` / `BCEID_PASSWORD` — default credentials
 - `PUPPETEER_EXECUTABLE_PATH` — override Chrome path locally
+- `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` — optional advanced Redis session store (not required)
 
 ## Project Layout
 
@@ -125,6 +125,12 @@ tally/
 ```
 
 ## Changelog
+
+### v1.6.1 — 2026-02-23
+- Add encrypted persistent auth cookie fallback for session continuity on Vercel (no Redis required)
+- Rehydrate `express-session` from auth cookie when server memory resets
+- Improve login/logout/session-expiry error handling with explicit messages
+- Add auth cookie unit tests (`npm run test:auth-cookie`)
 
 ### v1.5.0 — 2026-02-21
 - Minimal dashboard: single large income number centered in viewport (clamp 64-120px)
