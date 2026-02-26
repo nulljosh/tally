@@ -1,5 +1,7 @@
 #!/usr/bin/env node
-// One-time discovery script: maps the Monthly Reports form structure
+// Discovery script: maps the Monthly Reports form structure
+// Clicks "Resume" on the open report, walks through each page, captures fields
+// DOES NOT submit anything -- stops at confirmation/review pages
 // Run: node scripts/discover-monthly-reports.js
 // Output: data/monthly-reports-discovery/
 
@@ -9,6 +11,73 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const DATA_DIR = path.join(__dirname, '../data/monthly-reports-discovery');
+
+async function captureCurrentPage(page, pageNum, formStructure) {
+  const shotPath = path.join(DATA_DIR, `page-${String(pageNum).padStart(2, '0')}.png`);
+  await page.screenshot({ path: shotPath, fullPage: true });
+  console.log(`[*] Screenshot: ${shotPath}`);
+
+  const fields = await page.evaluate(() => {
+    const result = { url: location.href, title: document.title, fields: [], links: [], bodyPreview: '' };
+
+    // Form fields
+    document.querySelectorAll('input, select, textarea').forEach(el => {
+      if (el.type === 'hidden' && !el.name) return;
+      const label = el.labels?.[0]?.innerText?.trim() || '';
+      const closestLabel = !label ? (el.closest('div, td, li')?.querySelector('label, span.label, .field-label')?.innerText?.trim() || '') : '';
+      const options = el.tagName === 'SELECT'
+        ? Array.from(el.options).map(o => ({ value: o.value, text: o.text }))
+        : undefined;
+      result.fields.push({
+        tag: el.tagName.toLowerCase(),
+        type: el.type || '',
+        name: el.name || '',
+        id: el.id || '',
+        label: label || closestLabel,
+        value: el.value || '',
+        checked: el.checked || false,
+        disabled: el.disabled || false,
+        required: el.required || false,
+        options
+      });
+    });
+
+    // Radio/checkbox groups
+    document.querySelectorAll('fieldset, .form-group, .question, .radio-group, .checkbox-group').forEach(group => {
+      const legend = group.querySelector('legend, label:first-child, h3, h4, .group-label');
+      const inputs = group.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+      if (legend && inputs.length > 0) {
+        const choices = Array.from(inputs).map(i => ({
+          value: i.value,
+          name: i.name,
+          label: i.labels?.[0]?.innerText?.trim() || i.nextSibling?.textContent?.trim() || i.value,
+          checked: i.checked
+        }));
+        result.fields.push({
+          tag: 'group',
+          type: inputs[0].type,
+          label: legend.innerText.trim(),
+          name: inputs[0].name,
+          choices
+        });
+      }
+    });
+
+    // All clickable navigation elements
+    document.querySelectorAll('a, button, input[type="submit"], input[type="button"]').forEach(el => {
+      const text = (el.innerText || el.value || '').trim();
+      if (text && text.length < 100) {
+        result.links.push({ text, tag: el.tagName, href: el.href || '', type: el.type || '', id: el.id || '' });
+      }
+    });
+
+    result.bodyPreview = document.body.innerText.substring(0, 5000);
+    return result;
+  });
+
+  formStructure.push(fields);
+  return fields;
+}
 
 async function discover() {
   await fs.mkdir(DATA_DIR, { recursive: true });
@@ -62,127 +131,86 @@ async function discover() {
   }
   console.log('[+] Logged in');
 
-  // Find Monthly Reports link
-  await page.goto('https://myselfserve.gov.bc.ca/Auth', { waitUntil: 'networkidle2' });
+  // Navigate to Monthly Reports
+  console.log('[*] Going to Monthly Reports...');
+  await page.goto('https://myselfserve.gov.bc.ca/Auth/MonthlyReports', { waitUntil: 'networkidle2' });
   await new Promise(r => setTimeout(r, 2000));
 
-  const reportLink = await page.evaluate(() => {
-    const links = Array.from(document.querySelectorAll('a'));
-    for (const l of links) {
-      if ((l.innerText || '').toLowerCase().includes('monthly report')) return l.href;
+  let pageNum = 0;
+  const formStructure = [];
+
+  // Capture the landing page (report list)
+  pageNum++;
+  await captureCurrentPage(page, pageNum, formStructure);
+  console.log('[*] Captured landing page');
+
+  // Click "Resume" to enter the open report form
+  console.log('[*] Looking for Resume button...');
+  const clicked = await page.evaluate(() => {
+    const els = [...document.querySelectorAll('a, button, input[type="submit"]')];
+    for (const el of els) {
+      const text = (el.innerText || el.value || '').trim().toLowerCase();
+      if (text.includes('resume') || text.includes('start') || text.includes('begin')) {
+        el.click();
+        return (el.innerText || el.value || '').trim();
+      }
     }
     return null;
   });
 
-  if (!reportLink) {
-    console.log('[!] Monthly Reports link not found');
-    await page.screenshot({ path: path.join(DATA_DIR, 'home-page.png'), fullPage: true });
+  if (!clicked) {
+    console.log('[!] No Resume/Start button found. Check screenshot.');
     await browser.close();
     process.exit(1);
   }
 
-  console.log(`[*] Found link: ${reportLink}`);
-  await page.goto(reportLink, { waitUntil: 'networkidle2' });
-  await new Promise(r => setTimeout(r, 2000));
+  console.log(`[+] Clicked: "${clicked}"`);
+  await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 }).catch(() => {});
+  await new Promise(r => setTimeout(r, 3000));
 
-  // Screenshot and extract each page
-  let pageNum = 0;
-  const formStructure = [];
-
-  async function captureCurrentPage() {
-    pageNum++;
-    const shotPath = path.join(DATA_DIR, `page-${String(pageNum).padStart(2, '0')}.png`);
-    await page.screenshot({ path: shotPath, fullPage: true });
-    console.log(`[*] Screenshot: ${shotPath}`);
-
-    const fields = await page.evaluate(() => {
-      const result = { url: location.href, title: document.title, fields: [], links: [], bodyPreview: '' };
-
-      // Form fields
-      document.querySelectorAll('input, select, textarea').forEach(el => {
-        const label = el.labels?.[0]?.innerText?.trim() || el.name || el.id || '';
-        const options = el.tagName === 'SELECT'
-          ? Array.from(el.options).map(o => ({ value: o.value, text: o.text }))
-          : undefined;
-        result.fields.push({
-          tag: el.tagName.toLowerCase(),
-          type: el.type || '',
-          name: el.name || '',
-          id: el.id || '',
-          label,
-          value: el.value || '',
-          options
-        });
-      });
-
-      // Radio/checkbox groups
-      document.querySelectorAll('fieldset, .form-group, .question').forEach(group => {
-        const legend = group.querySelector('legend, label, h3, h4');
-        const inputs = group.querySelectorAll('input[type="radio"], input[type="checkbox"]');
-        if (legend && inputs.length > 0) {
-          const choices = Array.from(inputs).map(i => ({
-            value: i.value,
-            label: i.labels?.[0]?.innerText?.trim() || i.value,
-            checked: i.checked
-          }));
-          result.fields.push({
-            tag: 'group',
-            type: inputs[0].type,
-            label: legend.innerText.trim(),
-            choices
-          });
-        }
-      });
-
-      // Navigation links (Next, Continue, Submit, etc.)
-      document.querySelectorAll('a, button, input[type="submit"]').forEach(el => {
-        const text = (el.innerText || el.value || '').trim();
-        if (text.match(/next|continue|submit|save|back|previous|cancel/i)) {
-          result.links.push({ text, tag: el.tagName, href: el.href || '' });
-        }
-      });
-
-      result.bodyPreview = document.body.innerText.substring(0, 3000);
-      return result;
-    });
-
-    formStructure.push(fields);
-    return fields;
-  }
-
-  // Capture initial page
-  let currentPage = await captureCurrentPage();
-
-  // Click through pages (max 20 to prevent infinite loops)
+  // Walk through form pages (max 20)
   for (let i = 0; i < 20; i++) {
-    const nextLink = currentPage.links.find(l =>
-      l.text.match(/^(next|continue)$/i) && !l.text.match(/submit/i)
-    );
+    pageNum++;
+    const currentPage = await captureCurrentPage(page, pageNum, formStructure);
 
-    if (!nextLink) {
-      console.log('[*] No more Next/Continue buttons found. Stopping.');
+    console.log(`[*] Page ${pageNum}: ${currentPage.url}`);
+    console.log(`    Fields: ${currentPage.fields.length}`);
+    console.log(`    Links: ${currentPage.links.map(l => l.text).join(', ')}`);
+
+    // Check if this is a review/confirmation/submit page -- STOP here
+    const bodyLower = currentPage.bodyPreview.toLowerCase();
+    if (bodyLower.includes('review your') || bodyLower.includes('confirm and submit') || bodyLower.includes('review and submit')) {
+      console.log('[!] Hit review/confirmation page. Stopping before submit.');
       break;
     }
 
-    console.log(`[*] Clicking: ${nextLink.text}`);
+    // Look for Next/Continue/Save and Continue button
+    const nextBtn = currentPage.links.find(l => {
+      const t = l.text.toLowerCase();
+      return t.match(/^(next|continue|save and continue|save & continue|proceed)$/i) ||
+             t.includes('next') || t.includes('continue');
+    });
+
+    // Exclude submit/finish buttons
+    const isSubmit = nextBtn && nextBtn.text.toLowerCase().match(/submit|finish|complete|confirm/);
+
+    if (!nextBtn || isSubmit) {
+      console.log(`[*] No safe next button found. Last link texts: ${currentPage.links.map(l => l.text).join(', ')}`);
+      break;
+    }
+
+    console.log(`[*] Clicking: "${nextBtn.text}"`);
     await page.evaluate((text) => {
-      const els = [...document.querySelectorAll('a, button, input[type="submit"]')];
-      const el = els.find(e => (e.innerText || e.value || '').trim().toLowerCase() === text.toLowerCase());
+      const els = [...document.querySelectorAll('a, button, input[type="submit"], input[type="button"]')];
+      const el = els.find(e => {
+        const t = (e.innerText || e.value || '').trim();
+        return t === text;
+      });
       if (el) el.click();
-    }, nextLink.text);
+    }, nextBtn.text);
 
     await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 }).catch(() => {});
     await new Promise(r => setTimeout(r, 2000));
-
-    // Check if we hit a submit/confirmation page
-    const bodyText = await page.evaluate(() => document.body.innerText.toLowerCase());
-    if (bodyText.includes('confirm') || bodyText.includes('review your')) {
-      console.log('[!] Hit confirmation/review page. Stopping before submit.');
-      await captureCurrentPage();
-      break;
-    }
-
-    currentPage = await captureCurrentPage();
   }
 
   // Save structure

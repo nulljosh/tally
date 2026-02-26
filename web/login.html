@@ -233,17 +233,6 @@
     const errorMsg = document.getElementById('error-msg');
     const successMsg = document.getElementById('success-msg');
 
-    // Auto-login on localhost — fetch .env creds, fill fields, submit
-    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-      fetch('/api/dev-creds').then(r => r.json()).then(data => {
-        if (data.username && data.password) {
-          document.getElementById('username').value = data.username;
-          document.getElementById('password').value = data.password;
-          setTimeout(() => submitBtn.click(), 300);
-        }
-      }).catch(() => {});
-    }
-
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 

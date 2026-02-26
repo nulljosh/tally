@@ -1,0 +1,428 @@
+[
+  {
+    "url": "https://myselfserve.gov.bc.ca/Auth/DynamicForm#!/FormPage/SD81/5067335",
+    "body": "My Self Serve\n\nSkip to main content\nSkip to navigation\nAccessibility Statement\n Menu\nMonthly Report\nSection 1: Eligibility\n0% Complete\n Section 1 of 5\nAnswer each question by selecting either “Yes” or “No”. If applicable, your spouse is also required to answer the following questions.\nAre you still in need of assistance? \nYes\nNo\n Previous\nContinue \nHome\nDisclaimer\nPrivacy\nTerms of Use\nAccessibility\nCopyright",
+    "fields": [
+      {
+        "tag": "input",
+        "type": "radio",
+        "name": "NeedOfAssistance_177",
+        "id": "",
+        "label": "Yes",
+        "value": "Yes",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "radio",
+        "name": "NeedOfAssistance_177",
+        "id": "",
+        "label": "No",
+        "value": "No",
+        "checked": false
+      }
+    ],
+    "buttons": [
+      "Skip to main content",
+      "Skip to navigation",
+      "Accessibility Statement",
+      "Menu",
+      "Save",
+      "Save & Close",
+      "Sign Out",
+      "Section 1 of 5",
+      "Previous",
+      "Continue",
+      "Home",
+      "Disclaimer",
+      "Privacy",
+      "Terms of Use",
+      "Accessibility",
+      "Copyright",
+      "Yes, I'm still here"
+    ],
+    "sectionTitle": "Section 1: Eligibility"
+  },
+  {
+    "url": "https://myselfserve.gov.bc.ca/Auth/DynamicForm#!/FormPage/SD81/5067335",
+    "body": "My Self Serve\n\nSkip to main content\nSkip to navigation\nAccessibility Statement\n Menu\nMonthly Report\nSection 2: Income Declaration\n33% Complete\n Section 2 of 5\nIn the options below declare any income received in the previous month. If applicable, your spouse is also required to complete. Click \"More Information\" to learn more about income types.\nYour net employment income: \n More Information\n$\t\nYour employment insurance: \n More Information\n$\t\nYour spousal support/alimony: \n More Information\n$\t\nYour child support: \n More Information\n$\t\nYour WorkBC financial support: \n$\t\nYour student funding: \n More Information\n$\t\nYour rental income: \n More Information\n$\t\nYour room/board income: \n More Information\n$\t\nYour worker's compensation: \n More Information\n$\t\nYour private pensions (e.g. retirement, disability): \n More Information\n$\t\nYour OAS/GIS: \n More Information\n$\t\nYour trust income: \n$\t\nYour Canada Pension Plan (CPP): \n\nIncluding Canada Pension Plan/Quebec Pension Plan, Canada Pension Plan Disability, Disabled Contributor’s Child Benefit, Canada Pension Plan Survivors and Canada Pension Plan Orphans.\n\n More Information\n$\t\nYour tax credits (e.g. GST credit): \n$\t\nYour child tax benefits: \n$\t\nYour income tax refund: \n$\t\nYour all other income/money received: \n\nIf you declare money paid in relation to an injury, declare if it is to pay expenses resulting from that injury.\n\n$\t\nYour income of dependent children: \n\nDeclare your dependent child’s net employment income. Declare other sources of dependent child income in the appropriate income type fields.\n\n$\t\n Previous\nContinue \nHome\nDisclaimer\nPrivacy\nTerms of Use\nAccessibility\nCopyright",
+    "fields": [
+      {
+        "tag": "input",
+        "type": "number",
+        "name": "",
+        "id": "",
+        "label": "",
+        "value": "0",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "number",
+        "name": "",
+        "id": "",
+        "label": "",
+        "value": "0",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "number",
+        "name": "",
+        "id": "",
+        "label": "",
+        "value": "0",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "number",
+        "name": "",
+        "id": "",
+        "label": "",
+        "value": "0",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "number",
+        "name": "",
+        "id": "",
+        "label": "",
+        "value": "0",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "number",
+        "name": "",
+        "id": "",
+        "label": "",
+        "value": "0",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "number",
+        "name": "",
+        "id": "",
+        "label": "",
+        "value": "0",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "number",
+        "name": "",
+        "id": "",
+        "label": "",
+        "value": "0",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "number",
+        "name": "",
+        "id": "",
+        "label": "",
+        "value": "0",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "number",
+        "name": "",
+        "id": "",
+        "label": "",
+        "value": "0",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "number",
+        "name": "",
+        "id": "",
+        "label": "",
+        "value": "0",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "number",
+        "name": "",
+        "id": "",
+        "label": "",
+        "value": "0",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "number",
+        "name": "",
+        "id": "",
+        "label": "",
+        "value": "0",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "number",
+        "name": "",
+        "id": "",
+        "label": "",
+        "value": "0",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "number",
+        "name": "",
+        "id": "",
+        "label": "",
+        "value": "0",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "number",
+        "name": "",
+        "id": "",
+        "label": "",
+        "value": "0",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "number",
+        "name": "",
+        "id": "",
+        "label": "",
+        "value": "0",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "number",
+        "name": "",
+        "id": "",
+        "label": "",
+        "value": "0",
+        "checked": false
+      }
+    ],
+    "buttons": [
+      "Skip to main content",
+      "Skip to navigation",
+      "Accessibility Statement",
+      "Menu",
+      "Save",
+      "Save & Close",
+      "Sign Out",
+      "Section 2 of 5",
+      "More Information",
+      "More Information",
+      "More Information",
+      "More Information",
+      "More Information",
+      "More Information",
+      "More Information",
+      "More Information",
+      "More Information",
+      "More Information",
+      "More Information",
+      "Previous",
+      "Continue",
+      "Home",
+      "Disclaimer",
+      "Privacy",
+      "Terms of Use",
+      "Accessibility",
+      "Copyright",
+      "Yes, I'm still here"
+    ],
+    "sectionTitle": "Section 2: Income Declaration"
+  },
+  {
+    "url": "https://myselfserve.gov.bc.ca/Auth/DynamicForm#!/FormPage/SD81/5067335",
+    "body": "My Self Serve\n\nSkip to main content\nSkip to navigation\nAccessibility Statement\n Menu\nMonthly Report\nSection 3: Other Declarations\n90% Complete\n Section 3 of 5\nDo you have any additional changes to declare, including income? \n\nYou can provide more information about any of the questions answered above. If you are not sure if your change is a change in circumstance, include it here.\nA “change in circumstance” can include, but is not limited to:\n•  family composition — e.g., add or remove a spouse or dependant\n•  income — e.g., monthly employment income or lump sum payments (such as ICBC or a settlement)\n•  assets\n•  temporarily being out of province\n\nYes\nNo\n Previous\nContinue \nHome\nDisclaimer\nPrivacy\nTerms of Use\nAccessibility\nCopyright",
+    "fields": [
+      {
+        "tag": "input",
+        "type": "radio",
+        "name": "OtherChanges_969",
+        "id": "",
+        "label": "Yes",
+        "value": "Yes",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "radio",
+        "name": "OtherChanges_969",
+        "id": "",
+        "label": "No",
+        "value": "No",
+        "checked": false
+      }
+    ],
+    "buttons": [
+      "Skip to main content",
+      "Skip to navigation",
+      "Accessibility Statement",
+      "Menu",
+      "Save",
+      "Save & Close",
+      "Sign Out",
+      "Section 3 of 5",
+      "Previous",
+      "Continue",
+      "Home",
+      "Disclaimer",
+      "Privacy",
+      "Terms of Use",
+      "Accessibility",
+      "Copyright",
+      "Yes, I'm still here"
+    ],
+    "sectionTitle": "Section 3: Other Declarations"
+  },
+  {
+    "url": "https://myselfserve.gov.bc.ca/Auth/DynamicForm#!/FormPage/SD81/5067335",
+    "body": "My Self Serve\n\nSkip to main content\nSkip to navigation\nAccessibility Statement\n Menu\nMonthly Report\nSection 4: Add Supporting Documents\n93% Complete\n Section 4 of 5\nAdding Supporting Documents to your Monthly Report\n\nSupporting documents must be submitted before the fifth of the month to ensure that your monthly report can be processed.\nIncome verification documents must include the declared amount and date received. Examples of acceptable documents include:\n•  paystubs\n•  employer letters\n•  cash payment receipts\n•  financial records\n\nSupporting Documents\n More Information\n Attach Document\n Previous\nContinue \nHome\nDisclaimer\nPrivacy\nTerms of Use\nAccessibility\nCopyright",
+    "fields": [
+      {
+        "tag": "input",
+        "type": "file",
+        "name": "",
+        "id": "",
+        "label": "Attach Document",
+        "value": "",
+        "checked": false
+      }
+    ],
+    "buttons": [
+      "Skip to main content",
+      "Skip to navigation",
+      "Accessibility Statement",
+      "Menu",
+      "Save",
+      "Save & Close",
+      "Sign Out",
+      "Section 4 of 5",
+      "More Information",
+      "Previous",
+      "Continue",
+      "Home",
+      "Disclaimer",
+      "Privacy",
+      "Terms of Use",
+      "Accessibility",
+      "Copyright",
+      "Yes, I'm still here"
+    ],
+    "sectionTitle": "Section 4: Add Supporting Documents"
+  },
+  {
+    "url": "https://myselfserve.gov.bc.ca/Auth/DynamicForm#!/FormPage/SD81/5067335",
+    "body": "My Self Serve\n\nSkip to main content\nSkip to navigation\nAccessibility Statement\n Menu\nMonthly Report\nSection 5: Personal Information\n95% Complete\n Section 5 of 5\nYour Social Insurance Number (SIN): \nPrimary phone number: \n Previous\nContinue \nHome\nDisclaimer\nPrivacy\nTerms of Use\nAccessibility\nCopyright",
+    "fields": [
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "KeyPlayerSIN",
+        "id": "",
+        "label": "",
+        "value": "744 032 038",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "KeyPlayerPhone",
+        "id": "",
+        "label": "",
+        "value": "(778) 846-2726",
+        "checked": false
+      }
+    ],
+    "buttons": [
+      "Skip to main content",
+      "Skip to navigation",
+      "Accessibility Statement",
+      "Menu",
+      "Save",
+      "Save & Close",
+      "Sign Out",
+      "Section 5 of 5",
+      "Previous",
+      "Continue",
+      "Home",
+      "Disclaimer",
+      "Privacy",
+      "Terms of Use",
+      "Accessibility",
+      "Copyright",
+      "Yes, I'm still here"
+    ],
+    "sectionTitle": "Section 5: Personal Information"
+  },
+  {
+    "url": "https://myselfserve.gov.bc.ca/Auth/MonthlyReports/Submission?appID=5067335",
+    "body": "My Self Serve\n\nSkip to main content\nSkip to navigation\nAccessibility Statement\nSign Out \nNotifications\nMessages \nService Requests\nMonthly Reports\nPayment Info\nEmployment Plans\nAccount Info\n Save & Close (resume later)\nConfirm your Monthly Report\n\nWhat to expect next?\nReview your monthly report below. You will be asked to provide your 4-digit pin (and spouse if applicable) to complete your monthly report submission.\nIf more information is needed to process your monthly report, the ministry will contact you.\n\n\tMonthly Report\nAvoid delays, submit by the 5th\n\n\nThe personal information requested on this form is collected by the Ministry of Social Development and Poverty Reduction pursuant to sections 26(c) of the Freedom of Information and Protection of Privacy Act for the purpose of administering the Employment and Assistance Act and Employment and Assistance for Persons with Disabilities Act. If you have any questions about the collection, use or disclosure of this information, please contact the Ministry of Social Development and Poverty Reduction at 1-866-866-0800\n1.Since your last declaration\nAre you still in need of assistance?\t\nX\n Yes  No\nHas your family unit received or disposed of any assets?\t Yes \nX\n No\nAny changes to your shelter costs?\t Yes \nX\n No\nAny changes in Dependants or Persons living in the home?\t Yes \nX\n No\n\tApplicant\tSpouse\t\nAny employment changes?\t Yes \nX\n No\t Yes  No\nAre you attending / enrolled in school or training?\t Yes \nX\n No\t Yes  No\nAre you looking for work?\t Yes \nX\n No\t Yes  No\nHave you moved or entered a facility?\t Yes \nX\n No\t Yes  No\nAny outstanding warrants for your arrest?\t Yes \nX\n No\t Yes  No\nPlease explain all changes including income and submit proof:\n2.Declare all income and submit proof. Enter “0” if none\n\tApplicant\tSpouse\nNet Employment Income\t$0.00\t\nEmployment Insurance\t$0.00\t\nSpousal Support / Alimony\t$0.00\t\nChild Support\t$0.00\t\nWorkBC Financial Support\t$0.00\t\nStudent Funding (eg: Loans, Bursaries)\t$0.00\t\nRental Income\t$0.00\t\nRoom / Board Income\t$0.00\t\nWorker's Compensation\t$0.00\t\nPrivate Pensions (eg: Retirement, Disability)\t$0.00\t\nOAS / GIS\t$0.00\t\nTrust Income\t$0.00\t\nCanada Pension Plan (CPP)\t$0.00\t\nTax Credits (eg: GST Credit)\t$0.00\t\nChild Tax Benefits\t$0.00\t\nIncome Tax Refund\t$0.00\t\nAll other income / money received\t$0.00\t\nIncome of Dependent Children\t$0.00\t\n3.Declaration: I understand that the ministry may disclose this information to verify continuing eligibility for assistance under the above Acts and Regulations. I declare that all of the information provided on this form to the Ministry of Social Development and Poverty Reduction is true and complete.\nApplicant Signature\nJoshua Trommel\n\t\nDate (yyyy-mmm-dd)\n2026-Feb-26\n\t\nSpouse Signature\n\t\nDate (yyyy-mmm-dd)\n\n\nApplicant Print Name\nJoshua Trommel\n\t\nSpouse Print Name\n\n\nApplicant Telephone\n7788462726\n\t\nSocial Insurance Number\n744032038\n\t\nSpouse Telephone\n\t\nSocial Insurance Number\nHR0081 (2021/09/13)\n\nNotice:\n\nThe personal information requested on this form is collected by the Ministry of Social Development and Poverty Reduction pursuant to sections 26(c) of the Freedom of Information and Protection of Privacy Act for the purpose of administering the Employment and Assistance Act and Employment and Assistance for Persons with Disabilities Act. If you have any questions about the collection, use or disclosure of this information, please contact the Ministry of Social Development and Poverty Reduction at 1-866-866-0800\n\nDeclaration:\n\n I understand that the ministry may disclose this information to verify continuing eligibility for assistance under the above Acts and Regulations.\n\nI declare that all of the information provided on this form to the Ministry of Social Development and Poverty Reduction is true and complete.\nSubmit Monthly Report\nEnter your 4-digit PIN\n\n Previous\n\n\n\nHome\nDisclaimer\nPrivacy\nTerms of Use\nAccessibility\nCopyright",
+    "fields": [
+      {
+        "tag": "input",
+        "type": "checkbox",
+        "name": "DeclarationCB",
+        "id": "declare_cb",
+        "label": "I understand that the ministry may disclose this information to verify continuing eligibility for assistance under the above Acts and Regulations.\n\nI declare that all of the information provided on this form to the Ministry of Social Development and Poverty Reduction is true and complete.",
+        "value": "true",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "password",
+        "name": "KeyPlayerPIN",
+        "id": "kp_pin",
+        "label": "",
+        "value": "",
+        "checked": false
+      },
+      {
+        "tag": "input",
+        "type": "button",
+        "name": "",
+        "id": "btnSubmit",
+        "label": "",
+        "value": "Submit Request",
+        "checked": false
+      }
+    ],
+    "buttons": [
+      "Skip to main content",
+      "Skip to navigation",
+      "Accessibility Statement",
+      "Menu",
+      "Sign Out",
+      "Notifications",
+      "Messages",
+      "Service Requests",
+      "Monthly Reports",
+      "Payment Info",
+      "Employment Plans",
+      "Account Info",
+      "Sign Out",
+      "Save & Close (resume later)",
+      "Previous",
+      "View Status",
+      "Home",
+      "Disclaimer",
+      "Privacy",
+      "Terms of Use",
+      "Accessibility",
+      "Copyright",
+      "Yes, I'm still here"
+    ],
+    "sectionTitle": "Confirm your Monthly Report"
+  }
+]

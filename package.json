@@ -8,16 +8,13 @@
     "test": "node tools/test.js",
     "test:cors": "node tools/test-cors-utils.js",
     "test:auth-cookie": "node tools/test-auth-cookie.js",
-    "test:productivity": "node tools/test-productivity.js",
     "test:scraper": "node src/scraper.js",
     "api": "node src/api.js",
     "dev": "nodemon src/api.js",
     "watch": "concurrently \"nodemon src/api.js\" \"browser-sync start --proxy localhost:3000 --files 'web/**/*.html' --no-open\"",
     "start": "node src/api.js",
     "upload-blob": "node scripts/upload-to-blob.js",
-    "info": "bash scripts/tally-info.sh",
-    "brute": "nodemon brute/tools/brute-force-web.js",
-    "mock-server": "nodemon brute/mock-targets/mock-server.js"
+    "info": "bash scripts/tally-info.sh"
   },
   "keywords": [],
   "author": "",
@@ -31,7 +28,6 @@
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
     "express-session": "^1.18.2",
-    "pac-resolver": "^7.0.1",
     "puppeteer-core": "^24.37.5"
   },
   "devDependencies": {
