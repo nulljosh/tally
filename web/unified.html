@@ -562,6 +562,17 @@
       </div>
 
 
+      <!-- Monthly Reports -->
+      <div id="monthly-reports" style="display: none; max-width: 600px; margin: 24px auto; padding: 0 16px;">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Monthly Reports</div>
+            <span class="status" id="mr-status">--</span>
+          </div>
+          <div id="mr-content" style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;"></div>
+        </div>
+      </div>
+
       <!-- BCeID Login Prompt (shown when no data and no env credentials) -->
       <div id="bceid-login-prompt" style="display: none;">
         <div class="card" style="max-width: 480px; margin: 40px auto;">
@@ -981,6 +992,53 @@
           }
         } else {
           paymentInfo.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 20px;">No payment data</div>';
+        }
+
+        // Monthly Reports section
+        const mrSection = sections['Monthly Reports'];
+        const mrDiv = document.getElementById('monthly-reports');
+        const mrStatus = document.getElementById('mr-status');
+        const mrContent = document.getElementById('mr-content');
+
+        if (mrSection && mrSection.success) {
+          mrDiv.style.display = 'block';
+          const periods = mrSection.periods || [];
+          const statuses = mrSection.statuses || [];
+          const links = mrSection.reportLinks || [];
+
+          // Status badge
+          const hasOverdue = statuses.some(s => s.toLowerCase().includes('overdue'));
+          const hasPending = statuses.some(s => s.toLowerCase().includes('pending') || s.toLowerCase().includes('not submitted'));
+          const hasSubmitted = statuses.some(s => s.toLowerCase().includes('submitted') || s.toLowerCase().includes('completed'));
+
+          if (hasOverdue) {
+            mrStatus.textContent = 'Overdue';
+            mrStatus.className = 'status status-error';
+          } else if (hasPending) {
+            mrStatus.textContent = 'Pending';
+            mrStatus.className = 'status status-warning';
+          } else if (hasSubmitted) {
+            mrStatus.textContent = 'Submitted';
+            mrStatus.className = 'status status-success';
+          } else {
+            mrStatus.textContent = periods.length + ' periods';
+            mrStatus.className = 'status';
+          }
+
+          // Content
+          let html = '';
+          if (periods.length > 0) {
+            html += '<div style="margin-bottom: 8px;"><strong>Report Periods:</strong> ' + periods.slice(0, 6).join(', ') + '</div>';
+          }
+          if (mrSection.tableData && mrSection.tableData.length > 0) {
+            html += '<div style="font-size: 12px; margin-top: 8px;">';
+            mrSection.tableData.slice(0, 5).forEach(row => {
+              html += '<div style="padding: 4px 0; border-bottom: 1px solid var(--glass-border);">' + row + '</div>';
+            });
+            html += '</div>';
+          }
+          if (html === '') html = 'Monthly reports data found. ' + links.length + ' report link(s) detected.';
+          mrContent.innerHTML = html;
         }
 
       } catch (err) {

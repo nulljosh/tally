@@ -369,6 +369,12 @@ async function checkAllSections(options = {}) {
       }
     }
 
+    // Scrape Monthly Reports (reuses same authenticated session)
+    console.log('[*] Moving to Monthly Reports...');
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    const monthlyReportsResult = await scrapeMonthlyReports(page);
+    allResults['Monthly Reports'] = monthlyReportsResult;
+
     // Save cookies after all scraping
     await saveCookies(page);
 
@@ -448,8 +454,179 @@ async function checkAllSections(options = {}) {
   }
 }
 
+async function scrapeMonthlyReports(page) {
+  console.log(`\n${'='.repeat(60)}`);
+  console.log('[*] Scraping: Monthly Reports');
+  console.log('='.repeat(60));
+
+  try {
+    // Navigate to authenticated home to find Monthly Reports link
+    await page.goto('https://myselfserve.gov.bc.ca/Auth', {
+      waitUntil: 'networkidle2',
+      timeout: 30000
+    });
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Find and click Monthly Reports link
+    const reportLink = await page.evaluate(() => {
+      const links = Array.from(document.querySelectorAll('a'));
+      for (const link of links) {
+        const text = link.innerText?.trim().toLowerCase() || '';
+        if (text.includes('monthly report')) {
+          return link.href;
+        }
+      }
+      return null;
+    });
+
+    if (!reportLink) {
+      console.log('[!] Monthly Reports link not found on home page');
+      return { error: 'Monthly Reports link not found', success: false };
+    }
+
+    console.log(`[*] Found Monthly Reports link: ${reportLink}`);
+    await page.goto(reportLink, { waitUntil: 'networkidle2', timeout: 30000 });
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Check we didn't get kicked to login
+    if (page.url().includes('logon') || page.url().includes('Login')) {
+      return { error: 'Session expired', success: false };
+    }
+
+    // Screenshot the landing page (report list)
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const screenshotDir = path.join(DATA_DIR, 'screenshots');
+    await fs.mkdir(screenshotDir, { recursive: true }).catch(() => {});
+    const landingShot = path.join(screenshotDir, `monthly-reports-${timestamp}.png`);
+    await page.screenshot({ path: landingShot, fullPage: true });
+    console.log(`[*] Screenshot: ${landingShot}`);
+
+    // Extract report list from the page
+    const reportData = await page.evaluate(() => {
+      const body = document.body.innerText;
+      const allText = [];
+      const tableData = [];
+      const reports = [];
+
+      // Extract table rows (report history)
+      const tables = document.querySelectorAll('table');
+      tables.forEach(table => {
+        const rows = table.querySelectorAll('tr');
+        rows.forEach(row => {
+          const cells = row.querySelectorAll('td, th');
+          const rowData = Array.from(cells).map(cell => cell.innerText.trim());
+          if (rowData.length > 0 && rowData.some(d => d.length > 0)) {
+            tableData.push(rowData.join(' | '));
+          }
+        });
+      });
+
+      // Extract list items
+      document.querySelectorAll('li, p, div.content').forEach(el => {
+        const text = el.innerText?.trim();
+        if (text && text.length > 10) allText.push(text);
+      });
+
+      // Look for report period patterns (e.g., "January 2026", "2026/JAN")
+      const periodPattern = /((?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}|\d{4}\s*\/\s*[A-Z]{3})/gi;
+      const periods = body.match(periodPattern) || [];
+
+      // Look for status keywords
+      const statusPattern = /(?:submitted|pending|overdue|not submitted|completed|in progress|due)/gi;
+      const statuses = body.match(statusPattern) || [];
+
+      // Look for clickable report links (most recent)
+      const reportLinks = [];
+      document.querySelectorAll('a').forEach(a => {
+        const text = a.innerText?.trim() || '';
+        if (text.match(/report|view|edit|submit|complete/i) && !text.match(/skip|menu|nav/i)) {
+          reportLinks.push({ text, href: a.href });
+        }
+      });
+
+      return {
+        allText: [...new Set(allText)],
+        tableData: [...new Set(tableData)],
+        periods: [...new Set(periods)],
+        statuses: [...new Set(statuses)],
+        reportLinks,
+        pageTitle: document.title,
+        url: window.location.href,
+        bodyLength: body.length
+      };
+    });
+
+    console.log(`[+] Found ${reportData.tableData.length} table rows`);
+    console.log(`[+] Found ${reportData.periods.length} report periods`);
+    console.log(`[+] Found ${reportData.reportLinks.length} report links`);
+
+    // Try to click into the most recent report for details
+    let detailData = null;
+    let detailShot = null;
+    if (reportData.reportLinks.length > 0) {
+      const firstLink = reportData.reportLinks[0];
+      console.log(`[*] Clicking into report: ${firstLink.text}`);
+
+      await page.evaluate((href) => {
+        const link = document.querySelector(`a[href="${href}"]`);
+        if (link) link.click();
+      }, firstLink.href);
+
+      await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 }).catch(() => {});
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      detailShot = path.join(screenshotDir, `monthly-reports-detail-${timestamp}.png`);
+      await page.screenshot({ path: detailShot, fullPage: true });
+
+      detailData = await page.evaluate(() => {
+        const body = document.body.innerText;
+        const fields = [];
+
+        // Extract form fields and their values
+        document.querySelectorAll('label, .field-label, th').forEach(label => {
+          const text = label.innerText?.trim();
+          if (text && text.length > 2 && text.length < 200) {
+            // Find associated value
+            const next = label.nextElementSibling;
+            const value = next ? next.innerText?.trim() : '';
+            fields.push({ label: text, value });
+          }
+        });
+
+        // Extract input values
+        document.querySelectorAll('input, select, textarea').forEach(input => {
+          const name = input.name || input.id || '';
+          const value = input.value || '';
+          const label = input.labels?.[0]?.innerText?.trim() || name;
+          if (label) fields.push({ label, value });
+        });
+
+        return {
+          fields,
+          bodyText: body.substring(0, 5000),
+          url: window.location.href
+        };
+      });
+
+      console.log(`[+] Detail page: ${detailData.fields.length} fields extracted`);
+    }
+
+    return {
+      success: true,
+      ...reportData,
+      detailData,
+      screenshot: landingShot,
+      detailScreenshot: detailShot
+    };
+
+  } catch (error) {
+    console.log(`[!] Error scraping Monthly Reports: ${error.message}`);
+    return { error: error.message, success: false };
+  }
+}
+
 // Export for use as module
-module.exports = { checkAllSections, scrapeSection };
+module.exports = { checkAllSections, scrapeSection, scrapeMonthlyReports };
 
 // Run standalone
 if (require.main === module) {

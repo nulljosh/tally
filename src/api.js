@@ -486,6 +486,18 @@ app.get('/api/info', requireAuth, async (req, res) => {
     }
     if (activeBenefits.length === 0) activeBenefits.push('Income Assistance');
 
+    // Extract monthly reports
+    const reportsSection = data.sections['Monthly Reports'];
+    let monthlyReports = null;
+    if (reportsSection && reportsSection.success) {
+      monthlyReports = {
+        periods: reportsSection.periods || [],
+        statuses: reportsSection.statuses || [],
+        reportCount: (reportsSection.reportLinks || []).length,
+        hasDetail: !!reportsSection.detailData
+      };
+    }
+
     res.set('Cache-Control', 'private, max-age=300');
     res.json({
       nextPayment: {
@@ -494,6 +506,7 @@ app.get('/api/info', requireAuth, async (req, res) => {
       },
       unreadMessages: unreadCount,
       activeBenefits: [...new Set(activeBenefits)],
+      monthlyReports,
       lastUpdated: data.timestamp || data.checkedAt || new Date().toISOString()
     });
   } catch (error) {
