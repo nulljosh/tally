@@ -418,15 +418,21 @@
     }
 
     .logout-btn {
-      color: var(--text-primary);
-      border: 1px solid var(--glass-border);
-      background: var(--card-bg);
-      font-weight: 600;
-      min-height: 36px;
+      color: var(--text-secondary);
+      border: none;
+      background: none;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 10px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: color 0.15s, background 0.15s;
+      flex-shrink: 0;
     }
 
     .logout-btn:hover {
-      border-color: var(--accent);
+      color: var(--error);
+      background: rgba(255, 59, 48, 0.1);
     }
     .nav-dropdown-trigger .badge-count {
       background: var(--accent);
@@ -446,11 +452,12 @@
     }
     .nav-dropdown {
       display: none;
-      position: absolute;
-      top: calc(100% + 8px);
-      right: 0;
-      width: 360px;
-      max-height: 420px;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: min(420px, 90vw);
+      max-height: 60vh;
       overflow-y: auto;
       background: var(--card-bg);
       backdrop-filter: saturate(180%) blur(20px);
@@ -499,12 +506,8 @@
 
     @media (max-width: 768px) {
       .logout-btn {
-        position: fixed;
-        right: 14px;
-        bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-        z-index: 1200;
-        padding: 10px 14px;
-        border-radius: 12px;
+        padding: 6px 8px;
+        font-size: 11px;
       }
 
       .theme-toggle {
@@ -528,8 +531,8 @@
       <div class="tab" onclick="switchTab('bruteforce')">Security Testing</div>
       <div class="tab" onclick="switchTab('tools')">Tools</div>
     </div>
-    <button class="nav-dropdown-trigger logout-btn" onclick="logout()">Logout</button>
     <div class="theme-toggle" onclick="toggleTheme()"></div>
+    <button class="logout-btn" onclick="logout()">Logout</button>
   </nav>
 
   <div class="container">
