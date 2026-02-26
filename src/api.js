@@ -5,7 +5,7 @@ const path = require('path');
 const session = require('express-session');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
-const { checkAllSections } = require('./scraper');
+const { checkAllSections, runSubmitMonthlyReport } = require('./scraper');
 const { createCorsOptionsDelegate, parseAllowedOrigins } = require('./cors-utils');
 const { parseCookies, unsealAuthPayload, setAuthCookie, clearAuthCookie } = require('./auth-cookie');
 const puppeteer = require('puppeteer-core');
@@ -991,6 +991,71 @@ function calculateDTCEligibility(answers) {
     programs, flags, nextSteps
   };
 }
+
+// Dev-only: serve .env submission credentials for auto-fill
+app.get('/api/submit-creds', requireAuth, (req, res) => {
+  if (process.env.VERCEL) return res.json({});
+  res.json({
+    sin: process.env.BC_SIN || '',
+    phone: process.env.BC_PHONE || '',
+    pin: process.env.BC_PIN || ''
+  });
+});
+
+// Submit monthly report
+let isSubmitting = false;
+app.post('/api/submit-report', requireAuth, async (req, res) => {
+  if (isSubmitting) {
+    return res.status(429).json({ error: 'Submission already in progress' });
+  }
+  isSubmitting = true;
+
+  try {
+    const { sin, phone, pin, dryRun } = req.body || {};
+
+    // Resolve values: body > .env fallback
+    const resolvedSin = sin || process.env.BC_SIN;
+    const resolvedPhone = phone || process.env.BC_PHONE;
+    const resolvedPin = pin || process.env.BC_PIN;
+
+    if (!resolvedSin || !resolvedPhone || !resolvedPin) {
+      isSubmitting = false;
+      return res.status(400).json({ error: 'SIN, phone, and PIN are required' });
+    }
+
+    // Get login credentials from session
+    let username, password;
+    if (req.session && req.session.authenticated) {
+      username = req.session.bceidUsername;
+      password = decrypt(req.session.bceidPassword);
+    } else if (!process.env.VERCEL) {
+      username = process.env.BCEID_USERNAME;
+      password = process.env.BCEID_PASSWORD;
+    }
+
+    if (!username || !password) {
+      isSubmitting = false;
+      return res.status(401).json({ error: 'No login credentials available' });
+    }
+
+    const result = await runSubmitMonthlyReport({
+      username,
+      password,
+      sin: resolvedSin,
+      phone: resolvedPhone,
+      pin: resolvedPin,
+      dryRun: !!dryRun,
+      headless: true
+    });
+
+    isSubmitting = false;
+    res.json(result);
+  } catch (error) {
+    isSubmitting = false;
+    console.error('[API] submit-report error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 app.get('/api/check', requireAuth, async (req, res) => {
   if (isChecking) {

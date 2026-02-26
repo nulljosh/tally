@@ -574,6 +574,33 @@
           </div>
           <div id="mr-content" style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;"></div>
         </div>
+
+        <!-- Submit Monthly Report -->
+        <div class="card" style="margin-top: 16px;">
+          <div class="card-header">
+            <div class="card-title">Submit Monthly Report</div>
+          </div>
+          <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
+            Auto-fill and submit your monthly report through BC Self-Serve. Use Preview first to verify fields before submitting.
+          </p>
+          <div class="form-group">
+            <label>SIN</label>
+            <input type="text" id="submit-sin" placeholder="123456789" maxlength="9" autocomplete="off" style="font-family: monospace;">
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" id="submit-phone" placeholder="+17781234567" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label>PIN</label>
+            <input type="password" id="submit-pin" placeholder="****" maxlength="10" autocomplete="off" style="font-family: monospace;">
+          </div>
+          <div id="submit-status" style="display: none; font-size: 13px; margin-bottom: 12px; padding: 10px; border-radius: 8px;"></div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn" onclick="submitReport(true)" id="btn-preview" style="flex: 1; background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border);">Preview</button>
+            <button class="btn" onclick="submitReport(false)" id="btn-submit" style="flex: 1;">Submit</button>
+          </div>
+        </div>
       </div>
 
       <!-- BCeID Login Prompt (shown when no data and no env credentials) -->
@@ -1048,6 +1075,82 @@
         console.error('Error loading data:', err);
         showNoData('Data unavailable — try refreshing.');
         isLoadingData = false;
+      }
+    }
+
+    // Pre-fill submit credentials from .env
+    async function loadSubmitCreds() {
+      try {
+        const resp = await fetch('/api/submit-creds');
+        if (!resp.ok) return;
+        const creds = await resp.json();
+        if (creds.sin) document.getElementById('submit-sin').value = creds.sin;
+        if (creds.phone) document.getElementById('submit-phone').value = creds.phone;
+        if (creds.pin) document.getElementById('submit-pin').value = creds.pin;
+      } catch (_) {}
+    }
+    loadSubmitCreds();
+
+    async function submitReport(dryRun) {
+      const sin = document.getElementById('submit-sin').value.trim();
+      const phone = document.getElementById('submit-phone').value.trim();
+      const pin = document.getElementById('submit-pin').value.trim();
+      const statusEl = document.getElementById('submit-status');
+      const btnPreview = document.getElementById('btn-preview');
+      const btnSubmit = document.getElementById('btn-submit');
+
+      if (!sin || !phone || !pin) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = 'rgba(255, 59, 48, 0.1)';
+        statusEl.style.color = 'var(--error)';
+        statusEl.textContent = 'SIN, phone, and PIN are all required.';
+        return;
+      }
+
+      // Confirm before actual submission
+      if (!dryRun && !confirm('Submit your monthly report to BC Self-Serve? This cannot be undone.')) {
+        return;
+      }
+
+      btnPreview.disabled = true;
+      btnSubmit.disabled = true;
+      statusEl.style.display = 'block';
+      statusEl.style.background = 'rgba(0, 113, 227, 0.1)';
+      statusEl.style.color = 'var(--accent)';
+      statusEl.textContent = dryRun ? 'Running preview (dry run)...' : 'Submitting report...';
+
+      try {
+        const resp = await fetch('/api/submit-report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sin, phone, pin, dryRun })
+        });
+        const result = await resp.json();
+
+        if (result.success) {
+          statusEl.style.background = 'rgba(52, 199, 89, 0.1)';
+          statusEl.style.color = 'var(--success)';
+          if (result.dryRun) {
+            const fields = (result.preSubmitState?.fields || [])
+              .filter(f => f.name && f.value && f.type !== 'hidden')
+              .map(f => f.label ? f.label + ': ' + f.value : f.name + ': ' + f.value)
+              .join('\n');
+            statusEl.innerHTML = '<strong>Preview complete</strong> -- all fields filled, ready to submit.<br><details style="margin-top:8px;"><summary style="cursor:pointer;font-size:12px;">Field values</summary><pre style="font-size:11px;white-space:pre-wrap;margin-top:4px;">' + fields + '</pre></details>';
+          } else {
+            statusEl.innerHTML = '<strong>Report submitted.</strong> ' + (result.message || '');
+          }
+        } else {
+          statusEl.style.background = 'rgba(255, 59, 48, 0.1)';
+          statusEl.style.color = 'var(--error)';
+          statusEl.textContent = result.error || 'Submission failed';
+        }
+      } catch (err) {
+        statusEl.style.background = 'rgba(255, 59, 48, 0.1)';
+        statusEl.style.color = 'var(--error)';
+        statusEl.textContent = 'Network error: ' + err.message;
+      } finally {
+        btnPreview.disabled = false;
+        btnSubmit.disabled = false;
       }
     }
 

@@ -625,8 +625,362 @@ async function scrapeMonthlyReports(page) {
   }
 }
 
+async function submitMonthlyReport(page, options = {}) {
+  const { sin, phone, pin, dryRun = false } = options;
+
+  console.log(`\n${'='.repeat(60)}`);
+  console.log(`[*] Monthly Report Submission ${dryRun ? '(DRY RUN)' : ''}`);
+  console.log('='.repeat(60));
+
+  const screenshotDir = path.join(DATA_DIR, 'screenshots');
+  await fs.mkdir(screenshotDir, { recursive: true }).catch(() => {});
+  const ts = new Date().toISOString().replace(/[:.]/g, '-');
+  const shot = async (label) => {
+    const p = path.join(screenshotDir, `submit-${label}-${ts}.png`);
+    await page.screenshot({ path: p, fullPage: true }).catch(() => {});
+    console.log(`[*] Screenshot: ${p}`);
+    return p;
+  };
+
+  try {
+    // Navigate to Monthly Reports
+    await page.goto('https://myselfserve.gov.bc.ca/Auth/MonthlyReports', {
+      waitUntil: 'networkidle2', timeout: 30000
+    });
+    await new Promise(r => setTimeout(r, 2000));
+
+    if (page.url().includes('logon') || page.url().includes('Login')) {
+      return { success: false, error: 'Session expired' };
+    }
+
+    await shot('00-landing');
+
+    // Click Resume or Start
+    const resumeClicked = await page.evaluate(() => {
+      const els = [...document.querySelectorAll('a, button, input[type="submit"]')];
+      for (const el of els) {
+        const text = (el.innerText || el.value || '').trim().toLowerCase();
+        if (text.includes('resume') || text.includes('start') || text.includes('begin')) {
+          el.click();
+          return (el.innerText || el.value || '').trim();
+        }
+      }
+      return null;
+    });
+
+    if (!resumeClicked) {
+      return { success: false, error: 'No Resume/Start button found -- report may already be submitted' };
+    }
+
+    console.log(`[+] Clicked: "${resumeClicked}"`);
+    await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 }).catch(() => {});
+    await new Promise(r => setTimeout(r, 3000));
+
+    // Helper: click Continue/Next/Save and Continue
+    const clickNext = async () => {
+      await page.evaluate(() => {
+        const els = [...document.querySelectorAll('a, button, input[type="submit"], input[type="button"]')];
+        const el = els.find(e => {
+          const t = (e.innerText || e.value || '').trim().toLowerCase();
+          return t.includes('continue') || t.includes('next') || t === 'save and continue' || t === 'save & continue';
+        });
+        if (el) el.click();
+      });
+      await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 }).catch(() => {});
+      await new Promise(r => setTimeout(r, 2000));
+    };
+
+    // ── Section 1: Eligibility (9 Yes/No radios) ──
+    console.log('[*] Section 1: Eligibility');
+    await shot('01-eligibility-before');
+
+    await page.evaluate(() => {
+      const radios = document.querySelectorAll('input[type="radio"]');
+      const groups = {};
+      radios.forEach(r => {
+        if (!groups[r.name]) groups[r.name] = [];
+        groups[r.name].push(r);
+      });
+
+      for (const [name, inputs] of Object.entries(groups)) {
+        // NeedOfAssistance = Yes, everything else = No
+        const isNeedOfAssistance = name.toLowerCase().includes('needofassistance') ||
+          name.toLowerCase().includes('need_of_assistance') ||
+          name.toLowerCase().includes('needassistance');
+
+        for (const input of inputs) {
+          const label = input.labels?.[0]?.innerText?.trim().toLowerCase() || '';
+          const val = input.value.toLowerCase();
+
+          if (isNeedOfAssistance) {
+            if (val === 'yes' || val === 'true' || label === 'yes') {
+              input.checked = true;
+              input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          } else {
+            if (val === 'no' || val === 'false' || label === 'no') {
+              input.checked = true;
+              input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          }
+        }
+      }
+    });
+
+    await shot('01-eligibility-after');
+    await clickNext();
+
+    // ── Section 2: Income Declaration (18 number fields, leave as 0) ──
+    console.log('[*] Section 2: Income Declaration');
+    await shot('02-income-before');
+
+    // Fields default to 0, just verify and move on
+    await page.evaluate(() => {
+      document.querySelectorAll('input[type="number"], input[type="text"]').forEach(input => {
+        if (input.name && (input.name.toLowerCase().includes('income') || input.name.toLowerCase().includes('amount') || input.name.toLowerCase().includes('earning'))) {
+          if (!input.value || input.value === '') {
+            input.value = '0';
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        }
+      });
+    });
+
+    await shot('02-income-after');
+    await clickNext();
+
+    // ── Section 3: Other Declarations (1 Yes/No -- select No) ──
+    console.log('[*] Section 3: Other Declarations');
+    await shot('03-other-before');
+
+    await page.evaluate(() => {
+      const radios = document.querySelectorAll('input[type="radio"]');
+      const groups = {};
+      radios.forEach(r => {
+        if (!groups[r.name]) groups[r.name] = [];
+        groups[r.name].push(r);
+      });
+
+      for (const [, inputs] of Object.entries(groups)) {
+        for (const input of inputs) {
+          const label = input.labels?.[0]?.innerText?.trim().toLowerCase() || '';
+          const val = input.value.toLowerCase();
+          if (val === 'no' || val === 'false' || label === 'no') {
+            input.checked = true;
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        }
+      }
+    });
+
+    await shot('03-other-after');
+    await clickNext();
+
+    // ── Section 4: Supporting Documents (skip -- continue without uploading) ──
+    console.log('[*] Section 4: Supporting Documents (skipping)');
+    await shot('04-documents');
+    await clickNext();
+
+    // ── Section 5: Personal Info (SIN + Phone) ──
+    console.log('[*] Section 5: Personal Info');
+    await shot('05-personal-before');
+
+    await page.evaluate((sinVal, phoneVal) => {
+      const inputs = document.querySelectorAll('input');
+      for (const input of inputs) {
+        const name = (input.name || '').toLowerCase();
+        const id = (input.id || '').toLowerCase();
+        const label = input.labels?.[0]?.innerText?.toLowerCase() || '';
+        const placeholder = (input.placeholder || '').toLowerCase();
+        const all = name + id + label + placeholder;
+
+        if (all.includes('sin') || all.includes('social insurance')) {
+          input.value = sinVal;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        } else if (all.includes('phone') || all.includes('telephone') || all.includes('mobile')) {
+          input.value = phoneVal;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+    }, sin, phone);
+
+    await shot('05-personal-after');
+    await clickNext();
+
+    // ── Section 6: Declaration (checkbox + PIN + Submit) ──
+    console.log('[*] Section 6: Declaration');
+    await shot('06-declaration-before');
+
+    // Check the declaration checkbox
+    await page.evaluate(() => {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      for (const cb of checkboxes) {
+        const name = (cb.name || '').toLowerCase();
+        const id = (cb.id || '').toLowerCase();
+        const label = cb.labels?.[0]?.innerText?.toLowerCase() || '';
+        if (name.includes('declar') || id.includes('declar') || label.includes('declare') ||
+            label.includes('confirm') || label.includes('certif') || label.includes('agree')) {
+          cb.checked = true;
+          cb.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+    });
+
+    // Enter PIN
+    await page.evaluate((pinVal) => {
+      const inputs = document.querySelectorAll('input');
+      for (const input of inputs) {
+        const name = (input.name || '').toLowerCase();
+        const id = (input.id || '').toLowerCase();
+        const label = input.labels?.[0]?.innerText?.toLowerCase() || '';
+        const placeholder = (input.placeholder || '').toLowerCase();
+        const all = name + id + label + placeholder;
+
+        if (all.includes('pin') || all.includes('personal identification') || input.type === 'password') {
+          input.value = pinVal;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+    }, pin);
+
+    await shot('06-declaration-filled');
+
+    // Capture page state for dry-run preview
+    const preSubmitState = await page.evaluate(() => {
+      const body = document.body.innerText;
+      const fields = [];
+      document.querySelectorAll('input, select, textarea').forEach(el => {
+        if (el.type === 'hidden') return;
+        fields.push({
+          name: el.name || el.id || '',
+          type: el.type,
+          value: el.type === 'checkbox' ? el.checked : el.value,
+          label: el.labels?.[0]?.innerText?.trim() || ''
+        });
+      });
+      return { fields, bodyPreview: body.substring(0, 3000), url: location.href };
+    });
+
+    if (dryRun) {
+      console.log('[*] DRY RUN -- stopping before submit');
+      return {
+        success: true,
+        dryRun: true,
+        message: 'Dry run complete. All fields filled, ready to submit.',
+        preSubmitState,
+        screenshots: { declaration: path.join(screenshotDir, `submit-06-declaration-filled-${ts}.png`) }
+      };
+    }
+
+    // Actually submit
+    console.log('[*] SUBMITTING...');
+    await page.evaluate(() => {
+      const els = [...document.querySelectorAll('a, button, input[type="submit"], input[type="button"]')];
+      const el = els.find(e => {
+        const t = (e.innerText || e.value || '').trim().toLowerCase();
+        return t.includes('submit') || t.includes('confirm') || t.includes('finish');
+      });
+      if (el) el.click();
+    });
+
+    await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 }).catch(() => {});
+    await new Promise(r => setTimeout(r, 3000));
+
+    await shot('07-confirmation');
+
+    // Capture confirmation
+    const confirmation = await page.evaluate(() => {
+      return {
+        url: location.href,
+        title: document.title,
+        bodyText: document.body.innerText.substring(0, 5000)
+      };
+    });
+
+    const isSuccess = confirmation.bodyText.toLowerCase().includes('submit') ||
+      confirmation.bodyText.toLowerCase().includes('confirm') ||
+      confirmation.bodyText.toLowerCase().includes('success') ||
+      confirmation.bodyText.toLowerCase().includes('thank you') ||
+      confirmation.bodyText.toLowerCase().includes('received');
+
+    console.log(`[${isSuccess ? '+' : '!'}] Submission ${isSuccess ? 'succeeded' : 'may have failed'}`);
+
+    return {
+      success: isSuccess,
+      dryRun: false,
+      message: isSuccess ? 'Monthly report submitted successfully' : 'Submission completed but could not confirm success -- check screenshots',
+      confirmation,
+      screenshots: { confirmation: path.join(screenshotDir, `submit-07-confirmation-${ts}.png`) }
+    };
+
+  } catch (error) {
+    console.log(`[!] Submission error: ${error.message}`);
+    await shot('error');
+    return { success: false, error: error.message };
+  }
+}
+
+async function runSubmitMonthlyReport(options = {}) {
+  const { username, password, sin, phone, pin, dryRun = false, headless = true } = options;
+  let browser;
+
+  try {
+    let launchOptions;
+    if (IS_VERCEL) {
+      const chromium = require('@sparticuz/chromium');
+      launchOptions = {
+        args: chromium.args,
+        defaultViewport: { width: 1920, height: 1080 },
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless
+      };
+    } else {
+      launchOptions = {
+        headless,
+        defaultViewport: headless ? { width: 1920, height: 1080 } : null,
+        args: headless ? [] : ['--start-maximized'],
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+        userDataDir: './chrome-data'
+      };
+    }
+
+    browser = await puppeteer.launch(launchOptions);
+    const page = await browser.newPage();
+    page.setDefaultNavigationTimeout(30000);
+
+    // Login
+    let loginSuccess = false;
+    const credentials = { username, password };
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      loginSuccess = await attemptLogin(page, attempt, credentials);
+      if (loginSuccess) break;
+      if (attempt < 3) await new Promise(r => setTimeout(r, 2000));
+    }
+
+    if (!loginSuccess) {
+      throw new Error('Login failed after 3 attempts');
+    }
+
+    // Submit the report
+    const result = await submitMonthlyReport(page, { sin, phone, pin, dryRun });
+
+    await browser.close();
+    return result;
+  } catch (error) {
+    console.error('[!] runSubmitMonthlyReport error:', error.message);
+    if (browser) {
+      try { await browser.close(); } catch (_) {}
+    }
+    return { success: false, error: error.message };
+  }
+}
+
 // Export for use as module
-module.exports = { checkAllSections, scrapeSection, scrapeMonthlyReports };
+module.exports = { checkAllSections, scrapeSection, scrapeMonthlyReports, submitMonthlyReport, runSubmitMonthlyReport };
 
 // Run standalone
 if (require.main === module) {
