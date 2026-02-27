@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1a5a96">
+  <link rel="apple-touch-icon" href="/icon-192.svg">
   <title>Tally — Check your cheques without the bureaucracy</title>
   <meta name="description" content="Tally gives BC residents instant access to their Self-Serve benefits data — payments, messages, and notifications — without the government portal maze.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -530,5 +535,10 @@
     <p style="margin-top: 12px; font-size: 0.78rem; opacity: 0.5;">© 2026 Joshua Trommel &middot; <a href="https://github.com/nulljosh/tally/blob/main/LICENSE" target="_blank" rel="noopener" style="color: inherit;">MIT License</a> &middot; <a href="https://github.com/nulljosh/tally" target="_blank" rel="noopener" style="color: inherit;">github.com/nulljosh/tally</a></p>
   </footer>
 
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+  }
+</script>
 </body>
 </html>
