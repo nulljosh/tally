@@ -138,3 +138,11 @@ Project name: **tally**
 - **cheque** = Canadian spelling (payment)
 - "tally" = playful pun combining both
 - Decision finalized: "tally" (lowercase), display as "Tally" where appropriate
+
+## Roadmap
+- [ ] iOS companion app (tally-ios)
+- [ ] Auto-fill monthly reports end-to-end
+- [ ] Push notifications for payment dates
+- [ ] DTC application automation
+- [ ] Offline mode with cached data
+- [ ] Multi-province support
