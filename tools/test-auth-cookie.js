@@ -26,7 +26,13 @@ function testTamperDetection() {
   const secret = 'test-secret';
   const payload = { authenticated: true, userId: 'abc123' };
   const token = sealAuthPayload(payload, secret);
-  const tampered = token.slice(0, -1) + (token.slice(-1) === 'A' ? 'B' : 'A');
+  // Tamper with the auth tag (second segment) to guarantee GCM verification failure.
+  // Flipping the last char of the full token may only change base64 padding bits.
+  const parts = token.split('.');
+  const tag = parts[1];
+  const mid = Math.floor(tag.length / 2);
+  parts[1] = tag.slice(0, mid) + (tag[mid] === 'A' ? 'B' : 'A') + tag.slice(mid + 1);
+  const tampered = parts.join('.');
   const decoded = unsealAuthPayload(tampered, secret);
   assert.strictEqual(decoded, null);
 }

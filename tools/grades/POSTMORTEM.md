@@ -1,5 +1,7 @@
 # Postmortem: D2L Quiz Automation Project
 
+> **ARCHIVED** (2026-02-26) -- Project abandoned. Code kept for reference.
+
 ## Status: PARTIAL SUCCESS (2026-02-15)
 
 This project successfully automated Microsoft SSO login and D2L navigation but was unable to complete quiz starting due to D2L's anti-bot detection. The login and navigation framework remains valuable for screenshot capture and study guide generation.

@@ -198,6 +198,46 @@
       border-color: var(--accent);
     }
 
+    .paid-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: 100px;
+      border: 1px solid var(--glass-border);
+      background: var(--card-bg);
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 16px;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.15s;
+      user-select: none;
+    }
+
+    .paid-check:hover {
+      border-color: var(--accent);
+      transform: scale(1.03);
+    }
+
+    .paid-check.checked {
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .paid-check input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      padding: 0;
+      margin: 0;
+      accent-color: var(--success);
+      cursor: pointer;
+    }
+
+    .paid-check .paid-date {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
     .card-header {
       display: flex;
       align-items: center;
@@ -1016,7 +1056,12 @@
             paymentInfo.innerHTML = `<div style="text-align: center;">
               <div style="font-size: clamp(64px, 12vw, 120px); font-weight: 700; color: var(--text-primary); letter-spacing: -3px; line-height: 1;">${totalAmount}</div>
               <div style="font-size: 16px; font-weight: 400; color: var(--text-secondary); margin-top: 24px;">Next payment: ${paydayDate} (${paydayLabel})</div>
+              <label class="paid-check" id="paid-check" onclick="togglePaid()">
+                <input type="checkbox" id="paid-cb">
+                <span id="paid-label">Paid yet?</span>
+              </label>
             </div>`;
+            loadPaidStatus();
           } else {
             paymentInfo.innerHTML = '<div style="text-align: center; color: var(--text-secondary);">No payment data</div>';
           }
@@ -1076,6 +1121,43 @@
         showNoData('Data unavailable — try refreshing.');
         isLoadingData = false;
       }
+    }
+
+    // Paid status checkbox
+    async function loadPaidStatus() {
+      try {
+        const resp = await fetch('/api/paid-status', { credentials: 'include' });
+        if (!resp.ok) return;
+        const status = await resp.json();
+        const cb = document.getElementById('paid-cb');
+        const label = document.getElementById('paid-label');
+        const wrap = document.getElementById('paid-check');
+        if (!cb) return;
+        cb.checked = status.paid;
+        if (status.paid && status.updatedAt) {
+          const d = new Date(status.updatedAt);
+          const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          label.innerHTML = 'Paid <span class="paid-date">(' + dateStr + ')</span>';
+          wrap.classList.add('checked');
+        } else {
+          label.textContent = 'Paid yet?';
+          wrap.classList.remove('checked');
+        }
+      } catch (_) {}
+    }
+
+    async function togglePaid() {
+      const cb = document.getElementById('paid-cb');
+      const newVal = cb.checked;
+      try {
+        const resp = await fetch('/api/paid-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ paid: newVal })
+        });
+        if (resp.ok) loadPaidStatus();
+      } catch (_) {}
     }
 
     // Pre-fill submit credentials from .env

@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """
+ARCHIVED (2026-02-26) -- D2L quiz automation is a dead end. See POSTMORTEM.md.
+Code kept for reference only. Do not run.
+
 D2L Grade Checker v2.1
 Logs into D2L via Microsoft SSO, discovers all courses, retrieves grades.
 Run: python grades.py

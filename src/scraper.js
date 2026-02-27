@@ -635,11 +635,56 @@ async function submitMonthlyReport(page, options = {}) {
   const screenshotDir = path.join(DATA_DIR, 'screenshots');
   await fs.mkdir(screenshotDir, { recursive: true }).catch(() => {});
   const ts = new Date().toISOString().replace(/[:.]/g, '-');
+  const sectionTimers = {};
+
   const shot = async (label) => {
     const p = path.join(screenshotDir, `submit-${label}-${ts}.png`);
     await page.screenshot({ path: p, fullPage: true }).catch(() => {});
     console.log(`[*] Screenshot: ${p}`);
     return p;
+  };
+
+  // SPA-aware: wait for section content to change after clicking Continue.
+  // Sections 1-5 use Angular hash routing (no full page load).
+  // Section 5 -> Confirmation is a full page load.
+  const waitForSectionChange = async (currentSectionNum) => {
+    const isLastSection = currentSectionNum === 5;
+    if (isLastSection) {
+      // Section 5 -> Confirmation is a full page navigation
+      await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 }).catch(() => {});
+      await new Promise(r => setTimeout(r, 2000));
+      return;
+    }
+    // For hash-route transitions: poll for section title change
+    const nextSection = currentSectionNum + 1;
+    const expectedTitle = `Section ${nextSection}`;
+    try {
+      await page.waitForFunction(
+        (title) => {
+          const body = document.body.innerText || '';
+          return body.includes(title);
+        },
+        { timeout: 8000 },
+        expectedTitle
+      );
+    } catch (_) {
+      // Fallback: wait a fixed amount and hope content changed
+      console.log(`[!] Section change detection timed out, continuing anyway`);
+    }
+    await new Promise(r => setTimeout(r, 1000));
+  };
+
+  // Click the Continue button using page.click for proper Angular event handling
+  const clickContinue = async (currentSectionNum) => {
+    await page.evaluate(() => {
+      const els = [...document.querySelectorAll('a, button, input[type="submit"], input[type="button"]')];
+      const el = els.find(e => {
+        const t = (e.innerText || e.value || '').trim().toLowerCase();
+        return t === 'continue' || t.includes('continue');
+      });
+      if (el) el.click();
+    });
+    await waitForSectionChange(currentSectionNum);
   };
 
   try {
@@ -673,179 +718,186 @@ async function submitMonthlyReport(page, options = {}) {
     }
 
     console.log(`[+] Clicked: "${resumeClicked}"`);
+    // Initial navigation into the Angular SPA form
     await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 }).catch(() => {});
     await new Promise(r => setTimeout(r, 3000));
 
-    // Helper: click Continue/Next/Save and Continue
-    const clickNext = async () => {
-      await page.evaluate(() => {
-        const els = [...document.querySelectorAll('a, button, input[type="submit"], input[type="button"]')];
-        const el = els.find(e => {
-          const t = (e.innerText || e.value || '').trim().toLowerCase();
-          return t.includes('continue') || t.includes('next') || t === 'save and continue' || t === 'save & continue';
-        });
-        if (el) el.click();
-      });
-      await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 }).catch(() => {});
-      await new Promise(r => setTimeout(r, 2000));
-    };
-
-    // ── Section 1: Eligibility (9 Yes/No radios) ──
-    console.log('[*] Section 1: Eligibility');
+    // ── Section 1: Eligibility ──
+    sectionTimers[1] = Date.now();
+    console.log('[*] Section 1/5: Eligibility');
     await shot('01-eligibility-before');
 
-    await page.evaluate(() => {
-      const radios = document.querySelectorAll('input[type="radio"]');
-      const groups = {};
-      radios.forEach(r => {
-        if (!groups[r.name]) groups[r.name] = [];
-        groups[r.name].push(r);
-      });
-
-      for (const [name, inputs] of Object.entries(groups)) {
-        // NeedOfAssistance = Yes, everything else = No
-        const isNeedOfAssistance = name.toLowerCase().includes('needofassistance') ||
-          name.toLowerCase().includes('need_of_assistance') ||
-          name.toLowerCase().includes('needassistance');
-
-        for (const input of inputs) {
-          const label = input.labels?.[0]?.innerText?.trim().toLowerCase() || '';
-          const val = input.value.toLowerCase();
-
-          if (isNeedOfAssistance) {
-            if (val === 'yes' || val === 'true' || label === 'yes') {
-              input.checked = true;
-              input.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-          } else {
-            if (val === 'no' || val === 'false' || label === 'no') {
-              input.checked = true;
-              input.dispatchEvent(new Event('change', { bubbles: true }));
-            }
+    // Use page.click on exact radio selectors for Angular binding
+    try {
+      // NeedOfAssistance_177 = Yes
+      await page.click('input[name="NeedOfAssistance_177"][value="Yes"]');
+      console.log('[+] Set NeedOfAssistance = Yes');
+    } catch (e) {
+      // Fallback: try generic approach
+      console.log('[!] Exact selector failed, trying generic radio selection');
+      await page.evaluate(() => {
+        const radios = document.querySelectorAll('input[type="radio"]');
+        const groups = {};
+        radios.forEach(r => { if (!groups[r.name]) groups[r.name] = []; groups[r.name].push(r); });
+        for (const [name, inputs] of Object.entries(groups)) {
+          const isNeed = name.toLowerCase().includes('needofassistance');
+          for (const input of inputs) {
+            const val = input.value.toLowerCase();
+            if (isNeed && (val === 'yes')) { input.click(); }
+            else if (!isNeed && (val === 'no')) { input.click(); }
           }
         }
-      }
-    });
+      });
+    }
 
     await shot('01-eligibility-after');
-    await clickNext();
+    console.log(`[+] Section 1 done (${Date.now() - sectionTimers[1]}ms)`);
+    await clickContinue(1);
 
-    // ── Section 2: Income Declaration (18 number fields, leave as 0) ──
-    console.log('[*] Section 2: Income Declaration');
+    // ── Section 2: Income Declaration (18 number fields, all default to 0) ──
+    sectionTimers[2] = Date.now();
+    console.log('[*] Section 2/5: Income Declaration');
     await shot('02-income-before');
 
-    // Fields default to 0, just verify and move on
-    await page.evaluate(() => {
-      document.querySelectorAll('input[type="number"], input[type="text"]').forEach(input => {
-        if (input.name && (input.name.toLowerCase().includes('income') || input.name.toLowerCase().includes('amount') || input.name.toLowerCase().includes('earning'))) {
-          if (!input.value || input.value === '') {
-            input.value = '0';
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-            input.dispatchEvent(new Event('change', { bubbles: true }));
-          }
+    // Fields have no name/id but default to 0. Verify they're 0 and move on.
+    const incomeFieldCount = await page.evaluate(() => {
+      const fields = document.querySelectorAll('input[type="number"]');
+      let count = 0;
+      fields.forEach(f => {
+        if (f.value === '' || f.value === undefined) {
+          // Clear and type 0 via Angular-compatible events
+          f.focus();
+          f.value = '0';
+          f.dispatchEvent(new Event('input', { bubbles: true }));
+          f.dispatchEvent(new Event('change', { bubbles: true }));
+          f.blur();
         }
+        count++;
       });
+      return count;
     });
+    console.log(`[+] Verified ${incomeFieldCount} income fields at $0`);
 
     await shot('02-income-after');
-    await clickNext();
+    console.log(`[+] Section 2 done (${Date.now() - sectionTimers[2]}ms)`);
+    await clickContinue(2);
 
-    // ── Section 3: Other Declarations (1 Yes/No -- select No) ──
-    console.log('[*] Section 3: Other Declarations');
+    // ── Section 3: Other Declarations ──
+    sectionTimers[3] = Date.now();
+    console.log('[*] Section 3/5: Other Declarations');
     await shot('03-other-before');
 
-    await page.evaluate(() => {
-      const radios = document.querySelectorAll('input[type="radio"]');
-      const groups = {};
-      radios.forEach(r => {
-        if (!groups[r.name]) groups[r.name] = [];
-        groups[r.name].push(r);
+    // OtherChanges_969 = No
+    try {
+      await page.click('input[name="OtherChanges_969"][value="No"]');
+      console.log('[+] Set OtherChanges = No');
+    } catch (e) {
+      console.log('[!] Exact selector failed, trying generic');
+      await page.evaluate(() => {
+        const radios = document.querySelectorAll('input[type="radio"]');
+        radios.forEach(r => { if (r.value.toLowerCase() === 'no') r.click(); });
       });
-
-      for (const [, inputs] of Object.entries(groups)) {
-        for (const input of inputs) {
-          const label = input.labels?.[0]?.innerText?.trim().toLowerCase() || '';
-          const val = input.value.toLowerCase();
-          if (val === 'no' || val === 'false' || label === 'no') {
-            input.checked = true;
-            input.dispatchEvent(new Event('change', { bubbles: true }));
-          }
-        }
-      }
-    });
+    }
 
     await shot('03-other-after');
-    await clickNext();
+    console.log(`[+] Section 3 done (${Date.now() - sectionTimers[3]}ms)`);
+    await clickContinue(3);
 
-    // ── Section 4: Supporting Documents (skip -- continue without uploading) ──
-    console.log('[*] Section 4: Supporting Documents (skipping)');
+    // ── Section 4: Supporting Documents (skip) ──
+    sectionTimers[4] = Date.now();
+    console.log('[*] Section 4/5: Supporting Documents (skipping)');
     await shot('04-documents');
-    await clickNext();
+    console.log(`[+] Section 4 done (${Date.now() - sectionTimers[4]}ms)`);
+    await clickContinue(4);
 
     // ── Section 5: Personal Info (SIN + Phone) ──
-    console.log('[*] Section 5: Personal Info');
+    sectionTimers[5] = Date.now();
+    console.log('[*] Section 5/5: Personal Info');
     await shot('05-personal-before');
 
-    await page.evaluate((sinVal, phoneVal) => {
-      const inputs = document.querySelectorAll('input');
-      for (const input of inputs) {
-        const name = (input.name || '').toLowerCase();
-        const id = (input.id || '').toLowerCase();
-        const label = input.labels?.[0]?.innerText?.toLowerCase() || '';
-        const placeholder = (input.placeholder || '').toLowerCase();
-        const all = name + id + label + placeholder;
-
-        if (all.includes('sin') || all.includes('social insurance')) {
-          input.value = sinVal;
-          input.dispatchEvent(new Event('input', { bubbles: true }));
-          input.dispatchEvent(new Event('change', { bubbles: true }));
-        } else if (all.includes('phone') || all.includes('telephone') || all.includes('mobile')) {
-          input.value = phoneVal;
-          input.dispatchEvent(new Event('input', { bubbles: true }));
-          input.dispatchEvent(new Event('change', { bubbles: true }));
+    // Target exact field names: KeyPlayerSIN, KeyPlayerPhone
+    // Fields are pre-filled. Only overwrite if user provides values.
+    if (sin) {
+      try {
+        const sinField = await page.$('input[name="KeyPlayerSIN"]');
+        if (sinField) {
+          await sinField.click({ clickCount: 3 }); // select all
+          await sinField.type(sin);
+          console.log('[+] Set SIN');
         }
+      } catch (e) {
+        console.log('[!] SIN field not found by name, trying generic');
+        await page.evaluate((sinVal) => {
+          const inputs = document.querySelectorAll('input[type="text"]');
+          for (const input of inputs) {
+            const all = ((input.name || '') + (input.id || '')).toLowerCase();
+            if (all.includes('sin')) { input.value = sinVal; input.dispatchEvent(new Event('input', { bubbles: true })); }
+          }
+        }, sin);
       }
-    }, sin, phone);
+    }
+
+    if (phone) {
+      try {
+        const phoneField = await page.$('input[name="KeyPlayerPhone"]');
+        if (phoneField) {
+          await phoneField.click({ clickCount: 3 });
+          await phoneField.type(phone);
+          console.log('[+] Set Phone');
+        }
+      } catch (e) {
+        console.log('[!] Phone field not found by name, trying generic');
+        await page.evaluate((phoneVal) => {
+          const inputs = document.querySelectorAll('input[type="text"]');
+          for (const input of inputs) {
+            const all = ((input.name || '') + (input.id || '')).toLowerCase();
+            if (all.includes('phone')) { input.value = phoneVal; input.dispatchEvent(new Event('input', { bubbles: true })); }
+          }
+        }, phone);
+      }
+    }
 
     await shot('05-personal-after');
-    await clickNext();
+    console.log(`[+] Section 5 done (${Date.now() - sectionTimers[5]}ms)`);
+    // Section 5 -> Confirmation is a full page load
+    await clickContinue(5);
 
-    // ── Section 6: Declaration (checkbox + PIN + Submit) ──
-    console.log('[*] Section 6: Declaration');
+    // ── Confirmation Page (Declaration + PIN + Submit) ──
+    const confirmTimer = Date.now();
+    console.log('[*] Confirmation: Declaration');
     await shot('06-declaration-before');
 
-    // Check the declaration checkbox
-    await page.evaluate(() => {
-      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-      for (const cb of checkboxes) {
-        const name = (cb.name || '').toLowerCase();
-        const id = (cb.id || '').toLowerCase();
-        const label = cb.labels?.[0]?.innerText?.toLowerCase() || '';
-        if (name.includes('declar') || id.includes('declar') || label.includes('declare') ||
-            label.includes('confirm') || label.includes('certif') || label.includes('agree')) {
-          cb.checked = true;
-          cb.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-      }
-    });
+    // Check declaration checkbox by id
+    try {
+      await page.click('#declare_cb');
+      console.log('[+] Checked declaration checkbox');
+    } catch (e) {
+      console.log('[!] #declare_cb not found, trying fallback');
+      await page.evaluate(() => {
+        const cb = document.querySelector('input[name="DeclarationCB"]') ||
+          document.querySelector('input[type="checkbox"]');
+        if (cb) cb.click();
+      });
+    }
 
-    // Enter PIN
-    await page.evaluate((pinVal) => {
-      const inputs = document.querySelectorAll('input');
-      for (const input of inputs) {
-        const name = (input.name || '').toLowerCase();
-        const id = (input.id || '').toLowerCase();
-        const label = input.labels?.[0]?.innerText?.toLowerCase() || '';
-        const placeholder = (input.placeholder || '').toLowerCase();
-        const all = name + id + label + placeholder;
+    await new Promise(r => setTimeout(r, 500));
 
-        if (all.includes('pin') || all.includes('personal identification') || input.type === 'password') {
+    // Enter PIN using page.type for proper event triggering
+    try {
+      await page.type('#kp_pin', pin);
+      console.log('[+] Entered PIN');
+    } catch (e) {
+      console.log('[!] #kp_pin not found, trying fallback');
+      await page.evaluate((pinVal) => {
+        const input = document.querySelector('input[name="KeyPlayerPIN"]') ||
+          document.querySelector('input[type="password"]');
+        if (input) {
           input.value = pinVal;
           input.dispatchEvent(new Event('input', { bubbles: true }));
           input.dispatchEvent(new Event('change', { bubbles: true }));
         }
-      }
-    }, pin);
+      }, pin);
+    }
 
     await shot('06-declaration-filled');
 
@@ -867,6 +919,7 @@ async function submitMonthlyReport(page, options = {}) {
 
     if (dryRun) {
       console.log('[*] DRY RUN -- stopping before submit');
+      console.log(`[+] Confirmation page done (${Date.now() - confirmTimer}ms)`);
       return {
         success: true,
         dryRun: true,
@@ -876,16 +929,18 @@ async function submitMonthlyReport(page, options = {}) {
       };
     }
 
-    // Actually submit
+    // Actually submit using #btnSubmit
     console.log('[*] SUBMITTING...');
-    await page.evaluate(() => {
-      const els = [...document.querySelectorAll('a, button, input[type="submit"], input[type="button"]')];
-      const el = els.find(e => {
-        const t = (e.innerText || e.value || '').trim().toLowerCase();
-        return t.includes('submit') || t.includes('confirm') || t.includes('finish');
+    try {
+      await page.click('#btnSubmit');
+    } catch (e) {
+      console.log('[!] #btnSubmit not found, trying fallback');
+      await page.evaluate(() => {
+        const els = [...document.querySelectorAll('input[type="button"], input[type="submit"], button')];
+        const el = els.find(e => (e.value || e.innerText || '').toLowerCase().includes('submit'));
+        if (el) el.click();
       });
-      if (el) el.click();
-    });
+    }
 
     await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 }).catch(() => {});
     await new Promise(r => setTimeout(r, 3000));
@@ -908,6 +963,7 @@ async function submitMonthlyReport(page, options = {}) {
       confirmation.bodyText.toLowerCase().includes('received');
 
     console.log(`[${isSuccess ? '+' : '!'}] Submission ${isSuccess ? 'succeeded' : 'may have failed'}`);
+    console.log(`[+] Total confirmation page time: ${Date.now() - confirmTimer}ms`);
 
     return {
       success: isSuccess,
@@ -980,7 +1036,7 @@ async function runSubmitMonthlyReport(options = {}) {
 }
 
 // Export for use as module
-module.exports = { checkAllSections, scrapeSection, scrapeMonthlyReports, submitMonthlyReport, runSubmitMonthlyReport };
+module.exports = { checkAllSections, runSubmitMonthlyReport };
 
 // Run standalone
 if (require.main === module) {

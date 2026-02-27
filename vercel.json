@@ -17,13 +17,6 @@
       }
     },
     {
-      "src": "api/latest.js",
-      "use": "@vercel/node",
-      "config": {
-        "maxDuration": 10
-      }
-    },
-    {
       "src": "web/**",
       "use": "@vercel/static"
     }

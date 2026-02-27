@@ -984,6 +984,31 @@ function calculateDTCEligibility(answers) {
   };
 }
 
+// Paid status -- manual toggle, resets monthly
+app.get('/api/paid-status', requireAuth, (req, res) => {
+  const status = req.session.paidStatus || { paid: false, month: null, updatedAt: null };
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  if (status.month && status.month !== currentMonth) {
+    req.session.paidStatus = { paid: false, month: currentMonth, updatedAt: null };
+    return res.json({ paid: false, month: currentMonth, updatedAt: null });
+  }
+  res.json(status);
+});
+
+app.post('/api/paid-status', requireAuth, (req, res) => {
+  const { paid } = req.body;
+  if (typeof paid !== 'boolean') {
+    return res.status(400).json({ error: 'paid must be a boolean' });
+  }
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  req.session.paidStatus = {
+    paid,
+    month: currentMonth,
+    updatedAt: paid ? new Date().toISOString() : null
+  };
+  res.json(req.session.paidStatus);
+});
+
 // Dev-only: serve .env submission credentials for auto-fill
 app.get('/api/submit-creds', requireAuth, (req, res) => {
   if (process.env.VERCEL) return res.json({});

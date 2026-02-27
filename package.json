@@ -5,9 +5,11 @@
   "main": "src/scraper.js",
   "scripts": {
     "check": "node src/scraper.js",
-    "test": "node tools/test.js",
+    "test": "node tools/test-cors-utils.js && node tools/test-auth-cookie.js && node tools/test-paid-status.js",
     "test:cors": "node tools/test-cors-utils.js",
     "test:auth-cookie": "node tools/test-auth-cookie.js",
+    "test:paid-status": "node tools/test-paid-status.js",
+    "test:scraper": "node tools/test.js",
     "test:scraper": "node src/scraper.js",
     "api": "node src/api.js",
     "dev": "nodemon src/api.js",
