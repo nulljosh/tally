@@ -553,9 +553,6 @@
       .theme-toggle {
         width: 40px;
         height: 24px;
-        position: fixed;
-        top: calc(12px + env(safe-area-inset-top, 0px));
-        right: 14px;
         border: 1px solid var(--accent);
         background: var(--card-bg);
       }
@@ -594,6 +591,7 @@
             <div id="notifications-list"></div>
           </div>
         </div>
+        <button class="nav-dropdown-trigger" onclick="toggleMonthlyReports()">Monthly Reports</button>
       </div>
 
       <!-- Payment: the whole page -->
@@ -894,6 +892,11 @@
     }
 
     // Nav dropdowns
+    function toggleMonthlyReports() {
+      const el = document.getElementById('monthly-reports');
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
     function toggleDropdown(id) {
       const el = document.getElementById(id);
       const wasOpen = el.classList.contains('open');
