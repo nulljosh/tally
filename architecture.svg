@@ -1,164 +1,50 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="960" height="560">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" font-family="-apple-system, system-ui, sans-serif">
   <defs>
     <style>
-      text { font-family: 'DM Sans', 'Segoe UI', sans-serif; }
-      .label { font-size: 11px; fill: #8a9e90; letter-spacing: 0.08em; }
-      .title { font-size: 13px; fill: #e8e4da; font-weight: 500; }
-      .sub { font-size: 10px; fill: #6b7f70; }
-      .arrow-label { font-size: 10px; fill: #8a9e90; }
-      .version { font-size: 10px; fill: #d4a843; letter-spacing: 0.06em; }
+      .box { fill: #1a1a1a; stroke: #1a5a96; stroke-width: 2; }
+      .label { fill: #e0e0e0; font-size: 13px; text-anchor: middle; }
+      .sub { fill: #888; font-size: 10px; text-anchor: middle; }
+      .arrow { stroke: #666; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
     </style>
-    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L8,3 z" fill="#2d7a52"/>
-    </marker>
-    <marker id="arrow-muted" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L8,3 z" fill="#3a4a3e"/>
-    </marker>
-    <marker id="arrow-amber" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L8,3 z" fill="#d4a843"/>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#666"/>
     </marker>
   </defs>
 
-  <!-- Background -->
-  <rect width="960" height="560" fill="#0c1a12"/>
-  <!-- Subtle grid -->
-  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.02)" stroke-width="1"/>
-  </pattern>
-  <rect width="960" height="560" fill="url(#grid)"/>
+  <rect width="800" height="200" fill="#111"/>
 
-  <!-- Title -->
-  <text x="40" y="44" font-family="'DM Sans','Segoe UI',sans-serif" font-size="18" fill="#e8e4da" font-weight="400" letter-spacing="-0.02em">Tally — Architecture</text>
-  <text x="40" y="62" class="version">v1.4.1 · 2026-02-19</text>
+  <!-- Browser -->
+  <rect x="20" y="75" width="110" height="50" rx="8" class="box"/>
+  <text x="75" y="97" class="label">Browser</text>
+  <text x="75" y="113" class="sub">PWA</text>
 
-  <!-- ─── ROW 1: User-facing layer ─── -->
-  <text x="40" y="100" class="label">USER LAYER</text>
+  <!-- Arrow -->
+  <line x1="132" y1="100" x2="158" y2="100" class="arrow"/>
 
-  <!-- Landing -->
-  <rect x="40" y="112" width="160" height="72" rx="10" fill="#111f16" stroke="#1a5c3a" stroke-width="1.5"/>
-  <text x="120" y="141" text-anchor="middle" class="title">Landing Page</text>
-  <text x="120" y="157" text-anchor="middle" class="sub">web/landing.html</text>
-  <text x="120" y="171" text-anchor="middle" class="sub">GET /</text>
+  <!-- Vercel Express API -->
+  <rect x="160" y="75" width="160" height="50" rx="8" class="box"/>
+  <text x="240" y="97" class="label">Vercel Express API</text>
+  <text x="240" y="113" class="sub">auth + routes + sessions</text>
 
-  <!-- Login -->
-  <rect x="220" y="112" width="140" height="72" rx="10" fill="#111f16" stroke="#1a5c3a" stroke-width="1.5"/>
-  <text x="290" y="141" text-anchor="middle" class="title">Login</text>
-  <text x="290" y="157" text-anchor="middle" class="sub">web/login.html</text>
-  <text x="290" y="171" text-anchor="middle" class="sub">POST /api/login</text>
+  <!-- Fan-out arrows -->
+  <line x1="322" y1="88" x2="358" y2="55" class="arrow"/>
+  <line x1="322" y1="112" x2="358" y2="145" class="arrow"/>
 
-  <!-- Dashboard -->
-  <rect x="380" y="112" width="140" height="72" rx="10" fill="#111f16" stroke="#1a5c3a" stroke-width="1.5"/>
-  <text x="450" y="141" text-anchor="middle" class="title">Dashboard</text>
-  <text x="450" y="157" text-anchor="middle" class="sub">web/index.html</text>
-  <text x="450" y="171" text-anchor="middle" class="sub">GET /app · auth required</text>
+  <!-- BC Self-Serve (Puppeteer) -->
+  <rect x="360" y="30" width="200" height="50" rx="8" class="box"/>
+  <text x="460" y="52" class="label">BC Self-Serve</text>
+  <text x="460" y="68" class="sub">Puppeteer + @sparticuz/chromium</text>
 
-  <!-- Screener (public) -->
-  <rect x="540" y="112" width="140" height="72" rx="10" fill="#111f16" stroke="#3d9e6a" stroke-width="1.5" stroke-dasharray="4,2"/>
-  <text x="610" y="136" text-anchor="middle" class="title">Screener</text>
-  <text x="610" y="152" text-anchor="middle" class="sub">web/screen.html</text>
-  <text x="610" y="166" text-anchor="middle" class="sub">GET /screen · public</text>
-  <text x="610" y="178" text-anchor="middle" class="sub" fill="#3d9e6a">no auth required</text>
+  <!-- Vercel Blob Cache -->
+  <rect x="360" y="120" width="200" height="50" rx="8" class="box"/>
+  <text x="460" y="142" class="label">Vercel Blob Cache</text>
+  <text x="460" y="158" class="sub">tally-cache/userId/results.json</text>
 
-  <!-- arrow: landing → login -->
-  <line x1="200" y1="148" x2="218" y2="148" stroke="#2d7a52" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <text x="208" y="143" text-anchor="middle" class="arrow-label">CTA</text>
+  <!-- Arrow: BC Self-Serve -> myselfserve.gov.bc.ca -->
+  <line x1="562" y1="55" x2="588" y2="55" class="arrow"/>
 
-  <!-- arrow: login → dashboard -->
-  <line x1="360" y1="148" x2="378" y2="148" stroke="#2d7a52" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <text x="369" y="143" text-anchor="middle" class="arrow-label">session</text>
-
-  <!-- arrow: landing → screener -->
-  <line x1="120" y1="184" x2="595" y2="184" stroke="#3d9e6a" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arrow)"/>
-  <text x="350" y="198" text-anchor="middle" class="arrow-label" fill="#3d9e6a">Check eligibility (no login)</text>
-
-  <!-- ─── ROW 2: API Layer ─── -->
-  <text x="40" y="228" class="label">API LAYER · src/api.js</text>
-
-  <!-- Express server box -->
-  <rect x="40" y="240" width="560" height="80" rx="10" fill="#0f1d14" stroke="#2d7a52" stroke-width="1.5" stroke-dasharray="4,3"/>
-
-  <rect x="60" y="256" width="130" height="48" rx="8" fill="#111f16" stroke="#1a5c3a" stroke-width="1"/>
-  <text x="125" y="277" text-anchor="middle" class="title" font-size="11">Auth + Sessions</text>
-  <text x="125" y="291" text-anchor="middle" class="sub">AES-256-CBC</text>
-  <text x="125" y="303" text-anchor="middle" class="sub">rate limit 5/15min</text>
-
-  <rect x="210" y="256" width="130" height="48" rx="8" fill="#111f16" stroke="#1a5c3a" stroke-width="1"/>
-  <text x="275" y="277" text-anchor="middle" class="title" font-size="11">Scrape Trigger</text>
-  <text x="275" y="291" text-anchor="middle" class="sub">GET /api/check</text>
-  <text x="275" y="303" text-anchor="middle" class="sub">auth required</text>
-
-  <rect x="360" y="256" width="130" height="48" rx="8" fill="#111f16" stroke="#1a5c3a" stroke-width="1"/>
-  <text x="425" y="277" text-anchor="middle" class="title" font-size="11">Data Read</text>
-  <text x="425" y="291" text-anchor="middle" class="sub">GET /api/latest</text>
-  <text x="425" y="303" text-anchor="middle" class="sub">reads Blob cache</text>
-
-  <rect x="510" y="256" width="70" height="48" rx="8" fill="#111f16" stroke="#1a5c3a" stroke-width="1"/>
-  <text x="545" y="277" text-anchor="middle" class="title" font-size="11">DTC</text>
-  <text x="545" y="291" text-anchor="middle" class="sub">POST</text>
-  <text x="545" y="303" text-anchor="middle" class="sub">/api/dtc/screen</text>
-
-  <!-- arrows from user layer to API -->
-  <line x1="320" y1="184" x2="320" y2="238" stroke="#2d7a52" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <line x1="520" y1="184" x2="520" y2="238" stroke="#2d7a52" stroke-width="1.5" marker-end="url(#arrow)"/>
-
-  <!-- ─── ROW 3: Runtime split ─── -->
-  <text x="40" y="366" class="label">RUNTIME</text>
-
-  <!-- Puppeteer / Chromium box -->
-  <rect x="40" y="378" width="260" height="80" rx="10" fill="#111f16" stroke="#3d9e6a" stroke-width="1.5"/>
-  <text x="170" y="403" text-anchor="middle" class="title">Puppeteer</text>
-  <text x="170" y="419" text-anchor="middle" class="sub">@sparticuz/chromium on Vercel</text>
-  <text x="170" y="433" text-anchor="middle" class="sub">local Chrome on dev</text>
-  <text x="170" y="447" text-anchor="middle" class="sub">detects VERCEL env automatically</text>
-
-  <!-- Vercel Blob box -->
-  <rect x="340" y="378" width="260" height="80" rx="10" fill="#111f16" stroke="#d4a843" stroke-width="1.5"/>
-  <text x="470" y="403" text-anchor="middle" class="title">Vercel Blob</text>
-  <text x="470" y="419" text-anchor="middle" class="sub">tally-cache/&lt;userId&gt;/results.json</text>
-  <text x="470" y="433" text-anchor="middle" class="sub">userId = SHA-256(username)[:16]</text>
-  <text x="470" y="447" text-anchor="middle" class="sub">write: upload.js · read: latest.js</text>
-
-  <!-- arrows: API → Puppeteer -->
-  <line x1="170" y1="320" x2="170" y2="376" stroke="#3d9e6a" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <!-- arrows: API → Blob -->
-  <line x1="425" y1="320" x2="425" y2="376" stroke="#d4a843" stroke-width="1.5" marker-end="url(#arrow-amber)"/>
-
-  <!-- ─── ROW 4: External ─── -->
-  <text x="40" y="502" class="label">EXTERNAL</text>
-
-  <!-- BC Self-Serve -->
-  <rect x="40" y="514" width="200" height="36" rx="8" fill="#0c1a12" stroke="#3a4a3e" stroke-width="1"/>
-  <text x="140" y="536" text-anchor="middle" class="sub" font-size="11" fill="#6b7f70">myselfserve.gov.bc.ca</text>
-
-  <!-- arrow: Puppeteer → BC Self-Serve -->
-  <line x1="170" y1="458" x2="140" y2="512" stroke="#3a4a3e" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arrow-muted)"/>
-  <text x="108" y="490" class="arrow-label">scrape</text>
-
-  <!-- ─── LOCAL UPLOADER (right side) ─── -->
-  <text x="660" y="100" class="label">LOCAL WORKFLOW</text>
-
-  <rect x="660" y="112" width="260" height="72" rx="10" fill="#111f16" stroke="#3a4a3e" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="790" y="136" text-anchor="middle" class="title" font-size="12">Local Scraper</text>
-  <text x="790" y="152" text-anchor="middle" class="sub">npm run check</text>
-  <text x="790" y="166" text-anchor="middle" class="sub">scripts/upload-to-blob.js</text>
-
-  <rect x="660" y="240" width="260" height="80" rx="10" fill="#111f16" stroke="#3a4a3e" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="790" y="270" text-anchor="middle" class="title" font-size="12">POST /api/upload</text>
-  <text x="790" y="286" text-anchor="middle" class="sub">Authorization: Bearer UPLOAD_SECRET</text>
-  <text x="790" y="302" text-anchor="middle" class="sub">X-User-ID: &lt;hashed username&gt;</text>
-  <text x="790" y="316" text-anchor="middle" class="sub">writes → Vercel Blob</text>
-
-  <!-- arrow: local scraper → upload -->
-  <line x1="790" y1="184" x2="790" y2="238" stroke="#3a4a3e" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arrow-muted)"/>
-
-  <!-- arrow: upload → blob (cross) -->
-  <line x1="660" y1="300" x2="602" y2="420" stroke="#d4a843" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arrow-amber)"/>
-
-  <!-- CI badge -->
-  <rect x="660" y="378" width="260" height="80" rx="10" fill="#0f1d14" stroke="#1a5c3a" stroke-width="1"/>
-  <text x="790" y="406" text-anchor="middle" class="title" font-size="12">CI · .github/workflows/deploy.yml</text>
-  <text x="790" y="422" text-anchor="middle" class="sub">checkout → npm ci</text>
-  <text x="790" y="436" text-anchor="middle" class="sub">node --check (4 files)</text>
-  <text x="790" y="450" text-anchor="middle" class="sub" fill="#3d9e6a">● passing</text>
-
+  <!-- myselfserve -->
+  <rect x="590" y="30" width="180" height="50" rx="8" class="box"/>
+  <text x="680" y="52" class="label">myselfserve.gov.bc.ca</text>
+  <text x="680" y="68" class="sub">BC government portal</text>
 </svg>
