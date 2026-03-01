@@ -1,19 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
-  <rect width="200" height="200" rx="32" fill="#0c1220"/>
+  <rect width="200" height="200" rx="32" fill="#f5f5f7" stroke="#d1d5db" stroke-width="1"/>
   <!-- Clipboard body -->
-  <rect x="45" y="45" width="110" height="130" rx="10" fill="#131d2e" stroke="#1a5a96" stroke-width="2"/>
+  <rect x="45" y="45" width="110" height="130" rx="10" fill="#ffffff" stroke="#1a5a96" stroke-width="2"/>
   <!-- Clipboard clip -->
   <rect x="72" y="36" width="56" height="18" rx="6" fill="#1a5a96"/>
-  <rect x="82" y="30" width="36" height="12" rx="6" fill="#0c1220" stroke="#1a5a96" stroke-width="1.5"/>
+  <rect x="82" y="30" width="36" height="12" rx="6" fill="#f5f5f7" stroke="#1a5a96" stroke-width="1.5"/>
   <!-- Checklist items -->
   <rect x="62" y="78" width="14" height="14" rx="3" fill="none" stroke="#2472b2" stroke-width="1.5"/>
-  <polyline points="65,86 68,89 74,81" fill="none" stroke="#4e9cd7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="65,86 68,89 74,81" fill="none" stroke="#1d6fb8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   <rect x="84" y="82" width="55" height="6" rx="3" fill="#1a5a96" opacity="0.6"/>
   <rect x="62" y="104" width="14" height="14" rx="3" fill="none" stroke="#2472b2" stroke-width="1.5"/>
-  <polyline points="65,112 68,115 74,107" fill="none" stroke="#4e9cd7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="65,112 68,115 74,107" fill="none" stroke="#1d6fb8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   <rect x="84" y="108" width="45" height="6" rx="3" fill="#1a5a96" opacity="0.6"/>
   <rect x="62" y="130" width="14" height="14" rx="3" fill="none" stroke="#2472b2" stroke-width="1.5"/>
   <rect x="84" y="134" width="50" height="6" rx="3" fill="#1a5a96" opacity="0.3"/>
   <!-- Dollar sign accent -->
-  <text x="100" y="170" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#4e9cd7" opacity="0.5">$</text>
+  <text x="100" y="170" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#1d6fb8" opacity="0.5">$</text>
 </svg>
