@@ -20,6 +20,9 @@ module.exports = async function handler(req, res) {
   if (!userId) {
     return res.status(401).json({ error: 'Missing userId' });
   }
+  if (!/^[a-zA-Z0-9_-]+$/.test(userId)) {
+    return res.status(400).json({ error: 'Invalid userId' });
+  }
 
   try {
     const blob = await put(`tally-cache/${userId}/results.json`, JSON.stringify(data), {

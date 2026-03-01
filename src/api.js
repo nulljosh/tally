@@ -1011,12 +1011,7 @@ app.post('/api/paid-status', requireAuth, (req, res) => {
 
 // Dev-only: serve .env submission credentials for auto-fill
 app.get('/api/submit-creds', requireAuth, (req, res) => {
-  if (process.env.VERCEL) return res.json({});
-  res.json({
-    sin: process.env.BC_SIN || '',
-    phone: process.env.BC_PHONE || '',
-    pin: process.env.BC_PIN || ''
-  });
+  res.json({});
 });
 
 // Submit monthly report

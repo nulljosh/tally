@@ -568,7 +568,7 @@ async function scrapeMonthlyReports(page) {
       console.log(`[*] Clicking into report: ${firstLink.text}`);
 
       await page.evaluate((href) => {
-        const link = document.querySelector(`a[href="${href}"]`);
+        const link = Array.from(document.querySelectorAll('a')).find(a => a.href === href);
         if (link) link.click();
       }, firstLink.href);
 

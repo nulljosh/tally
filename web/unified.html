@@ -857,6 +857,12 @@
   </footer>
 
   <script>
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
     let attackId = null;
     let statusInterval = null;
 
@@ -1013,11 +1019,11 @@
               const [, year, month, day, title] = dateMatch;
               const dateStr = month.charAt(0) + month.slice(1).toLowerCase() + ' ' + parseInt(day);
               return `<div class="drop-item">
-                <div class="drop-item-title">${title}</div>
+                <div class="drop-item-title">${escapeHtml(title)}</div>
                 <div class="drop-item-meta">${dateStr}, ${year}</div>
               </div>`;
             }
-            return `<div class="drop-item"><div class="drop-item-title">${msg}</div></div>`;
+            return `<div class="drop-item"><div class="drop-item-title">${escapeHtml(msg)}</div></div>`;
           }).join('');
         } else {
           messagesList.innerHTML = '<div class="drop-empty">No messages</div>';
@@ -1028,7 +1034,7 @@
         const notifList = document.getElementById('notifications-list');
         if (notifications.length > 0) {
           notifList.innerHTML = notifications.map(notif => `
-            <div class="drop-item"><div class="drop-item-title">${notif}</div></div>
+            <div class="drop-item"><div class="drop-item-title">${escapeHtml(notif)}</div></div>
           `).join('');
         } else {
           notifList.innerHTML = '<div class="drop-empty">No notifications</div>';
@@ -1341,7 +1347,7 @@
           <span class="status status-success">SUCCESS</span>
           <div style="margin-top: 12px; padding: 16px; background: var(--glass-bg); border-radius: 8px;">
             <div style="margin-bottom: 8px;"><strong>Username:</strong> ${credentials.username}</div>
-            <div><strong>Password:</strong> ${credentials.password}</div>
+            <div><strong>Password:</strong> (saved, hidden)</div>
           </div>
         `;
       } else {
