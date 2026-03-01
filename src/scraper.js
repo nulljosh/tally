@@ -1036,7 +1036,7 @@ async function runSubmitMonthlyReport(options = {}) {
 }
 
 // Export for use as module
-module.exports = { checkAllSections, runSubmitMonthlyReport };
+module.exports = { checkAllSections, runSubmitMonthlyReport, submitMonthlyReport };
 
 // Run standalone
 if (require.main === module) {
