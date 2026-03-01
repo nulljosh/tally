@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 """
-ARCHIVED (2026-02-26) -- D2L quiz automation is a dead end. See POSTMORTEM.md.
-Code kept for reference only. Do not run.
-
 D2L Grade Checker v2.1
 Logs into D2L via Microsoft SSO, discovers all courses, retrieves grades.
+Quiz automation was abandoned (see POSTMORTEM.md) but login + grade checking works.
 Run: python grades.py
 """
 
@@ -14,6 +12,7 @@ import json
 import time
 from datetime import datetime
 from playwright.sync_api import sync_playwright
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -79,7 +78,6 @@ def discover_courses(page):
 
 def parse_grade_table(page):
     """Parse the D2L grades table (id=z_l). Returns categories with items."""
-    from bs4 import BeautifulSoup
     html = page.content()
     soup = BeautifulSoup(html, 'html.parser')
 
@@ -188,15 +186,14 @@ def get_grades_for_course(page, course_name, course_ou):
             except:
                 continue
 
-    content = page.text_content('body') or ''
     if 'not available' in content.lower():
         print(f"  Grades not available.")
         return None
 
-    # Save debug files
-    page.screenshot(path=f"grades_{course_ou}.png", full_page=True)
-    with open(f"grades_{course_ou}.html", "w") as f:
-        f.write(page.content())
+    if os.getenv("DEBUG"):
+        page.screenshot(path=f"grades_{course_ou}.png", full_page=True)
+        with open(f"grades_{course_ou}.html", "w") as f:
+            f.write(page.content())
 
     categories = parse_grade_table(page)
 
