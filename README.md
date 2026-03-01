@@ -1,8 +1,14 @@
+<div align="center">
+
 # Tally
+
+<img src="icon.svg" alt="Tally" width="120" />
 
 Check your cheques without the bureaucracy.
 
-**Live**: https://tally.heyitsmejosh.com
+[tally.heyitsmejosh.com](https://tally.heyitsmejosh.com)
+
+</div>
 
 ## Architecture
 
