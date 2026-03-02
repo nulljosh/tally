@@ -1,11 +1,19 @@
 # Tally - Claude Development Guide
 
 ## Design Rules
-- **NO EMOJIS** — strictly none anywhere in UI or code
-- **Color palette**: BC government blue (#1a5a96 primary, #2472b2 mid, #4e9cd7 light), navy bg (#0c1220), amber accents (#d4a843). No green.
-- **No heavy shadows** — max `box-shadow: 0 4px 16px rgba(0,0,0,0.2)`. No `box-shadow` glow on hover.
-- **No gradients on backgrounds** — use solid colors or ultra-subtle radial (opacity 0.08 max). Nav background: flat semi-transparent, not gradient.
-- **Animations**: Spring hover on all buttons/cards — `transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)`
+- **NO EMOJIS** -- strictly none anywhere in UI or code
+- **Aesthetic**: Minimal monochrome, cloned from heyitsmejosh.com portfolio
+- **Color palette**: Monochrome. Light: #ffffff bg, #f5f5f5 secondary, #171717 text, #737373 muted, #e5e5e5 border. Dark: #0a0a0a bg, #171717 secondary, #fafafa text, #a3a3a3 muted, #262626 border.
+- **Typography**: System font stack (`-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif`). No Fraunces, no DM Sans, no Google Fonts.
+- **Layout**: 640px max-width container, centered. Single-column, text-first.
+- **Theme toggle**: Sun/moon SVG button, View Transitions API (`document.startViewTransition()`), `[data-theme="dark"]` on `<html>`, localStorage + system preference detection.
+- **Links**: Underline-hover animation (`::after` pseudo-element, `width: 0 -> 100%`, `0.3s cubic-bezier(0.4, 0, 0.2, 1)`). No pill CTAs.
+- **Lists**: Bordered `.items` list (`border-top: 1px solid var(--border)` between items).
+- **No glass morphism** -- no `backdrop-filter`, no frosted glass, no `rgba` backgrounds. Solid colors only.
+- **No noise texture** -- no SVG fractalNoise overlays.
+- **No gradients** -- solid backgrounds only.
+- **Shadows**: Minimal. `0 1px 2px rgba(0,0,0,0.05)` max.
+- **Animations**: Spring hover on interactive elements -- `transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)`
 
 ## Project Overview
 Multi-user BC Self-Serve scraper with DTC Navigator. Each user logs in with their own BC Self-Serve credentials to view their benefits data.

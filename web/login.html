@@ -3,65 +3,78 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tally — Sign In</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <title>Tally -- Sign In</title>
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
+  <meta name="view-transition" content="same-origin">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --blue: #1a5a96;
-      --blue-mid: #2472b2;
-      --blue-light: #4e9cd7;
-      --amber: #d4a843;
-      --bg: #0c1220;
-      --bg-2: #111828;
-      --bg-card: #141d2e;
-      --text: #e8e4da;
-      --muted: #8a9eb8;
-      --border: rgba(78, 156, 215, 0.15);
-      --input-bg: rgba(12, 18, 32, 0.8);
+      --bg-primary: #ffffff;
+      --bg-secondary: #f5f5f5;
+      --text-primary: #171717;
+      --text-secondary: #737373;
+      --border: #e5e5e5;
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #171717;
+      --text-primary: #fafafa;
+      --text-secondary: #a3a3a3;
+      --border: #262626;
     }
 
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 300;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       line-height: 1.6;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 1.5rem;
+      transition: background 0.3s, color 0.3s;
     }
 
     .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 2.5rem;
       width: 100%;
       max-width: 400px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
     }
 
-    .logo {
-      font-family: 'Fraunces', serif;
-      font-size: 1.75rem;
-      font-weight: 400;
-      color: var(--text);
-      letter-spacing: -0.02em;
-      text-align: center;
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 0.5rem;
     }
 
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.25rem;
+      color: var(--text-secondary);
+      transition: color 0.2s;
+      display: flex;
+      align-items: center;
+    }
+
+    .theme-toggle:hover { color: var(--text-primary); }
+    .theme-toggle svg { width: 18px; height: 18px; }
+
     .tagline {
       font-size: 0.8125rem;
-      color: var(--muted);
-      text-align: center;
+      color: var(--text-secondary);
       margin-bottom: 2rem;
-      font-style: italic;
     }
 
     .form-group {
@@ -70,111 +83,113 @@
 
     label {
       display: block;
-      font-size: 0.8125rem;
+      font-size: 0.6875rem;
       font-weight: 500;
-      color: var(--muted);
+      color: var(--text-secondary);
       margin-bottom: 0.5rem;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
     }
 
     input {
       width: 100%;
-      background: var(--input-bg);
+      background: var(--bg-secondary);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 6px;
       padding: 0.75rem 1rem;
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
+      color: var(--text-primary);
+      font-family: inherit;
       font-size: 0.9375rem;
-      font-weight: 300;
       outline: none;
-      transition: border-color 0.15s ease;
+      transition: border-color 0.2s;
     }
 
     input:focus {
-      border-color: var(--blue-light);
+      border-color: var(--text-primary);
     }
 
     input::placeholder {
-      color: var(--muted);
+      color: var(--text-secondary);
       opacity: 0.5;
     }
 
     button[type="submit"] {
       width: 100%;
-      background: var(--blue);
-      color: #fff;
+      background: var(--text-primary);
+      color: var(--bg-primary);
       border: none;
-      border-radius: 8px;
-      padding: 0.8125rem 1rem;
-      font-family: 'DM Sans', sans-serif;
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      font-family: inherit;
       font-size: 0.9375rem;
       font-weight: 500;
       cursor: pointer;
       margin-top: 0.5rem;
-      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s ease;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s;
     }
 
     button[type="submit"]:hover {
-      background: var(--blue-mid);
+      opacity: 0.85;
       transform: translateY(-1px);
     }
 
     button[type="submit"]:disabled {
-      opacity: 0.6;
+      opacity: 0.4;
       cursor: not-allowed;
       transform: none;
     }
 
     #error-msg {
       display: none;
-      background: rgba(220, 60, 60, 0.12);
-      border: 1px solid rgba(220, 60, 60, 0.3);
-      border-radius: 8px;
-      color: #f08080;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: #e05252;
       font-size: 0.8125rem;
       padding: 0.75rem 1rem;
       margin-top: 1rem;
-      text-align: center;
     }
 
     #success-msg {
       display: none;
-      background: rgba(26, 90, 150, 0.12);
-      border: 1px solid rgba(78, 156, 215, 0.3);
-      border-radius: 8px;
-      color: var(--blue-light);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-primary);
       font-size: 0.8125rem;
       padding: 0.75rem 1rem;
       margin-top: 1rem;
-      text-align: center;
     }
 
     .footer-note {
-      text-align: center;
       font-size: 0.75rem;
-      color: var(--muted);
+      color: var(--text-secondary);
       margin-top: 1.75rem;
-      opacity: 0.6;
     }
 
     .footer-note a {
-      color: var(--blue-light);
+      color: var(--text-primary);
       text-decoration: none;
+      position: relative;
     }
 
-    .footer-note a:hover {
-      text-decoration: underline;
+    .footer-note a::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--text-primary);
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Rate limit / loading spinner inline */
+    .footer-note a:hover::after { width: 100%; }
+
     .spinner {
       display: inline-block;
       width: 14px;
       height: 14px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: #fff;
+      border: 2px solid var(--border);
+      border-top-color: var(--bg-primary);
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
       vertical-align: middle;
@@ -188,32 +203,36 @@
 </head>
 <body>
   <div class="card">
-    <div class="logo">Tally</div>
+    <div class="top-row">
+      <div class="logo">Tally</div>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <svg id="sunIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg id="moonIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </div>
     <div class="tagline">Check your cheques without the bureaucracy.</div>
 
     <form id="login-form">
       <div class="form-group">
         <label for="username">BCEID Username</label>
-        <input
-          type="text"
-          id="username"
-          name="username"
-          autocomplete="username"
-          placeholder="your.username"
-          required
-        >
+        <input type="text" id="username" name="username" autocomplete="username" placeholder="your.username" required>
       </div>
 
       <div class="form-group">
         <label for="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          autocomplete="current-password"
-          placeholder="••••••••"
-          required
-        >
+        <input type="password" id="password" name="password" autocomplete="current-password" placeholder="••••••••" required>
       </div>
 
       <button type="submit" id="submit-btn">Sign In</button>
@@ -223,11 +242,51 @@
     </form>
 
     <div class="footer-note">
-      <a href="/">Back to home</a> &nbsp;·&nbsp; Not affiliated with the Government of BC.
+      <a href="/">Back to home</a> &middot; Not affiliated with the Government of BC.
     </div>
   </div>
 
   <script>
+    // Theme
+    const themeToggle = document.getElementById('themeToggle');
+    const sunIcon = document.getElementById('sunIcon');
+    const moonIcon = document.getElementById('moonIcon');
+
+    const getPreferredTheme = () => {
+      const saved = localStorage.getItem('theme');
+      if (saved) return saved;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setTheme = (theme, animate) => {
+      const apply = () => {
+        if (theme === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          sunIcon.style.display = 'none';
+          moonIcon.style.display = 'block';
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+          sunIcon.style.display = 'block';
+          moonIcon.style.display = 'none';
+        }
+        localStorage.setItem('theme', theme);
+      };
+
+      if (animate && document.startViewTransition) {
+        document.startViewTransition(apply);
+      } else {
+        apply();
+      }
+    };
+
+    setTheme(getPreferredTheme(), false);
+
+    themeToggle.addEventListener('click', () => {
+      const current = document.documentElement.hasAttribute('data-theme') ? 'dark' : 'light';
+      setTheme(current === 'dark' ? 'light' : 'dark', true);
+    });
+
+    // Login form
     const form = document.getElementById('login-form');
     const submitBtn = document.getElementById('submit-btn');
     const errorMsg = document.getElementById('error-msg');
@@ -241,7 +300,6 @@
 
       if (!username || !password) return;
 
-      // Reset state
       errorMsg.style.display = 'none';
       successMsg.style.display = 'none';
       submitBtn.disabled = true;
@@ -258,11 +316,7 @@
         let data = {};
         if (bodyText) {
           if (contentType.includes('application/json')) {
-            try {
-              data = JSON.parse(bodyText);
-            } catch (_) {
-              data = {};
-            }
+            try { data = JSON.parse(bodyText); } catch (_) { data = {}; }
           } else {
             data = { error: bodyText.slice(0, 140) };
           }

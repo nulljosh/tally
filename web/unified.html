@@ -6,37 +6,43 @@
   <link rel="manifest" href="/manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#1a5a96">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
+  <meta name="view-transition" content="same-origin">
   <link rel="apple-touch-icon" href="/icon-192.svg">
   <link rel="stylesheet" href="design-tokens.css">
   <title>Tally Dashboard</title>
   <style>
     :root {
-      --glass-bg: rgba(255, 255, 255, 0.58);
-      --glass-border: rgba(255, 255, 255, 0.6);
-      --shadow: rgba(0, 0, 0, 0.08);
-      --text-primary: #1d1d1f;
-      --text-secondary: #86868b;
-      --accent: #0071e3;
+      --bg-primary: #ffffff;
+      --bg-secondary: #f5f5f5;
+      --text-primary: #171717;
+      --text-secondary: #737373;
+      --border: #e5e5e5;
+      --glass-bg: #f5f5f5;
+      --glass-border: #e5e5e5;
+      --shadow: rgba(0, 0, 0, 0.06);
+      --card-bg: #ffffff;
+      --accent: #171717;
       --success: #34c759;
       --warning: #ff9500;
       --error: #ff3b30;
-      --bg-primary: #f5f5f7;
-      --card-bg: rgba(255, 255, 255, 0.72);
     }
 
     [data-theme="dark"] {
-      --glass-bg: rgba(16, 18, 24, 0.68);
-      --glass-border: rgba(255, 255, 255, 0.12);
-      --shadow: rgba(0, 0, 0, 0.38);
-      --text-primary: #f5f5f7;
-      --text-secondary: #86868b;
-      --accent: #4ea1ff;
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #171717;
+      --text-primary: #fafafa;
+      --text-secondary: #a3a3a3;
+      --border: #262626;
+      --glass-bg: #171717;
+      --glass-border: #262626;
+      --shadow: rgba(0, 0, 0, 0.3);
+      --card-bg: #171717;
+      --accent: #fafafa;
       --success: #30d158;
       --warning: #ff9f0a;
       --error: #ff453a;
-      --bg-primary: #0b1020;
-      --card-bg: rgba(20, 24, 34, 0.72);
     }
 
     * {
@@ -46,7 +52,7 @@
     }
 
     body {
-      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       background: var(--bg-primary);
       color: var(--text-primary);
       transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -79,10 +85,9 @@
     }
 
     nav .logo {
-      font-family: 'Fraunces', Georgia, serif;
-      font-size: 21px;
-      font-weight: 600;
-      letter-spacing: -0.3px;
+      font-size: 1.25rem;
+      font-weight: 500;
+      letter-spacing: -0.02em;
       flex-shrink: 1;
       min-width: 0;
       overflow: hidden;
@@ -135,34 +140,20 @@
     }
 
     .theme-toggle {
-      width: 44px;
-      height: 26px;
-      background: var(--card-bg);
-      border-radius: 13px;
-      border: 1px solid var(--glass-border);
+      background: none;
+      border: none;
       cursor: pointer;
-      position: relative;
-      transition: all 0.3s;
+      padding: 0.25rem;
+      color: var(--text-secondary);
+      transition: color 0.2s;
+      display: flex;
+      align-items: center;
       flex-shrink: 0;
       z-index: 1200;
     }
 
-    .theme-toggle::before {
-      content: '';
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 20px;
-      height: 20px;
-      background: var(--accent);
-      border-radius: 50%;
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    }
-
-    [data-theme="dark"] .theme-toggle::before {
-      transform: translateX(18px);
-    }
+    .theme-toggle:hover { color: var(--text-primary); }
+    .theme-toggle svg { width: 18px; height: 18px; }
 
     /* Container */
     .container {
@@ -505,8 +496,7 @@
       max-height: 60vh;
       overflow-y: auto;
       background: var(--card-bg);
-      backdrop-filter: saturate(180%) blur(20px);
-      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      /* solid background, no blur */
       border-radius: 12px;
       border: 1px solid var(--glass-border);
       box-shadow: 0 8px 32px var(--shadow);
@@ -554,13 +544,6 @@
         padding: 6px 8px;
         font-size: 11px;
       }
-
-      .theme-toggle {
-        width: 40px;
-        height: 24px;
-        border: 1px solid var(--accent);
-        background: var(--card-bg);
-      }
     }
   </style>
 </head>
@@ -573,7 +556,10 @@
       <div class="tab" onclick="switchTab('bruteforce')">Security Testing</div>
       <div class="tab" onclick="switchTab('tools')">Tools</div>
     </div>
-    <div class="theme-toggle" onclick="toggleTheme()"></div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" onclick="toggleTheme()">
+      <svg id="sunIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <svg id="moonIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
     <button class="logout-btn" onclick="logout()">Logout</button>
   </nav>
 
@@ -888,13 +874,34 @@
     function toggleTheme() {
       const current = document.documentElement.getAttribute('data-theme');
       const newTheme = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', newTheme);
-      localStorage.setItem('theme', newTheme);
+      const apply = () => {
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        const sun = document.getElementById('sunIcon');
+        const moon = document.getElementById('moonIcon');
+        if (newTheme === 'dark') {
+          sun.style.display = 'none';
+          moon.style.display = 'block';
+        } else {
+          sun.style.display = 'block';
+          moon.style.display = 'none';
+        }
+      };
+      if (document.startViewTransition) {
+        document.startViewTransition(apply);
+      } else {
+        apply();
+      }
     }
 
     // Load saved theme
-    const savedTheme = localStorage.getItem('theme') || 'light';
+    const savedTheme = localStorage.getItem('theme') ||
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     document.documentElement.setAttribute('data-theme', savedTheme);
+    if (savedTheme === 'dark') {
+      document.getElementById('sunIcon').style.display = 'none';
+      document.getElementById('moonIcon').style.display = 'block';
+    }
 
     // Dev mode tabs only on localhost or explicit ?dev=1
     const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
