@@ -623,6 +623,7 @@
           <div class="card-header">
             <div class="card-title">Submit Monthly Report</div>
           </div>
+          <div id="mr-deadline" style="font-size: 13px; margin-bottom: 12px; padding: 8px 12px; border-radius: 8px; background: rgba(0, 113, 227, 0.08); color: var(--text-secondary);"></div>
           <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
             Auto-fill and submit your monthly report through BC Self-Serve. Use Preview first to verify fields before submitting.
           </p>
@@ -908,6 +909,23 @@
       el.style.display = el.style.display === 'none' ? 'block' : 'none';
     }
 
+    // Populate report deadline in monthly reports section
+    (function() {
+      const now = new Date();
+      let deadline = new Date(now.getFullYear(), now.getMonth(), 5);
+      if (now > deadline) deadline = new Date(now.getFullYear(), now.getMonth() + 1, 5);
+      const days = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
+      const label = days === 0 ? 'today' : days === 1 ? 'tomorrow' : 'in ' + days + ' days';
+      const dateStr = deadline.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+      const el = document.getElementById('mr-deadline');
+      if (el) {
+        const urgent = days <= 3;
+        el.style.background = urgent ? 'rgba(212, 168, 67, 0.12)' : 'rgba(0, 113, 227, 0.08)';
+        el.style.color = urgent ? 'var(--warning, #d4a843)' : 'var(--text-secondary)';
+        el.textContent = 'Report deadline: ' + dateStr + ' (' + label + ')';
+      }
+    })();
+
     function toggleDropdown(id) {
       const el = document.getElementById(id);
       const wasOpen = el.classList.contains('open');
@@ -1066,10 +1084,19 @@
           const paydayLabel = daysUntil === 0 ? 'Today' : daysUntil === 1 ? 'Tomorrow' : daysUntil + ' days';
           const paydayDate = nextPayday.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
+          // Report deadline (5th of each month)
+          let reportDeadline = new Date(now.getFullYear(), now.getMonth(), 5);
+          if (now > reportDeadline) reportDeadline = new Date(now.getFullYear(), now.getMonth() + 1, 5);
+          const daysUntilReport = Math.ceil((reportDeadline - now) / (1000 * 60 * 60 * 24));
+          const reportLabel = daysUntilReport === 0 ? 'Today' : daysUntilReport === 1 ? 'Tomorrow' : daysUntilReport + ' days';
+          const reportDate = reportDeadline.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+          const reportUrgent = daysUntilReport <= 3;
+
           if (totalAmount) {
             paymentInfo.innerHTML = `<div style="text-align: center;">
               <div style="font-size: clamp(64px, 12vw, 120px); font-weight: 700; color: var(--text-primary); letter-spacing: -3px; line-height: 1;">${totalAmount}</div>
               <div style="font-size: 16px; font-weight: 400; color: var(--text-secondary); margin-top: 24px;">Next payment: ${paydayDate} (${paydayLabel})</div>
+              <div style="font-size: 14px; font-weight: 400; color: ${reportUrgent ? 'var(--warning, #d4a843)' : 'var(--text-secondary)'}; margin-top: 8px;">Report due: ${reportDate} (${reportLabel})</div>
               <label class="paid-check" id="paid-check" onclick="togglePaid()">
                 <input type="checkbox" id="paid-cb">
                 <span id="paid-label">Paid yet?</span>
