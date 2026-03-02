@@ -19,11 +19,6 @@
       --text-primary: #171717;
       --text-secondary: #737373;
       --border: #e5e5e5;
-      --glass-bg: #f5f5f5;
-      --glass-border: #e5e5e5;
-      --shadow: rgba(0, 0, 0, 0.06);
-      --card-bg: #ffffff;
-      --accent: #171717;
       --success: #34c759;
       --warning: #ff9500;
       --error: #ff3b30;
@@ -35,11 +30,6 @@
       --text-primary: #fafafa;
       --text-secondary: #a3a3a3;
       --border: #262626;
-      --glass-bg: #171717;
-      --glass-border: #262626;
-      --shadow: rgba(0, 0, 0, 0.3);
-      --card-bg: #171717;
-      --accent: #fafafa;
       --success: #30d158;
       --warning: #ff9f0a;
       --error: #ff453a;
@@ -67,7 +57,7 @@
       right: 0;
       z-index: 1000;
       background: var(--bg-primary);
-      border-bottom: 1px solid var(--glass-border);
+      border-bottom: 1px solid var(--border);
       padding: 14px 32px;
       display: flex;
       align-items: center;
@@ -131,12 +121,12 @@
     }
 
     .tab:hover {
-      background: var(--glass-border);
+      background: var(--border);
     }
 
     .tab.active {
-      background: var(--accent);
-      color: white;
+      background: var(--text-primary);
+      color: var(--bg-primary);
     }
 
     .theme-toggle {
@@ -181,9 +171,9 @@
 
     /* Glass cards */
     .card {
-      background: var(--card-bg);
+      background: var(--bg-secondary);
       border-radius: 12px;
-      border: 1px solid var(--glass-border);
+      border: 1px solid var(--border);
       padding: 24px;
       margin-bottom: 20px;
       box-shadow: none;
@@ -191,7 +181,7 @@
     }
 
     .card:hover {
-      border-color: var(--accent);
+      border-color: var(--text-primary);
     }
 
     .paid-check {
@@ -200,8 +190,8 @@
       gap: 8px;
       padding: 8px 18px;
       border-radius: 100px;
-      border: 1px solid var(--glass-border);
-      background: var(--card-bg);
+      border: 1px solid var(--border);
+      background: var(--bg-secondary);
       cursor: pointer;
       font-size: 14px;
       color: var(--text-secondary);
@@ -211,7 +201,7 @@
     }
 
     .paid-check:hover {
-      border-color: var(--accent);
+      border-color: var(--text-primary);
       transform: scale(1.03);
     }
 
@@ -252,8 +242,8 @@
       border-radius: 10px;
       font-size: 11px;
       font-weight: 600;
-      background: var(--accent);
-      color: white;
+      background: var(--text-primary);
+      color: var(--bg-primary);
     }
 
     /* Grid */
@@ -274,7 +264,7 @@
       width: 100%;
       padding: 10px 12px;
       background: var(--bg-primary);
-      border: 1px solid var(--glass-border);
+      border: 1px solid var(--border);
       border-radius: 8px;
       color: var(--text-primary);
       font-family: inherit;
@@ -284,8 +274,8 @@
 
     input:focus, textarea:focus, select:focus {
       outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+      border-color: var(--text-primary);
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
     }
 
     textarea {
@@ -309,8 +299,8 @@
 
     /* Buttons */
     .btn {
-      background: var(--accent);
-      color: white;
+      background: var(--text-primary);
+      color: var(--bg-primary);
       border: none;
       padding: 10px 20px;
       border-radius: 10px;
@@ -331,7 +321,7 @@
     }
 
     .btn-secondary {
-      background: var(--glass-border);
+      background: var(--border);
       color: var(--text-primary);
     }
 
@@ -352,7 +342,7 @@
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--success));
+      background: var(--text-primary);
       width: 0%;
       transition: width 0.3s;
       display: flex;
@@ -360,13 +350,13 @@
       justify-content: center;
       font-size: 11px;
       font-weight: 700;
-      color: white;
+      color: var(--bg-primary);
     }
 
     /* List items */
     .list-item {
       padding: 16px 0;
-      border-bottom: 1px solid var(--glass-border);
+      border-bottom: 1px solid var(--border);
       transition: background 0.2s;
     }
 
@@ -400,8 +390,8 @@
     }
 
     .spinner {
-      border: 2px solid var(--glass-border);
-      border-top-color: var(--accent);
+      border: 2px solid var(--border);
+      border-top-color: var(--text-primary);
       border-radius: 50%;
       width: 32px;
       height: 32px;
@@ -422,9 +412,9 @@
       font-weight: 600;
     }
 
-    .status-success { background: var(--success); color: white; }
-    .status-error { background: var(--error); color: white; }
-    .status-warning { background: var(--warning); color: white; }
+    .status-success { background: var(--success); color: var(--bg-primary); }
+    .status-error { background: var(--error); color: var(--bg-primary); }
+    .status-warning { background: var(--warning); color: var(--bg-primary); }
 
     /* Dev-only tabs: hidden in production */
     .dev-only { display: none; }
@@ -449,7 +439,7 @@
       font-family: inherit;
     }
     .nav-dropdown-trigger:hover {
-      background: var(--glass-border);
+      background: var(--border);
       color: var(--text-primary);
     }
 
@@ -471,8 +461,8 @@
       background: rgba(255, 59, 48, 0.1);
     }
     .nav-dropdown-trigger .badge-count {
-      background: var(--accent);
-      color: white;
+      background: var(--text-primary);
+      color: var(--bg-primary);
       font-size: 11px;
       font-weight: 600;
       padding: 1px 6px;
@@ -495,11 +485,11 @@
       width: min(420px, 90vw);
       max-height: 60vh;
       overflow-y: auto;
-      background: var(--card-bg);
+      background: var(--bg-secondary);
       /* solid background, no blur */
       border-radius: 12px;
-      border: 1px solid var(--glass-border);
-      box-shadow: 0 8px 32px var(--shadow);
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
       z-index: 1001;
       padding: 8px;
     }
@@ -519,7 +509,7 @@
       cursor: default;
     }
     .nav-dropdown .drop-item:hover {
-      background: var(--glass-border);
+      background: var(--border);
     }
     .nav-dropdown .drop-item-title {
       font-size: 13px;
@@ -609,7 +599,7 @@
           <div class="card-header">
             <div class="card-title">Submit Monthly Report</div>
           </div>
-          <div id="mr-deadline" style="font-size: 13px; margin-bottom: 12px; padding: 8px 12px; border-radius: 8px; background: rgba(0, 113, 227, 0.08); color: var(--text-secondary);"></div>
+          <div id="mr-deadline" style="font-size: 13px; margin-bottom: 12px; padding: 8px 12px; border-radius: 8px; background: var(--bg-secondary); color: var(--text-secondary);"></div>
           <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
             Auto-fill and submit your monthly report through BC Self-Serve. Use Preview first to verify fields before submitting.
           </p>
@@ -627,7 +617,7 @@
           </div>
           <div id="submit-status" style="display: none; font-size: 13px; margin-bottom: 12px; padding: 10px; border-radius: 8px;"></div>
           <div style="display: flex; gap: 8px;">
-            <button class="btn" onclick="submitReport(true)" id="btn-preview" style="flex: 1; background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border);">Preview</button>
+            <button class="btn" onclick="submitReport(true)" id="btn-preview" style="flex: 1; background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border);">Preview</button>
             <button class="btn" onclick="submitReport(false)" id="btn-submit" style="flex: 1;">Submit</button>
           </div>
         </div>
@@ -827,15 +817,15 @@
 
         <div class="card">
           <div class="card-title" style="margin-bottom: 12px;">Documentation</div>
-          <a href="../docs/README.md" target="_blank" style="display: block; padding: 8px 0; color: var(--accent); text-decoration: none;">README</a>
-          <a href="../docs/TODO.md" target="_blank" style="display: block; padding: 8px 0; color: var(--accent); text-decoration: none;">TODO</a>
-          <a href="../brute-force/README.md" target="_blank" style="display: block; padding: 8px 0; color: var(--accent); text-decoration: none;">Brute Force Docs</a>
+          <a href="../docs/README.md" target="_blank" style="display: block; padding: 8px 0; color: var(--text-primary); text-decoration: none;">README</a>
+          <a href="../docs/TODO.md" target="_blank" style="display: block; padding: 8px 0; color: var(--text-primary); text-decoration: none;">TODO</a>
+          <a href="../brute-force/README.md" target="_blank" style="display: block; padding: 8px 0; color: var(--text-primary); text-decoration: none;">Brute Force Docs</a>
         </div>
       </div>
     </div>
   </div>
 
-  <footer style="text-align: center; padding: 24px 32px; font-size: 12px; color: var(--text-secondary); border-top: 1px solid var(--glass-border);">
+  <footer style="text-align: center; padding: 24px 32px; font-size: 12px; color: var(--text-secondary); border-top: 1px solid var(--border);">
     MIT License 2026 Joshua Trommel
     <span style="margin: 0 8px;">|</span>
     <a href="https://github.com/nulljosh/tally" target="_blank" style="color: var(--text-secondary); text-decoration: none;">GitHub</a>
@@ -927,7 +917,7 @@
       const el = document.getElementById('mr-deadline');
       if (el) {
         const urgent = days <= 3;
-        el.style.background = urgent ? 'rgba(212, 168, 67, 0.12)' : 'rgba(0, 113, 227, 0.08)';
+        el.style.background = urgent ? 'var(--bg-secondary)' : 'var(--bg-secondary)';
         el.style.color = urgent ? 'var(--warning, #d4a843)' : 'var(--text-secondary)';
         el.textContent = 'Report deadline: ' + dateStr + ' (' + label + ')';
       }
@@ -1156,7 +1146,7 @@
           if (mrSection.tableData && mrSection.tableData.length > 0) {
             html += '<div style="font-size: 12px; margin-top: 8px;">';
             mrSection.tableData.slice(0, 5).forEach(row => {
-              html += '<div style="padding: 4px 0; border-bottom: 1px solid var(--glass-border);">' + row + '</div>';
+              html += '<div style="padding: 4px 0; border-bottom: 1px solid var(--border);">' + row + '</div>';
             });
             html += '</div>';
           }
@@ -1245,8 +1235,8 @@
       btnPreview.disabled = true;
       btnSubmit.disabled = true;
       statusEl.style.display = 'block';
-      statusEl.style.background = 'rgba(0, 113, 227, 0.1)';
-      statusEl.style.color = 'var(--accent)';
+      statusEl.style.background = 'var(--bg-secondary)';
+      statusEl.style.color = 'var(--text-primary)';
       statusEl.textContent = dryRun ? 'Running preview (dry run)...' : 'Submitting report...';
 
       try {
@@ -1379,7 +1369,7 @@
       if (success) {
         content.innerHTML = `
           <span class="status status-success">SUCCESS</span>
-          <div style="margin-top: 12px; padding: 16px; background: var(--glass-bg); border-radius: 8px;">
+          <div style="margin-top: 12px; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
             <div style="margin-bottom: 8px;"><strong>Username:</strong> ${credentials.username}</div>
             <div><strong>Password:</strong> (saved, hidden)</div>
           </div>
@@ -1635,7 +1625,7 @@
         const savedArr = Array.isArray(savedAnswer) ? savedAnswer : [];
         html += `<div style="display: flex; flex-direction: column; gap: 8px;">
           ${q.options.map(opt => `
-            <label style="display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--glass-bg); border-radius: 8px; border: 1px solid var(--glass-border); cursor: pointer; font-size: 14px; margin-bottom: 0;">
+            <label style="display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border); cursor: pointer; font-size: 14px; margin-bottom: 0;">
               <input type="checkbox" value="${opt.value}" ${savedArr.includes(opt.value) ? 'checked' : ''} onchange="updateMultiSelect('${q.id}')" style="width: auto; margin: 0;">
               ${opt.label}
             </label>
@@ -1987,7 +1977,7 @@
                           flag.type === 'warning' ? 'rgba(255, 149, 0, 0.1)' :
                           'rgba(0, 122, 255, 0.1)';
           const borderColor = flag.type === 'success' ? 'var(--success)' :
-                              flag.type === 'warning' ? 'var(--warning)' : 'var(--accent)';
+                              flag.type === 'warning' ? 'var(--warning)' : 'var(--text-primary)';
           html += `<div style="padding: 12px 16px; background: ${bgColor}; border-left: 3px solid ${borderColor}; border-radius: 0 8px 8px 0; margin-bottom: 8px; font-size: 13px; line-height: 1.5; color: var(--text-primary);">
             ${flag.text}
           </div>`;
@@ -2003,7 +1993,7 @@
         html += `<div class="list-item">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <div class="list-item-title">${prog.name}</div>
-            <span class="status" style="background: ${statusColor}; color: white;">${statusText}</span>
+            <span class="status" style="background: ${statusColor}; color: var(--bg-primary);">${statusText}</span>
           </div>
           <div class="list-item-meta">${prog.description}</div>
         </div>`;
@@ -2017,11 +2007,11 @@
         results.nextSteps.forEach((step, i) => {
           stepsHtml += `<div class="list-item">
             <div style="display: flex; gap: 12px; align-items: flex-start;">
-              <div style="min-width: 28px; height: 28px; background: var(--accent); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">${i + 1}</div>
+              <div style="min-width: 28px; height: 28px; background: var(--text-primary); color: var(--bg-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">${i + 1}</div>
               <div>
                 <div class="list-item-title" style="font-weight: 600;">${step.title}</div>
                 <div class="list-item-meta" style="margin-top: 4px;">${step.description}</div>
-                ${step.action ? `<div style="margin-top: 8px; font-size: 12px; color: var(--accent); font-weight: 500;">${step.action}</div>` : ''}
+                ${step.action ? `<div style="margin-top: 8px; font-size: 12px; color: var(--text-primary); font-weight: 500;">${step.action}</div>` : ''}
               </div>
             </div>
           </div>`;

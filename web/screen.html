@@ -126,7 +126,7 @@
       padding: 52px;
       width: 100%;
       max-width: 660px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
 
     /* PROGRESS */
@@ -229,12 +229,12 @@
     }
 
     .opt:hover {
-      background: rgba(26,90,150,0.1);
-      border-color: rgba(78,156,215,0.3);
+      background: var(--bg-3);
+      border-color: var(--border);
     }
 
     .opt.selected {
-      background: rgba(26,90,150,0.18);
+      background: var(--bg-3);
       border-color: var(--blue-mid);
     }
 
@@ -311,7 +311,7 @@
       border-color: var(--blue-light);
     }
 
-    .income-input::placeholder { color: rgba(232,228,218,0.2); }
+    .income-input::placeholder { color: var(--muted); }
 
     /* NAV BUTTONS */
     .nav-btns {
@@ -397,8 +397,8 @@
       border: 1px solid var(--border, #e5e5e5);
     }
 
-    .chip-green { color: var(--blue-light); border-color: rgba(78,156,215,0.3); background: rgba(26,90,150,0.1); }
-    .chip-amber { color: var(--amber); border-color: rgba(212,168,67,0.3); background: rgba(212,168,67,0.08); }
+    .chip-green { color: var(--blue-light); border-color: var(--border); background: var(--bg-3); }
+    .chip-amber { color: var(--amber); border-color: var(--border); background: var(--bg-3); }
     .chip-muted { color: var(--muted); }
 
     .programs-list {
@@ -416,13 +416,13 @@
     }
 
     .program-card.eligible {
-      border-color: rgba(78,156,215,0.25);
-      background: rgba(45,122,82,0.06);
+      border-color: var(--border);
+      background: var(--bg-3);
     }
 
     .program-card.possible {
-      border-color: rgba(212,168,67,0.2);
-      background: rgba(212,168,67,0.04);
+      border-color: var(--border);
+      background: var(--bg-3);
     }
 
     .program-card.ineligible {
@@ -456,8 +456,8 @@
       margin-top: 2px;
     }
 
-    .badge-eligible { background: rgba(78,156,215,0.2); color: var(--blue-light); }
-    .badge-possible { background: rgba(212,168,67,0.15); color: var(--amber); }
+    .badge-eligible { background: var(--bg-3); color: var(--blue-light); }
+    .badge-possible { background: var(--bg-3); color: var(--amber); }
     .badge-no { background: var(--bg-2); color: var(--muted); }
 
     .program-amount {
@@ -514,8 +514,8 @@
     .total-bar {
       padding: 24px 28px;
       border-radius: 14px;
-      border: 1px solid rgba(78,156,215,0.3);
-      background: rgba(26,90,150,0.1);
+      border: 1px solid var(--border);
+      background: var(--bg-3);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -550,7 +550,7 @@
     /* FOOTNOTE */
     .footnote {
       font-size: 0.8rem;
-      color: rgba(138,158,144,0.5);
+      color: var(--muted);
       text-align: center;
       margin-top: 24px;
       line-height: 1.5;
@@ -599,11 +599,11 @@
       text-align: center;
       padding: 32px 24px;
       font-size: 0.78rem;
-      color: rgba(138,158,144,0.45);
+      color: var(--muted);
       position: relative;
       z-index: 1;
     }
-    .site-footer a { color: rgba(138,158,144,0.6); text-decoration: none; }
+    .site-footer a { color: var(--muted); text-decoration: none; }
     .site-footer a:hover { color: var(--muted); }
   </style>
 </head>
@@ -638,7 +638,7 @@
         <p class="step-desc">
           Answer a few simple questions and Tally will show you every BC and Canadian government benefit you may qualify for — retirement, disability, housing support, and more.
         </p>
-        <p class="step-desc" style="font-size: 0.9rem; color: rgba(138,158,144,0.6);">
+        <p class="step-desc" style="font-size: 0.9rem; color: var(--muted);">
           Takes about 3 minutes. Nothing is stored or sent anywhere.
         </p>
         <div class="nav-btns">
