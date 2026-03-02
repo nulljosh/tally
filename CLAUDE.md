@@ -103,7 +103,21 @@ UPLOAD_SECRET=random_string
 
 ## Development History
 
-### 2026-02-19 — v1.3.0 (Vercel fix + landing page)
+### 2026-03-01 -- v2.0.0 (Portfolio vibe clone overhaul)
+- Full design overhaul: replaced Dark Editorial / BC gov blue / Apple Liquid Glass with minimal monochrome aesthetic cloned from heyitsmejosh.com portfolio
+- Color system: monochrome light (#ffffff/#171717/#737373/#e5e5e5) and dark (#0a0a0a/#fafafa/#a3a3a3/#262626)
+- Typography: system font stack, removed Fraunces + DM Sans + Google Fonts entirely
+- Layout: 640px max-width container, single-column, text-first
+- Theme toggle: sun/moon SVG button with View Transitions API on all pages (landing, login, dashboard, screen)
+- Landing page: complete rebuild as portfolio-style minimal page with bordered item lists
+- Login page: monochrome restyle, no card shadow, clean inputs
+- Dashboard (unified.html): replaced glass morphism vars with solid monochrome, SVG theme toggle
+- Benefits checker (screen.html): monochrome vars, removed noise texture, added theme toggle
+- design-tokens.css: complete rewrite with monochrome token system
+- manifest.json: updated theme_color and background_color
+- Added /vibeclone Claude Code slash command for extracting design tokens from any URL
+
+### 2026-02-19 -- v1.3.0 (Vercel fix + landing page)
 - Fixed: `api.js` had macOS hardcoded Chrome path — crashed on Vercel Linux. Now uses `@sparticuz/chromium` when `VERCEL` env is set (`scraper.js` already had this right)
 - Fixed: CI workflow was "Deploy to GitHub Pages" (Pages never enabled, failed every push since Feb 16). Replaced with proper Node.js CI
 - Added: public landing page `web/landing.html` — Fraunces serif, dark green/amber, explains product to laymen
