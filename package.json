@@ -10,7 +10,7 @@
     "test:auth-cookie": "node tools/test-auth-cookie.js",
     "test:paid-status": "node tools/test-paid-status.js",
     "test:scraper": "node tools/test.js",
-    "test:scraper": "node src/scraper.js",
+    "test:monthly-report": "node tools/test-monthly-report.js",
     "api": "node src/api.js",
     "dev": "nodemon src/api.js",
     "watch": "concurrently \"nodemon src/api.js\" \"browser-sync start --proxy localhost:3000 --files 'web/**/*.html' --no-open\"",
