@@ -177,7 +177,7 @@ async function attemptBCLogin(username, password) {
 
 const allowedOrigins = parseAllowedOrigins(
   process.env.CORS_ORIGINS,
-  'http://localhost:3000,http://127.0.0.1:3000,https://tally-production.vercel.app'
+  'http://localhost:3000,http://127.0.0.1:3000,https://tally-production.vercel.app,https://tally.heyitsmejosh.com'
 );
 
 app.use(cors(createCorsOptionsDelegate(allowedOrigins)));

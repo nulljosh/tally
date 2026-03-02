@@ -24,7 +24,7 @@ function getOriginHost(origin) {
 }
 
 function isOriginAllowed(origin, requestHost, allowedOrigins) {
-  if (!origin) return false;
+  if (!origin) return true;
   if (Array.isArray(allowedOrigins) && allowedOrigins.includes(origin)) return true;
 
   const normalizedRequestHost = normalizeHost(requestHost);
