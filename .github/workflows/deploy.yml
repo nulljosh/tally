@@ -24,7 +24,7 @@ jobs:
         run: npm ci
 
       - name: Check syntax
-        run: node --check src/api.js && node --check src/scraper.js && node --check api/upload.js && node --check api/latest.js
+        run: node --check src/api.js && node --check src/scraper.js && node --check api/upload.js
 
       - name: Verify package-lock is present
         run: test -f package-lock.json && echo "package-lock.json OK"
