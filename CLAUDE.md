@@ -161,7 +161,13 @@ Project name: **tally**
 - "tally" = playful pun combining both
 - Decision finalized: "tally" (lowercase), display as "Tally" where appropriate
 
+## User Benefits Status
+- PWD designation: documents submitted 2026-03-04, pending approval
+- Current: Income Assistance (~$1000/mo) -> Expected: PWD (~$1500-1700/mo)
+- Dashboard should reflect PWD payment amounts once approved
+
 ## Roadmap
+- [ ] PWD payment tracking (update income display when designation approved)
 - [ ] iOS companion app (tally-ios)
 - [ ] Auto-fill monthly reports end-to-end
 - [ ] Push notifications for payment dates
