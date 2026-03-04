@@ -1054,10 +1054,32 @@
             setNavUsername(titleCase(paidTo), true);
           }
 
-          // Next payday (25th of each month)
+          // 2026 BC Income Assistance payment dates (month index -> day)
+          const payDates2026 = {
+            0: 21,  // Jan 21 (for Feb)
+            1: 25,  // Feb 25 (for Mar)
+            2: 25,  // Mar 25 (for Apr)
+            3: 22,  // Apr 22 (for May)
+            4: 27,  // May 27 (for Jun)
+            5: 24,  // Jun 24 (for Jul)
+            6: 29,  // Jul 29 (for Aug)
+            7: 26,  // Aug 26 (for Sep)
+            8: 23,  // Sep 23 (for Oct)
+            9: 21,  // Oct 21 (for Nov)
+            10: 18, // Nov 18 (for Dec)
+            11: 16, // Dec 16 (for Jan 2027)
+          };
           const now = new Date();
-          let nextPayday = new Date(now.getFullYear(), now.getMonth(), 25);
-          if (now > nextPayday) nextPayday = new Date(now.getFullYear(), now.getMonth() + 1, 25);
+          const thisMonthDay = payDates2026[now.getMonth()];
+          let nextPayday;
+          if (thisMonthDay && now <= new Date(now.getFullYear(), now.getMonth(), thisMonthDay)) {
+            nextPayday = new Date(now.getFullYear(), now.getMonth(), thisMonthDay);
+          } else {
+            const nextMonth = (now.getMonth() + 1) % 12;
+            const nextDay = payDates2026[nextMonth] || 25;
+            const nextYear = nextMonth === 0 ? now.getFullYear() + 1 : now.getFullYear();
+            nextPayday = new Date(nextYear, nextMonth, nextDay);
+          }
           const daysUntil = Math.ceil((nextPayday - now) / (1000 * 60 * 60 * 24));
           const paydayLabel = daysUntil === 0 ? 'Today' : daysUntil === 1 ? 'Tomorrow' : daysUntil + ' days';
           const paydayDate = nextPayday.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
