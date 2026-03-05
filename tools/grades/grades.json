@@ -1,5 +1,6 @@
 {
-  "retrieved_at": "2026-02-15T20:20:30.057677",
+  "retrieved_at": "2026-03-04T16:04:00.000000",
+  "overall_grade_pct": 51,
   "courses": [
     {
       "course": "LEC Pre-Calculus 12 25-26 JR, PREC12 OL 25-26 RATCLIFFE - LEC",
@@ -287,12 +288,19 @@
     {
       "course": "LEC Anatomy & Physiology 12 25-26 AD, ATPH12 OL 25-26 DHIMAN - LEC",
       "course_ou": "153403",
-      "retrieved_at": "2026-02-15T20:20:30.057422",
+      "retrieved_at": "2026-03-04T16:04:00.000000",
       "categories": [
         {
           "category": "Course Plan",
           "grade_pct": null,
-          "items": []
+          "items": [
+            {
+              "name": "Course Plan",
+              "score": 1.0,
+              "out_of": 1.0,
+              "percentage": 100.0
+            }
+          ]
         },
         {
           "category": "Learning Guides",
@@ -468,6 +476,60 @@
           "items": [
             {
               "name": "Final Exam",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            }
+          ]
+        },
+        {
+          "category": "Midterm Exam",
+          "grade_pct": null,
+          "items": [
+            {
+              "name": "Midterm Exam",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            }
+          ]
+        },
+        {
+          "category": "Unit Projects",
+          "grade_pct": null,
+          "items": [
+            {
+              "name": "U2 Projects",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "U3 Projects",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "U5 Projects",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "U6 Projects",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "U8 Projects",
+              "score": null,
+              "out_of": null,
+              "percentage": null
+            },
+            {
+              "name": "U9 Projects",
               "score": null,
               "out_of": null,
               "percentage": null
