@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
+  <meta name="view-transition" content="same-origin">
+  <link rel="apple-touch-icon" href="/icon-192.svg">
+  <title>Tally -- School</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f5f5f5;
+      --text-primary: #171717;
+      --text-secondary: #737373;
+      --border: #e5e5e5;
+      --link: #171717;
+      --green: #16a34a;
+      --red: #dc2626;
+      --amber: #d97706;
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #171717;
+      --text-primary: #fafafa;
+      --text-secondary: #a3a3a3;
+      --border: #262626;
+      --link: #fafafa;
+      --green: #4ade80;
+      --red: #f87171;
+      --amber: #fbbf24;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 4rem 1.5rem 3rem;
+    }
+
+    header { margin-bottom: 2rem; }
+
+    header .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+    }
+
+    h1 a {
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.25rem;
+      color: var(--text-secondary);
+      transition: color 0.2s;
+      display: flex;
+      align-items: center;
+    }
+
+    .theme-toggle:hover { color: var(--text-primary); }
+    .theme-toggle svg { width: 18px; height: 18px; }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+    }
+
+    /* Course selector */
+    .course-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .course-tab {
+      padding: 0.625rem 1rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .course-tab:hover { color: var(--text-primary); }
+
+    .course-tab.active {
+      color: var(--text-primary);
+      border-bottom-color: var(--text-primary);
+    }
+
+    /* Overall grade */
+    .overall {
+      text-align: center;
+      padding: 1.5rem 0;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .overall-grade {
+      font-size: clamp(3rem, 10vw, 4.5rem);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .overall-label {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      margin-top: 0.25rem;
+    }
+
+    /* Sections */
+    section { margin-bottom: 2rem; }
+
+    h2 {
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+    }
+
+    /* Grade rows */
+    .grade-list { list-style: none; }
+
+    .grade-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      font-size: 0.9375rem;
+    }
+
+    .grade-list li + li {
+      border-top: 1px solid var(--border);
+    }
+
+    .grade-name {
+      color: var(--text-primary);
+      font-weight: 400;
+    }
+
+    .grade-value {
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .grade-value.high { color: var(--green); }
+    .grade-value.mid { color: var(--amber); }
+    .grade-value.low { color: var(--red); }
+    .grade-value.none { color: var(--text-secondary); font-weight: 400; }
+
+    /* Category header with average */
+    .cat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .cat-avg {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    /* Progress bar */
+    .progress-wrap {
+      margin-bottom: 2rem;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--text-primary);
+      border-radius: 2px;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 0.375rem;
+    }
+
+    footer {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      padding: 1rem 0 2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    footer a {
+      color: var(--text-secondary);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    footer a:hover { color: var(--text-primary); }
+
+    @media (max-width: 640px) {
+      .container { padding: 3rem 1.25rem 2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="top-row">
+        <h1><a href="/">Tally</a> / School</h1>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <svg id="sunIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <svg id="moonIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+      <p class="subtitle">Langley School District -- 2025-26</p>
+    </header>
+
+    <div class="course-tabs" id="courseTabs"></div>
+
+    <div id="courseContent"></div>
+
+    <footer>
+      <a href="/">Back to Tally</a> &middot; Updated <span id="lastUpdated"></span>
+    </footer>
+  </div>
+
+  <script>
+    // Theme
+    const themeToggle = document.getElementById('themeToggle');
+    const sunIcon = document.getElementById('sunIcon');
+    const moonIcon = document.getElementById('moonIcon');
+
+    const getPreferredTheme = () => {
+      const saved = localStorage.getItem('theme');
+      if (saved) return saved;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    };
+
+    const setTheme = (theme, animate) => {
+      const apply = () => {
+        if (theme === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          sunIcon.style.display = 'none';
+          moonIcon.style.display = 'block';
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+          sunIcon.style.display = 'block';
+          moonIcon.style.display = 'none';
+        }
+        localStorage.setItem('theme', theme);
+      };
+      if (animate && document.startViewTransition) {
+        document.startViewTransition(apply);
+      } else {
+        apply();
+      }
+    };
+
+    setTheme(getPreferredTheme(), false);
+
+    themeToggle.addEventListener('click', () => {
+      const current = document.documentElement.hasAttribute('data-theme') ? 'dark' : 'light';
+      setTheme(current === 'dark' ? 'light' : 'dark', true);
+    });
+
+    // Grades data (embedded from grades.json)
+    const GRADES = {"retrieved_at":"2026-03-04T16:04:00.000000","overall_grade_pct":51,"courses":[{"course":"LEC Pre-Calculus 12 25-26 JR, PREC12 OL 25-26 RATCLIFFE - LEC","course_ou":"184298","retrieved_at":"2026-02-15T20:20:25.732053","categories":[{"category":"Learning Guides","grade_pct":null,"items":[{"name":"U1 Learning Guide","score":null,"out_of":100,"percentage":null},{"name":"U2 Learning Guide","score":null,"out_of":100,"percentage":null},{"name":"U3 Learning Guide","score":null,"out_of":100,"percentage":null},{"name":"U4 Learning Guide","score":null,"out_of":100,"percentage":null},{"name":"U5 Learning Guide","score":null,"out_of":100,"percentage":null},{"name":"U6 Learning Guide","score":null,"out_of":100,"percentage":null},{"name":"U7 Learning Guide","score":null,"out_of":100,"percentage":null},{"name":"FIN Review","score":null,"out_of":100,"percentage":null}]},{"category":"Projects","grade_pct":88,"items":[{"name":"U1 Projects","score":88,"out_of":100,"percentage":88},{"name":"U2 Projects","score":null,"out_of":100,"percentage":null},{"name":"U3 Projects","score":null,"out_of":100,"percentage":null},{"name":"U4 Projects","score":null,"out_of":100,"percentage":null},{"name":"U5 Projects","score":null,"out_of":100,"percentage":null},{"name":"U6 Projects","score":null,"out_of":100,"percentage":null},{"name":"U7 Projects","score":null,"out_of":100,"percentage":null}]},{"category":"Unit Tests","grade_pct":100,"items":[{"name":"U1-Quiz #1","score":100,"out_of":100,"percentage":100},{"name":"U1 Exam","score":null,"out_of":100,"percentage":null},{"name":"U2 Exam","score":null,"out_of":100,"percentage":null},{"name":"U3 Exam","score":null,"out_of":100,"percentage":null},{"name":"U4 Exam","score":null,"out_of":100,"percentage":null},{"name":"U5 Exam","score":null,"out_of":100,"percentage":null},{"name":"U6 Exam","score":null,"out_of":100,"percentage":null},{"name":"U7 Exam","score":null,"out_of":100,"percentage":null}]},{"category":"Module Exams","grade_pct":null,"items":[{"name":"Module 1 Exam","score":null,"out_of":100,"percentage":null},{"name":"Module 2 Exam","score":null,"out_of":100,"percentage":null},{"name":"Module 3 Exam","score":null,"out_of":100,"percentage":null}]},{"category":"Final Exam","grade_pct":null,"items":[{"name":"Final Exam","score":null,"out_of":100,"percentage":null}]},{"category":"Quizzes","grade_pct":94,"items":[{"name":"U1-Quiz #2","score":83,"out_of":100,"percentage":83},{"name":"U2-Quiz #1","score":100,"out_of":100,"percentage":100},{"name":"U2-Quiz #2","score":100,"out_of":100,"percentage":100},{"name":"U3-Quiz #1","score":null,"out_of":100,"percentage":null},{"name":"U3-Quiz #2","score":null,"out_of":100,"percentage":null},{"name":"U4-Quiz #1","score":null,"out_of":100,"percentage":null},{"name":"U4-Quiz #2","score":null,"out_of":100,"percentage":null},{"name":"U5-Quiz #1","score":null,"out_of":100,"percentage":null},{"name":"U5-Quiz #2","score":null,"out_of":100,"percentage":null},{"name":"U6-Quiz #1","score":null,"out_of":100,"percentage":null},{"name":"U6-Quiz #2","score":null,"out_of":100,"percentage":null},{"name":"U7-Quiz #1","score":null,"out_of":100,"percentage":null},{"name":"U7-Quiz #2","score":null,"out_of":100,"percentage":null}]}]},{"course":"LEC Anatomy & Physiology 12 25-26 AD, ATPH12 OL 25-26 DHIMAN - LEC","course_ou":"153403","retrieved_at":"2026-03-04T16:04:00.000000","categories":[{"category":"Course Plan","grade_pct":null,"items":[{"name":"Course Plan","score":1,"out_of":1,"percentage":100}]},{"category":"Learning Guides","grade_pct":100,"items":[{"name":"U1 Learning Guide","score":3,"out_of":3,"percentage":100},{"name":"U2 Learning Guide","score":3,"out_of":3,"percentage":100},{"name":"U3 Learning Guide","score":3,"out_of":3,"percentage":100},{"name":"U4 Learning Guide","score":null,"out_of":null,"percentage":null},{"name":"U5 Learning Guide","score":null,"out_of":null,"percentage":null},{"name":"U6 Learning Guide","score":null,"out_of":null,"percentage":null},{"name":"U7 Learning Guide","score":null,"out_of":null,"percentage":null},{"name":"U8 Learning Guide","score":null,"out_of":null,"percentage":null},{"name":"U9 Learning Guide","score":null,"out_of":null,"percentage":null}]},{"category":"Projects","grade_pct":100,"items":[{"name":"Module 1 Project","score":15,"out_of":15,"percentage":100},{"name":"Module 2 Project","score":null,"out_of":null,"percentage":null},{"name":"Module 3 Project","score":null,"out_of":null,"percentage":null}]},{"category":"Unit Exams","grade_pct":97,"items":[{"name":"1.1 Quiz","score":2,"out_of":2,"percentage":100},{"name":"U1 Test","score":2,"out_of":2,"percentage":100},{"name":"U2 Test","score":2,"out_of":2,"percentage":90},{"name":"U3 Test","score":2,"out_of":2,"percentage":100},{"name":"U4 Test","score":2,"out_of":2,"percentage":95},{"name":"U5 Test","score":null,"out_of":null,"percentage":null},{"name":"U6 Test","score":null,"out_of":null,"percentage":null},{"name":"U7 Test","score":null,"out_of":null,"percentage":null},{"name":"U8 Test","score":null,"out_of":null,"percentage":null},{"name":"U9 Test","score":null,"out_of":null,"percentage":null}]},{"category":"Module Exams","grade_pct":27,"items":[{"name":"Module 1 Exam","score":6,"out_of":20,"percentage":31},{"name":"Module 2 Exam","score":4,"out_of":20,"percentage":22}]},{"category":"Final Exam","grade_pct":null,"items":[{"name":"Final Exam","score":null,"out_of":null,"percentage":null}]},{"category":"Midterm Exam","grade_pct":null,"items":[{"name":"Midterm Exam","score":null,"out_of":null,"percentage":null}]},{"category":"Unit Projects","grade_pct":null,"items":[{"name":"U2 Projects","score":null,"out_of":null,"percentage":null},{"name":"U3 Projects","score":null,"out_of":null,"percentage":null},{"name":"U5 Projects","score":null,"out_of":null,"percentage":null},{"name":"U6 Projects","score":null,"out_of":null,"percentage":null},{"name":"U8 Projects","score":null,"out_of":null,"percentage":null},{"name":"U9 Projects","score":null,"out_of":null,"percentage":null}]},{"category":"Quizzes","grade_pct":0,"items":[{"name":"1.2 Quiz","score":0,"out_of":0,"percentage":100},{"name":"1.3 Quiz","score":0,"out_of":0,"percentage":90},{"name":"1.4 Quiz","score":0,"out_of":0,"percentage":100},{"name":"1.5 Quiz","score":0,"out_of":0,"percentage":100},{"name":"1.6 Quiz","score":0,"out_of":0,"percentage":100},{"name":"1.7 Quiz","score":0,"out_of":0,"percentage":90},{"name":"1.8 Quiz","score":0,"out_of":0,"percentage":100},{"name":"2.1 Quiz","score":0,"out_of":0,"percentage":100},{"name":"2.2 Quiz","score":0,"out_of":0,"percentage":100},{"name":"2.3-2.4 Quiz","score":0,"out_of":0,"percentage":100},{"name":"2.5 Quiz","score":0,"out_of":0,"percentage":95},{"name":"3.1 Quiz","score":0,"out_of":0,"percentage":90},{"name":"3.2-3.3 Quiz","score":0,"out_of":0,"percentage":100},{"name":"3.4-3.5 Quiz","score":null,"out_of":null,"percentage":null},{"name":"3.6 Quiz","score":null,"out_of":null,"percentage":null},{"name":"4.1-4.2 Quiz","score":0,"out_of":0,"percentage":100},{"name":"4.3-4.4 Quiz","score":0,"out_of":0,"percentage":100},{"name":"5.1 Quiz","score":null,"out_of":null,"percentage":null},{"name":"5.2 Quiz","score":null,"out_of":null,"percentage":null},{"name":"5.3 Quiz","score":null,"out_of":null,"percentage":null},{"name":"6.1 Quiz","score":null,"out_of":null,"percentage":null},{"name":"6.2 Quiz","score":null,"out_of":null,"percentage":null},{"name":"6.3 Quiz","score":null,"out_of":null,"percentage":null},{"name":"6.4 Quiz","score":null,"out_of":null,"percentage":null},{"name":"6.5 Quiz","score":null,"out_of":null,"percentage":null},{"name":"6.6 Quiz","score":null,"out_of":null,"percentage":null},{"name":"6.7 Quiz","score":null,"out_of":null,"percentage":null},{"name":"7.1 Quiz","score":null,"out_of":null,"percentage":null},{"name":"7.2 Quiz","score":null,"out_of":null,"percentage":null},{"name":"7.3 Quiz","score":null,"out_of":null,"percentage":null},{"name":"7.4 Quiz","score":null,"out_of":null,"percentage":null},{"name":"7.5 Quiz","score":null,"out_of":null,"percentage":null},{"name":"8.1 Quiz","score":null,"out_of":null,"percentage":null},{"name":"8.2 Quiz","score":null,"out_of":null,"percentage":null},{"name":"8.3 Quiz","score":null,"out_of":null,"percentage":null},{"name":"8.5 Quiz","score":null,"out_of":null,"percentage":null},{"name":"9.1 Quiz","score":null,"out_of":null,"percentage":null},{"name":"9.2 Quiz","score":null,"out_of":null,"percentage":null},{"name":"9.3 Quiz","score":null,"out_of":null,"percentage":null},{"name":"9.4 Quiz","score":null,"out_of":null,"percentage":null},{"name":"9.5 Quiz","score":null,"out_of":null,"percentage":null}]}]}]};
+
+    // Short course names
+    function shortName(full) {
+      if (full.includes('Pre-Calculus')) return 'Pre-Calculus 12';
+      if (full.includes('Anatomy')) return 'Anatomy & Physiology 12';
+      return full.split(',')[0];
+    }
+
+    function gradeClass(pct) {
+      if (pct === null || pct === undefined) return 'none';
+      if (pct >= 80) return 'high';
+      if (pct >= 60) return 'mid';
+      return 'low';
+    }
+
+    function formatPct(pct) {
+      if (pct === null || pct === undefined) return '--';
+      return Math.round(pct) + '%';
+    }
+
+    // Count completed items across all categories
+    function courseProgress(course) {
+      let done = 0, total = 0;
+      for (const cat of course.categories) {
+        for (const item of cat.items) {
+          total++;
+          if (item.percentage !== null) done++;
+        }
+      }
+      return { done, total };
+    }
+
+    // Render
+    const tabsEl = document.getElementById('courseTabs');
+    const contentEl = document.getElementById('courseContent');
+    const updatedEl = document.getElementById('lastUpdated');
+
+    updatedEl.textContent = new Date(GRADES.retrieved_at).toLocaleDateString('en-CA', {
+      year: 'numeric', month: 'short', day: 'numeric'
+    });
+
+    let activeCourse = 0;
+
+    function renderTabs() {
+      tabsEl.innerHTML = '';
+      GRADES.courses.forEach((c, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'course-tab' + (i === activeCourse ? ' active' : '');
+        btn.textContent = shortName(c.course);
+        btn.addEventListener('click', () => {
+          activeCourse = i;
+          renderTabs();
+          renderCourse(c);
+        });
+        tabsEl.appendChild(btn);
+      });
+    }
+
+    function renderCourse(course) {
+      const { done, total } = courseProgress(course);
+      const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+      // Find overall grade if available
+      const overallPct = GRADES.overall_grade_pct;
+      const overallDisplay = (activeCourse === 1 && overallPct) ? overallPct + '%' : null;
+
+      let html = '';
+
+      // Overall grade (only A&P has it tracked)
+      if (overallDisplay) {
+        html += `
+          <div class="overall">
+            <div class="overall-grade">${overallDisplay}</div>
+            <div class="overall-label">Overall Grade</div>
+          </div>`;
+      }
+
+      // Progress bar
+      html += `
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div class="progress-label">
+            <span>${done} of ${total} items complete</span>
+            <span>${pct}%</span>
+          </div>
+        </div>`;
+
+      // Categories
+      const skipCategories = ['Course Plan'];
+      for (const cat of course.categories) {
+        if (skipCategories.includes(cat.category)) continue;
+        if (cat.items.length === 0) continue;
+
+        const avgDisplay = cat.grade_pct !== null ? formatPct(cat.grade_pct) : null;
+
+        html += `<section>
+          <div class="cat-header">
+            <h2>${cat.category}</h2>
+            ${avgDisplay ? `<span class="cat-avg">${avgDisplay} avg</span>` : ''}
+          </div>
+          <ul class="grade-list">`;
+
+        for (const item of cat.items) {
+          const cls = gradeClass(item.percentage);
+          const val = formatPct(item.percentage);
+          html += `<li>
+            <span class="grade-name">${item.name}</span>
+            <span class="grade-value ${cls}">${val}</span>
+          </li>`;
+        }
+
+        html += `</ul></section>`;
+      }
+
+      contentEl.innerHTML = html;
+    }
+
+    // Default to A&P (index 1) if it exists
+    activeCourse = GRADES.courses.length > 1 ? 1 : 0;
+    renderTabs();
+    renderCourse(GRADES.courses[activeCourse]);
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
+  </script>
+</body>
+</html>

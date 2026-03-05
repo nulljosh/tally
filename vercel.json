@@ -26,6 +26,7 @@
     { "src": "^/screen$", "dest": "/src/api.js" },
     { "src": "/api/(.*)", "dest": "/src/api.js" },
     { "src": "/data/(.*)", "dest": "/src/api.js" },
+    { "src": "^/school$", "dest": "/web/school.html" },
     { "src": "^/$", "dest": "/web/landing.html" },
     { "src": "^/app$", "dest": "/src/api.js" },
     { "src": "/login", "dest": "/web/login.html" },
