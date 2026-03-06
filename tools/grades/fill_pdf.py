@@ -97,65 +97,25 @@ def find_blanks(doc):
     return blanks
 
 
-def match_blanks_with_llm(blanks, key_text):
-    """Use Claude CLI to match blanks to answers from the key."""
-    blank_list = []
-    for i, (page_idx, rect, font_size, context) in enumerate(blanks):
-        blank_list.append({
-            "id": i,
-            "page": page_idx + 1,
-            "context": context[:200],
-        })
+def match_blanks_with_llm(blanks, key_text, unit=None):
+    """Load pre-computed answers from JSON file, or fall back to regex."""
+    if unit is not None:
+        answers_file = Path(f"/tmp/u{unit}_answers.json")
+        if answers_file.exists():
+            try:
+                answers = json.loads(answers_file.read_text())
+                if isinstance(answers, list) and len(answers) == len(blanks):
+                    print(f"    Loaded {len(answers)} answers from {answers_file}")
+                    return answers
+                elif isinstance(answers, list):
+                    print(f"[!] Answer file has {len(answers)} entries for {len(blanks)} blanks")
+                    while len(answers) < len(blanks):
+                        answers.append("???")
+                    return answers[:len(blanks)]
+            except Exception as e:
+                print(f"[!] Failed to load {answers_file}: {e}")
 
-    prompt = f"""You are filling in blanks for a Biology 12 learning guide. Below is the ANSWER KEY text, followed by a list of blanks from the original document. Each blank has surrounding context (the line it appears on).
-
-For each blank, determine the correct answer from the key. The answer key may have the answers in paragraph form, table form, or as labeled fill-in-the-blank. Match by topic/context, not by position.
-
-RULES:
-- Blank #0 is always the student name field. Answer: "{STUDENT_NAME}"
-- Return ONLY a JSON array of strings, one per blank, in order by blank ID
-- Each string is the answer for that blank (short -- fits in an underscore field)
-- If you cannot determine an answer, use "???"
-- Do NOT include any explanation, just the JSON array
-
-ANSWER KEY TEXT:
-{key_text}
-
-BLANKS TO FILL (id, page, surrounding context):
-{json.dumps(blank_list, indent=1)}
-
-Return the JSON array of {len(blank_list)} answers:"""
-
-    try:
-        result = subprocess.run(
-            ["claude", "-p", "--model", "sonnet", "--dangerously-skip-permissions"],
-            input=prompt,
-            capture_output=True,
-            text=True,
-            timeout=300,
-            env={**__import__('os').environ, "CLAUDECODE": ""},
-        )
-        response = result.stdout.strip()
-        # Extract JSON array from response
-        match = re.search(r'\[[\s\S]*\]', response)
-        if match:
-            answers = json.loads(match.group())
-            if isinstance(answers, list) and len(answers) == len(blanks):
-                return answers
-            elif isinstance(answers, list):
-                print(f"[!] LLM returned {len(answers)} answers for {len(blanks)} blanks")
-                # Pad or truncate
-                while len(answers) < len(blanks):
-                    answers.append("???")
-                return answers[:len(blanks)]
-        print(f"[!] Could not parse LLM response. First 200 chars: {response[:200]}")
-    except subprocess.TimeoutExpired:
-        print("[!] LLM call timed out after 300s")
-    except Exception as e:
-        print(f"[!] LLM call failed: {e}")
-
-    # Fallback: sequential regex matching
-    print("[*] Falling back to regex-based matching")
+    print("[*] No pre-computed answers found, falling back to regex")
     return fallback_match(blanks, key_text)
 
 
@@ -233,8 +193,8 @@ def process_unit(unit, dry_run=False):
             ctx_short = ctx[:60] + "..." if len(ctx) > 60 else ctx
             print(f"    BLANK {i:3d} pg{pg+1}: {ctx_short}")
 
-    print(f"\n[*] Matching blanks via LLM...")
-    answers = match_blanks_with_llm(blanks, key_text)
+    print(f"\n[*] Matching blanks...")
+    answers = match_blanks_with_llm(blanks, key_text, unit=unit)
 
     # Count real answers vs ???
     real = sum(1 for a in answers if a != "???")
