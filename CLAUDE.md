@@ -172,10 +172,10 @@ Project name: **tally**
 - [x] D2L grade scraper + PDF auto-fill
 - [x] School grade dashboard (school.html)
 - [x] D2L dropbox submission (iframe dialog automation)
-- [ ] PWD payment tracking (update income display when designation approved)
+- [x] PWD payment tracking (update income display when designation approved)
 - [ ] iOS companion app (tally-ios)
-- [ ] Auto-fill monthly reports end-to-end
+- [x] Auto-fill monthly reports end-to-end
 - [x] ~~Push notifications~~ (dropped -- browser notifs not useful)
-- [ ] DTC application automation
-- [ ] Offline mode with cached data
+- [x] DTC application automation
+- [x] Offline mode with cached data
 - [ ] Multi-province support

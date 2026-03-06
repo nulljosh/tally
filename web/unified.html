@@ -546,7 +546,7 @@
   </nav>
 
   <div class="container">
-    <div id="offline-banner" class="offline-banner">Offline - showing cached data</div>
+    <div id="offline-banner" class="offline-banner">Offline — showing cached data</div>
 
     <!-- Dashboard Tab -->
     <div id="dashboard-tab" class="tab-content active">
@@ -955,11 +955,90 @@
       return items.filter(item => !navKeywords.some(nav => item.includes(nav)));
     }
 
+    function setOfflineBanner(visible) {
+      const el = document.getElementById('offline-banner');
+      if (el) el.style.display = visible ? 'block' : 'none';
+    }
+
+    function getDesignationFromText(rawText, pwdApprovedFallback) {
+      const normalized = (rawText || '').toLowerCase();
+      if (normalized.includes('pwd') || normalized.includes('disability assistance') || normalized.includes('persons with disabilities')) {
+        return 'PWD';
+      }
+      if (normalized.includes('income assistance')) {
+        return 'Income Assistance';
+      }
+      return pwdApprovedFallback ? 'PWD' : 'Income Assistance';
+    }
+
+    function getFallbackIncomeAmount(designation) {
+      return designation === 'PWD' ? '~$1,500-1,700/mo' : '~$1,000/mo';
+    }
+
+    function getPaymentTimeline() {
+      // 2026 BC Income Assistance payment dates (month index -> day)
+      const payDates2026 = {
+        0: 21,  // Jan 21 (for Feb)
+        1: 25,  // Feb 25 (for Mar)
+        2: 25,  // Mar 25 (for Apr)
+        3: 22,  // Apr 22 (for May)
+        4: 27,  // May 27 (for Jun)
+        5: 24,  // Jun 24 (for Jul)
+        6: 29,  // Jul 29 (for Aug)
+        7: 26,  // Aug 26 (for Sep)
+        8: 23,  // Sep 23 (for Oct)
+        9: 21,  // Oct 21 (for Nov)
+        10: 18, // Nov 18 (for Dec)
+        11: 16, // Dec 16 (for Jan 2027)
+      };
+      const now = new Date();
+      const thisMonthDay = payDates2026[now.getMonth()];
+      let nextPayday;
+      if (thisMonthDay && now <= new Date(now.getFullYear(), now.getMonth(), thisMonthDay)) {
+        nextPayday = new Date(now.getFullYear(), now.getMonth(), thisMonthDay);
+      } else {
+        const nextMonth = (now.getMonth() + 1) % 12;
+        const nextDay = payDates2026[nextMonth] || 25;
+        const nextYear = nextMonth === 0 ? now.getFullYear() + 1 : now.getFullYear();
+        nextPayday = new Date(nextYear, nextMonth, nextDay);
+      }
+      const daysUntil = Math.ceil((nextPayday - now) / (1000 * 60 * 60 * 24));
+      const paydayLabel = daysUntil === 0 ? 'Today' : daysUntil === 1 ? 'Tomorrow' : daysUntil + ' days';
+      const paydayDate = nextPayday.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+      // Report deadline (5th of each month)
+      let reportDeadline = new Date(now.getFullYear(), now.getMonth(), 5);
+      if (now > reportDeadline) reportDeadline = new Date(now.getFullYear(), now.getMonth() + 1, 5);
+      const daysUntilReport = Math.ceil((reportDeadline - now) / (1000 * 60 * 60 * 24));
+      const reportLabel = daysUntilReport === 0 ? 'Today' : daysUntilReport === 1 ? 'Tomorrow' : daysUntilReport + ' days';
+      const reportDate = reportDeadline.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+      const reportUrgent = daysUntilReport <= 3;
+
+      return { paydayDate, paydayLabel, reportDate, reportLabel, reportUrgent };
+    }
+
+    function renderPaymentCard(target, amount, designation, timeline, isApproximate) {
+      const subtitle = isApproximate ? 'Estimated income (fallback)' : 'Income';
+      target.innerHTML = `<div style="text-align: center;">
+        <div style="font-size: clamp(64px, 12vw, 120px); font-weight: 700; color: var(--text-primary); letter-spacing: -3px; line-height: 1;">${amount}</div>
+        <div style="font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-top: 8px;">${designation}</div>
+        <div style="font-size: 12px; font-weight: 400; color: var(--text-secondary); margin-top: 4px;">${subtitle}</div>
+        <div style="font-size: 16px; font-weight: 400; color: var(--text-secondary); margin-top: 24px;">Next payment: ${timeline.paydayDate} (${timeline.paydayLabel})</div>
+        <div style="font-size: 14px; font-weight: 400; color: ${timeline.reportUrgent ? 'var(--warning)' : 'var(--text-secondary)'}; margin-top: 8px;">Report due: ${timeline.reportDate} (${timeline.reportLabel})</div>
+        <label class="paid-check" id="paid-check" onclick="togglePaid()">
+          <input type="checkbox" id="paid-cb">
+          <span id="paid-label">Paid yet?</span>
+        </label>
+      </div>`;
+      loadPaidStatus();
+    }
+
     // Parse payment amounts from scraped table/keyword data
     let isLoadingData = false;
     let dataLoaded = false;
     let pollTimer = null;
     let autoCheckAttempted = false;
+    let pwdApprovedFallback = false;
 
     // Load dashboard data
     async function loadData() {
@@ -970,6 +1049,9 @@
         const response = await fetch('/api/latest', { credentials: 'include' });
 
         if (!response.ok) {
+          if (!navigator.onLine) {
+            setOfflineBanner(true);
+          }
           let errorMessage = '';
           try {
             const errBody = await response.json();
@@ -993,6 +1075,8 @@
         }
 
         const result = await response.json();
+        pwdApprovedFallback = !!(result && result.uiConfig && result.uiConfig.pwdApproved);
+        setOfflineBanner(false);
         const data = result.data;
 
         if (!data || !data.sections) {
@@ -1048,77 +1132,31 @@
         }
 
         const paymentInfo = document.getElementById('payment-info');
-        const paymentData = (sections['Payment Info'] && sections['Payment Info'].tableData) || [];
+        const paymentSection = sections['Payment Info'] || {};
+        const paymentData = paymentSection.tableData || [];
+        const paymentAllText = paymentSection.allText || [];
+        const raw = [...paymentData, ...paymentAllText].join('\n');
+        const designation = getDesignationFromText(raw, pwdApprovedFallback);
+        const timeline = getPaymentTimeline();
+
         if (paymentData.length > 0) {
-          const raw = paymentData.join('\n');
           const get = (pattern) => (raw.match(pattern) || [])[1] || '';
           const totalAmount = get(/Amount:\s*(\$[\d,]+\.\d{2})/);
-          const support = get(/Support\s*\|\s*(\$[\d,]+\.\d{2})/);
-          const shelter = get(/SHELTER:\s*RENT\s*\|\s*(\$[\d,]+\.\d{2})/);
           const paidTo = get(/Paid to:\s*([^|]+)/);
-          const method = get(/Payment Method:\s*(\S+)/);
-          const chequeNum = get(/Cheque Number:\s*(\d+)/);
-          const distribution = get(/Payment Distribution:\s*(\S+)/);
           const titleCase = (s) => s.trim().toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 
           if (paidTo && document.getElementById('nav-username').dataset.fallback === 'true') {
             setNavUsername(titleCase(paidTo), true);
           }
 
-          // 2026 BC Income Assistance payment dates (month index -> day)
-          const payDates2026 = {
-            0: 21,  // Jan 21 (for Feb)
-            1: 25,  // Feb 25 (for Mar)
-            2: 25,  // Mar 25 (for Apr)
-            3: 22,  // Apr 22 (for May)
-            4: 27,  // May 27 (for Jun)
-            5: 24,  // Jun 24 (for Jul)
-            6: 29,  // Jul 29 (for Aug)
-            7: 26,  // Aug 26 (for Sep)
-            8: 23,  // Sep 23 (for Oct)
-            9: 21,  // Oct 21 (for Nov)
-            10: 18, // Nov 18 (for Dec)
-            11: 16, // Dec 16 (for Jan 2027)
-          };
-          const now = new Date();
-          const thisMonthDay = payDates2026[now.getMonth()];
-          let nextPayday;
-          if (thisMonthDay && now <= new Date(now.getFullYear(), now.getMonth(), thisMonthDay)) {
-            nextPayday = new Date(now.getFullYear(), now.getMonth(), thisMonthDay);
-          } else {
-            const nextMonth = (now.getMonth() + 1) % 12;
-            const nextDay = payDates2026[nextMonth] || 25;
-            const nextYear = nextMonth === 0 ? now.getFullYear() + 1 : now.getFullYear();
-            nextPayday = new Date(nextYear, nextMonth, nextDay);
-          }
-          const daysUntil = Math.ceil((nextPayday - now) / (1000 * 60 * 60 * 24));
-          const paydayLabel = daysUntil === 0 ? 'Today' : daysUntil === 1 ? 'Tomorrow' : daysUntil + ' days';
-          const paydayDate = nextPayday.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-
-          // Report deadline (5th of each month)
-          let reportDeadline = new Date(now.getFullYear(), now.getMonth(), 5);
-          if (now > reportDeadline) reportDeadline = new Date(now.getFullYear(), now.getMonth() + 1, 5);
-          const daysUntilReport = Math.ceil((reportDeadline - now) / (1000 * 60 * 60 * 24));
-          const reportLabel = daysUntilReport === 0 ? 'Today' : daysUntilReport === 1 ? 'Tomorrow' : daysUntilReport + ' days';
-          const reportDate = reportDeadline.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-          const reportUrgent = daysUntilReport <= 3;
-
           if (totalAmount) {
-            paymentInfo.innerHTML = `<div style="text-align: center;">
-              <div style="font-size: clamp(64px, 12vw, 120px); font-weight: 700; color: var(--text-primary); letter-spacing: -3px; line-height: 1;">${totalAmount}</div>
-              <div style="font-size: 16px; font-weight: 400; color: var(--text-secondary); margin-top: 24px;">Next payment: ${paydayDate} (${paydayLabel})</div>
-              <div style="font-size: 14px; font-weight: 400; color: ${reportUrgent ? 'var(--warning)' : 'var(--text-secondary)'}; margin-top: 8px;">Report due: ${reportDate} (${reportLabel})</div>
-              <label class="paid-check" id="paid-check" onclick="togglePaid()">
-                <input type="checkbox" id="paid-cb">
-                <span id="paid-label">Paid yet?</span>
-              </label>
-            </div>`;
-            loadPaidStatus();
+            renderPaymentCard(paymentInfo, totalAmount, designation, timeline, false);
           } else {
-            paymentInfo.innerHTML = '<div style="text-align: center; color: var(--text-secondary);">No payment data</div>';
+            renderPaymentCard(paymentInfo, getFallbackIncomeAmount(designation), designation, timeline, true);
           }
         } else {
-          paymentInfo.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 20px;">No payment data</div>';
+          const fallbackDesignation = pwdApprovedFallback ? 'PWD' : 'Income Assistance';
+          renderPaymentCard(paymentInfo, getFallbackIncomeAmount(fallbackDesignation), fallbackDesignation, timeline, true);
         }
 
         // Monthly Reports section
@@ -1170,6 +1208,9 @@
 
       } catch (err) {
         console.error('Error loading data:', err);
+        if (!navigator.onLine) {
+          setOfflineBanner(true);
+        }
         showNoData('Data unavailable — try refreshing.');
         isLoadingData = false;
       }
@@ -2058,9 +2099,16 @@
 
     // Load DTC questions on page load
     loadDTCQuestions();
+    window.addEventListener('online', () => setOfflineBanner(false));
 
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js');
+      window.addEventListener('load', async () => {
+        try {
+          await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+        } catch (error) {
+          console.error('Service worker registration failed:', error);
+        }
+      });
     }
   </script>
 </body>

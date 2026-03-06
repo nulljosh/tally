@@ -16,7 +16,8 @@
     "watch": "concurrently \"nodemon src/api.js\" \"browser-sync start --proxy localhost:3000 --files 'web/**/*.html' --no-open\"",
     "start": "node src/api.js",
     "upload-blob": "node scripts/upload-to-blob.js",
-    "info": "bash scripts/tally-info.sh"
+    "info": "bash scripts/tally-info.sh",
+    "monthly-report": "python3 tools/monthly_report.py"
   },
   "keywords": [],
   "author": "",
