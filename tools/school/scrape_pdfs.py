@@ -280,30 +280,41 @@ def submit_to_dropbox(page, filled_pdf_path, unit_num):
     add_btn.scroll_into_view_if_needed()
     time.sleep(1)
     add_btn.click(force=True)
-    time.sleep(4)
 
-    # Find the file dialog iframe (d2l/common/dialogs/file/main.d2l)
+    # Wait for the file dialog iframe to appear (lazy-loaded)
     dialog_frame = None
-    for frame in page.frames:
-        if "dialogs/file/main" in frame.url:
-            dialog_frame = frame
+    for attempt in range(15):
+        time.sleep(1)
+        for frame in page.frames:
+            if "dialogs/file" in frame.url or "common/dialogs" in frame.url:
+                dialog_frame = frame
+                break
+        if dialog_frame:
             break
-
     if not dialog_frame:
-        print(f"  ERROR: File dialog iframe not found")
-        page.screenshot(path=str(Path.home() / "Downloads" / f"d2l-upload-fail-u{unit_num}.png"), full_page=True)
-        return False
+        # Debug: list all frame URLs
+        print(f"  Frames found: {[f.url[:80] for f in page.frames]}")
 
-    # Click "My Computer" inside the iframe, which triggers native file chooser
-    my_computer = dialog_frame.locator('text="My Computer"').first
+    # Click "My Computer" -- could be in iframe or main frame
+    target_frame = dialog_frame if dialog_frame else page
+    if not dialog_frame:
+        # Check if My Computer is in main frame
+        mc_main = page.locator('text="My Computer"')
+        if mc_main.count() == 0:
+            print(f"  ERROR: No 'My Computer' option found anywhere")
+            page.screenshot(path=str(Path.home() / "Downloads" / f"d2l-upload-fail-u{unit_num}.png"), full_page=True)
+            return False
+
+    # Click "My Computer" which triggers native file chooser
+    my_computer = target_frame.locator('text="My Computer"').first
     with page.expect_file_chooser(timeout=15000) as fc_info:
         my_computer.click()
     file_chooser = fc_info.value
     file_chooser.set_files(str(filled_pdf_path))
     time.sleep(3)
 
-    # Click "Add" button in the dialog iframe to confirm the file
-    add_confirm = dialog_frame.locator('button:has-text("Add"), input[value="Add"]')
+    # Click "Add" button in the dialog to confirm the file
+    add_confirm = target_frame.locator('button:has-text("Add"), input[value="Add"]')
     if add_confirm.count() > 0:
         add_confirm.first.click()
         time.sleep(3)

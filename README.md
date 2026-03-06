@@ -4,7 +4,7 @@
 
 <img src="icon.svg" alt="Tally" width="120" />
 
-BC benefits tracker + school grade dashboard.
+BC benefits tracker + D2L school automation.
 
 [tally.heyitsmejosh.com](https://tally.heyitsmejosh.com)
 
@@ -26,7 +26,7 @@ BC benefits tracker + school grade dashboard.
 
 **Benefits** -- BC Self-Serve scraper, income tracking, payment dates, DTC navigator
 
-**School** -- D2L grade scraper, learning guide PDF auto-fill, dropbox submission, grade dashboard (`school.html`)
+**School** -- D2L grade scraper, learning guide PDF auto-fill, automated dropbox submission (iframe dialog + file chooser), grade dashboard (`school.html`)
 
 ## Dev
 
@@ -43,7 +43,7 @@ Open http://localhost:3000. Copy `.env.example` to `.env`.
 - [x] PWA support
 - [x] School grade dashboard
 - [x] D2L PDF scraper + auto-fill
-- [x] D2L dropbox submission (shadow DOM piercing)
+- [x] D2L dropbox submission (iframe dialog automation)
 - [ ] Auto-fill monthly reports
 - [ ] Push notifications for payment dates
 - [ ] DTC application automation

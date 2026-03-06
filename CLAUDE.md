@@ -64,7 +64,7 @@ npm run upload-blob  # Upload to Vercel Blob
 - `api/upload.js` - Vercel Blob upload endpoint
 - `api/latest.js` - Vercel Blob read endpoint
 - `scripts/upload-to-blob.js` - Local upload script
-- `tools/school/scrape_pdfs.py` - D2L PDF scraper + dropbox submitter (Playwright, shadow DOM)
+- `tools/school/scrape_pdfs.py` - D2L PDF scraper + dropbox submitter (Playwright, iframe dialog + file chooser)
 - `web/school.html` - School grade dashboard
 
 ## Multi-User Flow
@@ -171,7 +171,7 @@ Project name: **tally**
 ## Roadmap
 - [x] D2L grade scraper + PDF auto-fill
 - [x] School grade dashboard (school.html)
-- [x] D2L dropbox submission (shadow DOM piercing)
+- [x] D2L dropbox submission (iframe dialog automation)
 - [ ] PWD payment tracking (update income display when designation approved)
 - [ ] iOS companion app (tally-ios)
 - [ ] Auto-fill monthly reports end-to-end
