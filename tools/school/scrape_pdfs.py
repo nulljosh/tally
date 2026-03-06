@@ -370,8 +370,7 @@ def submit_to_dropbox(page, filled_pdf_path, unit_num):
     submit_btn = page.locator('button:has-text("Submit"), input[value="Submit"]').first
     if submit_btn.count() > 0:
         submit_btn.click(force=True)
-        time.sleep(3)
-        page.wait_for_load_state("networkidle")
+        time.sleep(5)
 
     body_text = page.locator("body").inner_text()
     if any(w in body_text.lower() for w in ["successfully", "submitted", "receipt"]):
