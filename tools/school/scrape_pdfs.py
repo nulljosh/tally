@@ -309,59 +309,76 @@ def submit_to_dropbox(page, filled_pdf_path, unit_num):
     add_btn.click(force=True)
     time.sleep(3)
 
-    # "My Computer" is in an iframe dialog -- clicking it navigates to
-    # a file upload sub-view, THEN a browse button triggers file chooser
-    clicked = False
-    target_frame = None
+    # Step 1: Click "My Computer" in iframe dialog (navigates to upload sub-view)
     for frame in page.frames[1:]:
         try:
             loc = frame.locator('a:has-text("My Computer"):not(.d2l-offscreen), div:has-text("My Computer"):not(.d2l-offscreen)').first
             if loc.count() > 0 and loc.is_visible():
                 loc.click()
-                target_frame = frame
+                break
+        except Exception:
+            continue
+    time.sleep(3)
+
+    # Step 2: Find file input across ALL frames and set file directly
+    file_set = False
+    for frame in page.frames:
+        try:
+            fi = frame.locator('input[type="file"]')
+            if fi.count() > 0:
+                fi.first.set_input_files(str(filled_pdf_path))
+                file_set = True
+                print(f"  File attached via input[type=file]")
                 break
         except Exception:
             continue
 
-    if not target_frame:
-        print(f"  ERROR: Could not find 'My Computer' in dialog iframe")
+    if not file_set:
+        # Try file chooser on any clickable upload element across frames
+        for frame in page.frames:
+            try:
+                upload_btn = frame.locator('button:has-text("Upload"), a:has-text("Upload"), button:has-text("Browse")').first
+                if upload_btn.count() > 0 and upload_btn.is_visible():
+                    with page.expect_file_chooser(timeout=10000) as fc_info:
+                        upload_btn.click()
+                    fc_info.value.set_files(str(filled_pdf_path))
+                    file_set = True
+                    break
+            except Exception:
+                continue
+
+    if not file_set:
+        print(f"  ERROR: Could not find file input in any frame")
         return False
 
     time.sleep(2)
 
-    # Now in the file upload sub-view -- find the browse/upload button or file input
-    with page.expect_file_chooser(timeout=15000) as fc_info:
-        # Try file input first
-        file_input = target_frame.locator('input[type="file"]').first
-        if file_input.count() > 0:
-            file_input.set_input_files(str(filled_pdf_path))
-        else:
-            # Click browse/upload button
-            browse = target_frame.locator('button:has-text("Upload"), a:has-text("Upload"), button:has-text("Browse"), a:has-text("Browse"), input[type="button"]').first
-            if browse.count() > 0:
-                browse.click()
-            else:
-                # Last resort: click any prominent button in the frame
-                target_frame.locator('button, input[type="button"], input[type="submit"]').first.click()
-    try:
-        file_chooser = fc_info.value
-        file_chooser.set_files(str(filled_pdf_path))
-        clicked = True
-    except Exception:
-        # file input .set_input_files() doesn't trigger filechooser event -- that's ok
-        clicked = True
+    # "Add" button is inside the dialog iframe -- click it there first
+    for frame in page.frames:
+        try:
+            add_btn_frame = frame.locator('button:has-text("Add"):not(:has-text("Add a File"))').first
+            if add_btn_frame.count() > 0 and add_btn_frame.is_visible():
+                add_btn_frame.click(force=True)
+                print(f"  Clicked 'Add' in dialog")
+                break
+        except Exception:
+            continue
+    time.sleep(3)
 
-    time.sleep(2)
-
-    # Click "Add" then "Submit"
-    for btn_text in ["Add", "Submit"]:
-        btn = page.locator(f'button:has-text("{btn_text}")').first
-        if btn.count() > 0:
-            btn.click()
-            time.sleep(2)
+    # Dialog should close, now click "Submit" on the main page
+    # Use force=True to bypass any remaining overlay
+    submit_btn = page.locator('button:has-text("Submit"), input[value="Submit"]').first
+    if submit_btn.count() > 0:
+        submit_btn.click(force=True)
+        time.sleep(3)
+        page.wait_for_load_state("networkidle")
 
     body_text = page.locator("body").inner_text()
     if any(w in body_text.lower() for w in ["successfully", "submitted", "receipt"]):
+        print(f"  SUBMITTED (UI): {filename} -> {folder_name}")
+        return True
+
+    if "submission" in page.url.lower():
         print(f"  SUBMITTED (UI): {filename} -> {folder_name}")
         return True
 
