@@ -26,7 +26,7 @@ BC benefits tracker + D2L school automation.
 
 **Benefits** -- BC Self-Serve scraper, income tracking, payment dates, DTC navigator
 
-**School** -- D2L grade scraper, learning guide PDF auto-fill, automated dropbox submission (iframe dialog + file chooser), grade dashboard (`school.html`)
+**School** -- D2L grade scraper, learning guide PDF auto-fill, dropbox submission (Valence API), grade dashboard (`school.html`)
 
 ## Dev
 
@@ -43,7 +43,7 @@ Open http://localhost:3000. Copy `.env.example` to `.env`.
 - [x] PWA support
 - [x] School grade dashboard
 - [x] D2L PDF scraper + auto-fill
-- [x] D2L dropbox submission (iframe dialog automation)
+- [x] D2L dropbox submission (Valence API + browser UI fallback)
 - [ ] Auto-fill monthly reports
 - [ ] Push notifications for payment dates
 - [ ] DTC application automation

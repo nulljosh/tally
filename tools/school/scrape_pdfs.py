@@ -223,7 +223,7 @@ def main():
 
 
 def submit_to_dropbox(page, filled_pdf_path, unit_num):
-    """Submit a filled PDF to the D2L dropbox for the given unit."""
+    """Submit a filled PDF to the D2L dropbox for the given unit via API."""
     # Get dropbox folders
     api_ver = None
     folders = None
@@ -263,82 +263,142 @@ def submit_to_dropbox(page, filled_pdf_path, unit_num):
     folder_name = target_folder["Name"]
     file_path = Path(filled_pdf_path)
     filename = file_path.name
+    file_bytes = file_path.read_bytes()
     print(f"  Dropbox folder: {folder_name} (ID: {folder_id})")
 
-    # Try API upload first
-    file_bytes = file_path.read_bytes()
+    # Upload via browser-context fetch (FormData) -- carries session cookies
+    import base64
+    b64_data = base64.b64encode(file_bytes).decode("ascii")
     api_url = f"{D2L_BASE}/d2l/api/le/{api_ver}/{COURSE_OU}/dropbox/folders/{folder_id}/submissions/mysubmissions/"
-    try:
-        resp = page.request.fetch(api_url, method="POST", multipart={
-            "": {
-                "name": filename,
-                "mimeType": "application/pdf",
-                "buffer": file_bytes,
-            }
-        })
-        if resp.status in (200, 201):
-            print(f"  SUBMITTED (API): {filename} -> {folder_name}")
-            return True
-        print(f"  API upload returned {resp.status}, falling back to browser UI")
-    except Exception as e:
-        print(f"  API upload failed ({e}), falling back to browser UI")
 
-    # Fallback: browser UI submission
+    result = page.evaluate("""async ([url, b64, fname]) => {
+        const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+        const blob = new Blob([bytes], {type: 'application/pdf'});
+        const fd = new FormData();
+        fd.append('', blob, fname);
+        try {
+            const resp = await fetch(url, {method: 'POST', body: fd});
+            const text = await resp.text();
+            return {status: resp.status, ok: resp.ok, body: text.substring(0, 500)};
+        } catch(e) {
+            return {status: 0, ok: false, body: e.message};
+        }
+    }""", [api_url, b64_data, filename])
+
+    if result["ok"]:
+        print(f"  SUBMITTED (API): {filename} -> {folder_name}")
+        return True
+
+    print(f"  API returned {result['status']}: {result['body'][:200]}")
+
+    # Fallback: browser UI with file input interception
+    print(f"  Trying browser UI fallback...")
     submit_url = (
         f"{D2L_BASE}/d2l/lms/dropbox/user/folder_submit_files.d2l"
         f"?db={folder_id}&grpid=0&isprv=0&bp=0&ou={COURSE_OU}"
     )
     page.goto(submit_url, timeout=30000)
     page.wait_for_load_state("networkidle")
+    time.sleep(2)
 
     # Click "Add a File"
-    page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
     add_btn = page.locator('button:has-text("Add a File")').first
+    if add_btn.count() == 0:
+        add_btn = page.locator('a:has-text("Add a File"), [title*="Add a File"]').first
     add_btn.scroll_into_view_if_needed()
     add_btn.click(force=True)
-    time.sleep(2)
+    time.sleep(3)
 
-    # Click "My Computer" in main DOM (D2L web component, not iframe)
-    my_computer = page.locator('text="My Computer"').first
-    if my_computer.count() == 0:
-        print(f"  ERROR: No 'My Computer' option found in page")
+    # Debug: dump dialog structure
+    debug_info = page.evaluate("""() => {
+        const info = {frames: document.querySelectorAll('iframe').length, dialogs: []};
+        // Check for d2l custom elements
+        document.querySelectorAll('d2l-dialog, d2l-dialog-fullscreen, [role="dialog"], .d2l-dialog').forEach(el => {
+            info.dialogs.push({tag: el.tagName, id: el.id, cls: el.className.substring(0, 100),
+                hasShadow: !!el.shadowRoot, html: el.innerHTML.substring(0, 300)});
+        });
+        // Check shadow roots on all custom elements
+        document.querySelectorAll('*').forEach(el => {
+            if (el.shadowRoot) {
+                const sr = el.shadowRoot;
+                if (sr.innerHTML.includes('My Computer')) {
+                    info.dialogs.push({tag: el.tagName + ' (shadow)', html: sr.innerHTML.substring(0, 500)});
+                }
+            }
+        });
+        // Check if "My Computer" text exists anywhere in main DOM
+        info.mainDomHasMyComputer = document.body.innerHTML.includes('My Computer');
+        return info;
+    }""")
+    print(f"  DEBUG: {json.dumps(debug_info, indent=2)[:1000]}")
+
+    # Find "My Computer" -- check main page, frames, and shadow DOM
+    clicked = False
+
+    # Check all frames first (D2L sometimes uses iframes for dialogs)
+    for frame in page.frames:
+        loc = frame.locator('text="My Computer"').first
+        if loc.count() > 0:
+            with page.expect_file_chooser(timeout=15000) as fc_info:
+                loc.click()
+            fc_info.value.set_files(str(filled_pdf_path))
+            clicked = True
+            break
+
+    if not clicked:
+        # Shadow DOM traversal -- match with includes (text may have extra chars)
+        with page.expect_file_chooser(timeout=15000) as fc_info:
+            page.evaluate("""() => {
+                function clickInShadow(root) {
+                    const els = root.querySelectorAll('*');
+                    for (const el of els) {
+                        const t = (el.innerText || el.textContent || '').trim();
+                        if (t.startsWith('My Computer') && el.clientHeight > 0) {
+                            el.click();
+                            return true;
+                        }
+                        if (el.shadowRoot && clickInShadow(el.shadowRoot)) return true;
+                    }
+                    return false;
+                }
+                if (!clickInShadow(document)) {
+                    // Last resort: click by coordinates if dialog is visible
+                    const all = document.querySelectorAll('*');
+                    for (const el of all) {
+                        if (el.textContent.includes('My Computer') && el.clientHeight > 0 && el.clientHeight < 80) {
+                            el.click();
+                            return;
+                        }
+                    }
+                }
+            }""")
+            try:
+                file_chooser = fc_info.value
+                file_chooser.set_files(str(filled_pdf_path))
+                clicked = True
+            except Exception:
+                pass
+
+    if not clicked:
+        print(f"  ERROR: Could not interact with 'My Computer' in dialog")
+        page.screenshot(path=str(Path.home() / "Downloads" / f"debug_u{unit_num}.png"))
         return False
 
-    with page.expect_file_chooser(timeout=15000) as fc_info:
-        my_computer.click()
-    file_chooser = fc_info.value
-    file_chooser.set_files(str(filled_pdf_path))
     time.sleep(2)
 
-    # Click "Add" to confirm file selection
-    add_confirm = page.locator('button:has-text("Add"), input[value="Add"]')
-    if add_confirm.count() > 0:
-        add_confirm.first.click()
-        time.sleep(2)
+    # Click "Add" then "Submit"
+    for btn_text in ["Add", "Submit"]:
+        btn = page.locator(f'button:has-text("{btn_text}")').first
+        if btn.count() > 0:
+            btn.click()
+            time.sleep(2)
 
-    # Click Submit
-    page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
-    submit_btn = page.locator('button:has-text("Submit")').first
-    if submit_btn.count() == 0:
-        submit_btn = page.locator('input[type="submit"][value*="Submit"]').first
-    if submit_btn.count() > 0:
-        submit_btn.click()
-        page.wait_for_load_state("networkidle")
-    else:
-        print(f"  WARNING: No submit button found")
-
-    # Check for confirmation
     body_text = page.locator("body").inner_text()
-    if "successfully" in body_text.lower() or "submitted" in body_text.lower():
-        print(f"  SUBMITTED: {filename} -> {folder_name}")
+    if any(w in body_text.lower() for w in ["successfully", "submitted", "receipt"]):
+        print(f"  SUBMITTED (UI): {filename} -> {folder_name}")
         return True
 
-    if "submission" in page.url.lower() or "receipt" in page.url.lower():
-        print(f"  SUBMITTED: {filename} -> {folder_name}")
-        return True
-
-    print(f"  WARNING: Upload may have succeeded but no confirmation detected")
-    print(f"  Current URL: {page.url}")
+    print(f"  WARNING: Upload status unclear. URL: {page.url}")
     return True
 
 
