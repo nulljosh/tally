@@ -74,26 +74,41 @@ def extract_key_text(key_path):
 
 
 def find_blanks(doc):
-    """Find all underscore blanks with exact pixel coordinates."""
+    """Find all underscore blanks with exact pixel coordinates via rawdict."""
     blanks = []
     for page_idx in range(len(doc)):
         page = doc[page_idx]
-        text_dict = page.get_text("dict")
+        text_dict = page.get_text("rawdict")
         for block in text_dict.get("blocks", []):
             if block.get("type") != 0:
                 continue
             for line in block.get("lines", []):
-                line_text = "".join(s["text"] for s in line.get("spans", []))
+                line_text = "".join(
+                    c["c"] for s in line.get("spans", [])
+                    for c in s.get("chars", [])
+                )
                 for span in line.get("spans", []):
-                    txt = span["text"]
-                    for m in BLANK_PATTERN.finditer(txt):
-                        x0, y0, x1, y1 = span["bbox"]
-                        font_size = span["size"]
-                        char_w = (x1 - x0) / len(txt) if len(txt) > 0 else font_size * 0.5
-                        blank_x0 = x0 + m.start() * char_w
-                        blank_x1 = x0 + m.end() * char_w
-                        rect = fitz.Rect(blank_x0, y0, blank_x1, y1)
-                        blanks.append((page_idx, rect, font_size, line_text.strip()))
+                    chars = span.get("chars", [])
+                    if not chars:
+                        continue
+                    font_size = span["size"]
+                    i = 0
+                    while i < len(chars):
+                        if chars[i]["c"] == "_":
+                            j = i
+                            while j < len(chars) and chars[j]["c"] == "_":
+                                j += 1
+                            if j - i >= 3:
+                                first_bbox = chars[i]["bbox"]
+                                last_bbox = chars[j - 1]["bbox"]
+                                rect = fitz.Rect(
+                                    first_bbox[0], first_bbox[1],
+                                    last_bbox[2], last_bbox[3],
+                                )
+                                blanks.append((page_idx, rect, font_size, line_text.strip()))
+                            i = j
+                        else:
+                            i += 1
     return blanks
 
 
@@ -148,8 +163,10 @@ def fill_pdf(doc, blanks, answers):
         answer = str(answer)
         blank_w = rect.width
         blank_h = rect.height
-        # Expand white rect slightly for clean coverage
-        pad_rect = fitz.Rect(rect.x0 - 1, rect.y0 - 1, rect.x1 + 1, rect.y1 + 1)
+        # Expand white rect to fully cover underscores (proportional to font)
+        pad_x = max(2, font_size * 0.1)
+        pad_y = max(2, font_size * 0.2)
+        pad_rect = fitz.Rect(rect.x0 - pad_x, rect.y0 - pad_y, rect.x1 + pad_x, rect.y1 + pad_y)
         page.draw_rect(pad_rect, color=(1, 1, 1), fill=(1, 1, 1))
         # Start at 80% of original font size, scale down until text fits
         fs = font_size * 0.8
