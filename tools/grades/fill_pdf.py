@@ -140,17 +140,34 @@ def fallback_match(blanks, key_text):
 
 
 def fill_pdf(doc, blanks, answers):
-    """White-out blanks and insert answer text."""
+    """White-out blanks and insert answer text, scaled to fit."""
     for (page_idx, rect, font_size, context), answer in zip(blanks, answers):
+        if not answer or answer == "???":
+            continue
         page = doc[page_idx]
-        page.draw_rect(rect, color=(1, 1, 1), fill=(1, 1, 1))
-        text_size = min(font_size * 0.85, rect.height * 0.8)
-        if text_size < 4:
-            text_size = font_size * 0.7
-        insert_point = fitz.Point(rect.x0 + 1, rect.y1 - 2)
+        answer = str(answer)
+        blank_w = rect.width
+        blank_h = rect.height
+        # Expand white rect slightly for clean coverage
+        pad_rect = fitz.Rect(rect.x0 - 1, rect.y0 - 1, rect.x1 + 1, rect.y1 + 1)
+        page.draw_rect(pad_rect, color=(1, 1, 1), fill=(1, 1, 1))
+        # Start at 80% of original font size, scale down until text fits
+        fs = font_size * 0.8
+        min_fs = 4.0
+        text_w = fitz.get_text_length(answer, fontname="helv", fontsize=fs)
+        while text_w > blank_w and fs > min_fs:
+            fs -= 0.5
+            text_w = fitz.get_text_length(answer, fontname="helv", fontsize=fs)
+        # If still too wide, truncate
+        if text_w > blank_w:
+            while len(answer) > 1 and fitz.get_text_length(answer, fontname="helv", fontsize=fs) > blank_w:
+                answer = answer[:-1]
+        # Vertically center in blank
+        y = rect.y0 + (blank_h + fs * 0.75) / 2
+        insert_point = fitz.Point(rect.x0 + 1, y)
         page.insert_text(
-            insert_point, str(answer),
-            fontname="helv", fontsize=text_size,
+            insert_point, answer,
+            fontname="helv", fontsize=fs,
             color=(0, 0, 0.6),
         )
 
