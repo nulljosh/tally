@@ -265,69 +265,65 @@ def submit_to_dropbox(page, filled_pdf_path, unit_num):
     filename = file_path.name
     print(f"  Dropbox folder: {folder_name} (ID: {folder_id})")
 
-    # Browser UI: Add a File -> My Computer (in iframe dialog) -> file chooser -> Submit
+    # Try API upload first
+    file_bytes = file_path.read_bytes()
+    api_url = f"{D2L_BASE}/d2l/api/le/{api_ver}/{COURSE_OU}/dropbox/folders/{folder_id}/submissions/mysubmissions/"
+    try:
+        resp = page.request.fetch(api_url, method="POST", multipart={
+            "": {
+                "name": filename,
+                "mimeType": "application/pdf",
+                "buffer": file_bytes,
+            }
+        })
+        if resp.status in (200, 201):
+            print(f"  SUBMITTED (API): {filename} -> {folder_name}")
+            return True
+        print(f"  API upload returned {resp.status}, falling back to browser UI")
+    except Exception as e:
+        print(f"  API upload failed ({e}), falling back to browser UI")
+
+    # Fallback: browser UI submission
     submit_url = (
         f"{D2L_BASE}/d2l/lms/dropbox/user/folder_submit_files.d2l"
         f"?db={folder_id}&grpid=0&isprv=0&bp=0&ou={COURSE_OU}"
     )
     page.goto(submit_url, timeout=30000)
-    time.sleep(5)
+    page.wait_for_load_state("networkidle")
 
-    # Scroll to bottom and click "Add a File"
+    # Click "Add a File"
     page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
-    time.sleep(2)
     add_btn = page.locator('button:has-text("Add a File")').first
     add_btn.scroll_into_view_if_needed()
-    time.sleep(1)
     add_btn.click(force=True)
+    time.sleep(2)
 
-    # Wait for the file dialog iframe to appear (lazy-loaded)
-    dialog_frame = None
-    for attempt in range(15):
-        time.sleep(1)
-        for frame in page.frames:
-            if "dialogs/file" in frame.url or "common/dialogs" in frame.url:
-                dialog_frame = frame
-                break
-        if dialog_frame:
-            break
-    if not dialog_frame:
-        # Debug: list all frame URLs
-        print(f"  Frames found: {[f.url[:80] for f in page.frames]}")
+    # Click "My Computer" in main DOM (D2L web component, not iframe)
+    my_computer = page.locator('text="My Computer"').first
+    if my_computer.count() == 0:
+        print(f"  ERROR: No 'My Computer' option found in page")
+        return False
 
-    # Click "My Computer" -- could be in iframe or main frame
-    target_frame = dialog_frame if dialog_frame else page
-    if not dialog_frame:
-        # Check if My Computer is in main frame
-        mc_main = page.locator('text="My Computer"')
-        if mc_main.count() == 0:
-            print(f"  ERROR: No 'My Computer' option found anywhere")
-            page.screenshot(path=str(Path.home() / "Downloads" / f"d2l-upload-fail-u{unit_num}.png"), full_page=True)
-            return False
-
-    # Click "My Computer" which triggers native file chooser
-    my_computer = target_frame.locator('text="My Computer"').first
     with page.expect_file_chooser(timeout=15000) as fc_info:
         my_computer.click()
     file_chooser = fc_info.value
     file_chooser.set_files(str(filled_pdf_path))
-    time.sleep(3)
+    time.sleep(2)
 
-    # Click "Add" button in the dialog to confirm the file
-    add_confirm = target_frame.locator('button:has-text("Add"), input[value="Add"]')
+    # Click "Add" to confirm file selection
+    add_confirm = page.locator('button:has-text("Add"), input[value="Add"]')
     if add_confirm.count() > 0:
         add_confirm.first.click()
-        time.sleep(3)
+        time.sleep(2)
 
-    # Back in main page -- click Submit
+    # Click Submit
     page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
-    time.sleep(1)
     submit_btn = page.locator('button:has-text("Submit")').first
     if submit_btn.count() == 0:
         submit_btn = page.locator('input[type="submit"][value*="Submit"]').first
     if submit_btn.count() > 0:
         submit_btn.click()
-        time.sleep(5)
+        page.wait_for_load_state("networkidle")
     else:
         print(f"  WARNING: No submit button found")
 
@@ -355,7 +351,13 @@ def submit_filled_pdfs():
 
     # Find all filled PDFs
     filled = []
-    for base in [Path.home() / "Documents" / "School" / "science"]:
+    search_paths = [
+        Path.home() / "Documents" / "School" / "science",
+        Path.home() / "Downloads" / "d2l-science",
+    ]
+    for base in search_paths:
+        if not base.exists():
+            continue
         for unit_dir in sorted(base.iterdir()):
             if not unit_dir.is_dir():
                 continue
