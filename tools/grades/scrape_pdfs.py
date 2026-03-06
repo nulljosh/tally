@@ -2,12 +2,14 @@
 """
 D2L PDF Scraper - Downloads learning guide PDFs from Anatomy & Physiology 12.
 Credentials from macOS Keychain (service: d2l-langley).
+Uses D2L's content API after browser auth to discover and download files.
 """
 
 import os
 import re
 import subprocess
 import time
+import json
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
@@ -49,188 +51,173 @@ def login(page, username, password):
     print("Logged in.")
 
 
-def discover_units(page):
-    """Navigate to course content and find unit modules."""
-    page.goto(f"{D2L_BASE}/d2l/le/content/{COURSE_OU}/Home", timeout=30000)
-    time.sleep(3)
-
-    # D2L content TOC: find module links in the sidebar/content area
-    links = page.query_selector_all('a[href*="/le/content/"][href*="viewContent"]')
-    if not links:
-        # Try the table of contents tree
-        links = page.query_selector_all('a[href*="/d2l/le/content/"]')
-
-    units = {}
-    for link in links:
-        href = link.get_attribute('href') or ''
-        text = link.inner_text().strip()
-        if not text:
-            continue
-        # Group by unit number
-        unit_match = re.search(r'unit\s*(\d+)', text, re.IGNORECASE)
-        if unit_match:
-            unit_num = unit_match.group(1)
-            if unit_num not in units:
-                units[unit_num] = []
-            units[unit_num].append({"text": text, "href": href})
-
-    return units
+def get_toc(page):
+    """Use D2L API to get full content table of contents."""
+    # Try multiple API versions
+    for ver in ["1.67", "1.50", "1.47", "1.39"]:
+        url = f"{D2L_BASE}/d2l/api/le/{ver}/{COURSE_OU}/content/toc"
+        resp = page.request.get(url)
+        if resp.ok:
+            return resp.json()
+    # Fallback: try the content root
+    resp = page.request.get(f"{D2L_BASE}/d2l/api/le/1.67/{COURSE_OU}/content/root/")
+    if resp.ok:
+        return resp.json()
+    return None
 
 
-def find_pdf_links(page):
-    """Find all PDF download links on the current page."""
-    links = page.query_selector_all('a[href$=".pdf"], a[href*=".pdf?"], a[href*="/content/enforced/"]')
-    pdfs = []
-    for link in links:
-        href = link.get_attribute('href') or ''
-        text = link.inner_text().strip()
-        if '.pdf' in href.lower() or 'download' in text.lower():
-            pdfs.append({"text": text, "href": href})
-    return pdfs
+def extract_topics(toc, depth=0):
+    """Recursively extract all topics from TOC structure."""
+    topics = []
+    if isinstance(toc, dict):
+        modules = toc.get("Modules", [])
+        module_topics = toc.get("Topics", [])
+        title = toc.get("Title", "")
+
+        for topic in module_topics:
+            topics.append({
+                "title": topic.get("Title", ""),
+                "url": topic.get("Url", ""),
+                "type": topic.get("TypeIdentifier", ""),
+                "topic_id": topic.get("TopicId", ""),
+                "module_title": title,
+            })
+
+        for module in modules:
+            topics.extend(extract_topics(module, depth + 1))
+
+    elif isinstance(toc, list):
+        for item in toc:
+            topics.extend(extract_topics(item, depth))
+
+    return topics
 
 
-def download_pdf(page, url, save_path):
-    """Download a PDF file."""
-    if save_path.exists():
-        print(f"  SKIP (exists): {save_path.name}")
+def download_file(page, url, save_path):
+    """Download a file from D2L."""
+    if save_path.exists() and save_path.stat().st_size > 0:
+        print(f"  SKIP: {save_path.name}")
         return False
 
     try:
-        with page.expect_download(timeout=30000) as dl_info:
-            page.evaluate(f'window.location.href = "{url}"')
-        download = dl_info.value
-        download.save_as(str(save_path))
-        print(f"  SAVED: {save_path.name}")
-        return True
-    except Exception:
-        # Fallback: direct navigation download
-        try:
-            response = page.request.get(url)
-            if response.ok:
-                save_path.write_bytes(response.body())
-                print(f"  SAVED (direct): {save_path.name}")
-                return True
-        except Exception as e:
-            print(f"  FAIL: {e}")
+        full_url = url if url.startswith("http") else f"{D2L_BASE}{url}"
+        resp = page.request.get(full_url)
+        if resp.ok and len(resp.body()) > 100:
+            save_path.parent.mkdir(parents=True, exist_ok=True)
+            save_path.write_bytes(resp.body())
+            size_kb = len(resp.body()) // 1024
+            print(f"  SAVED: {save_path.name} ({size_kb}KB)")
+            return True
+        else:
+            print(f"  FAIL: {save_path.name} (status {resp.status})")
+    except Exception as e:
+        print(f"  ERROR: {save_path.name}: {e}")
     return False
 
 
-def scrape_content_page(page, unit_num):
-    """Scrape a unit's content page for PDFs."""
-    unit_dir = SAVE_DIR / f"unit {unit_num}"
-    unit_dir.mkdir(parents=True, exist_ok=True)
-
-    # Navigate to unit content via TOC
-    page.goto(f"{D2L_BASE}/d2l/le/content/{COURSE_OU}/Home", timeout=30000)
-    time.sleep(2)
-
-    # Click on the unit in the TOC
-    unit_link = page.query_selector(f'text=/Unit\\s*{unit_num}/i')
-    if not unit_link:
-        print(f"  Unit {unit_num} not found in TOC")
-        return 0
-
-    unit_link.click()
-    time.sleep(3)
-
-    # Look for PDF links in the content area
-    downloaded = 0
-    all_links = page.query_selector_all('a')
-    for link in all_links:
-        href = link.get_attribute('href') or ''
-        text = link.inner_text().strip()
-
-        if '.pdf' in href.lower():
-            filename = re.sub(r'[?#].*', '', href.split('/')[-1])
-            if not filename.endswith('.pdf'):
-                filename = f"{text[:50]}.pdf" if text else "unknown.pdf"
-            filename = re.sub(r'[^\w\s\-.]', '_', filename)
-            save_path = unit_dir / filename
-
-            full_url = href if href.startswith('http') else f"{D2L_BASE}{href}"
-            if download_pdf(page, full_url, save_path):
-                downloaded += 1
-            elif save_path.exists():
-                pass  # already counted as skip
-
-    # Also check for content topics that might contain embedded PDFs
-    topic_links = page.query_selector_all('a[href*="viewContent"]')
-    for tlink in topic_links:
-        thref = tlink.get_attribute('href') or ''
-        ttext = tlink.inner_text().strip()
-        if not thref or not ttext:
-            continue
-
-        full_url = thref if thref.startswith('http') else f"{D2L_BASE}{thref}"
-        page.goto(full_url, timeout=30000)
-        time.sleep(2)
-
-        # Check if this page has PDF links
-        pdf_links = page.query_selector_all('a[href$=".pdf"], a[href*=".pdf?"]')
-        for plink in pdf_links:
-            phref = plink.get_attribute('href') or ''
-            ptext = plink.inner_text().strip()
-            filename = re.sub(r'[?#].*', '', phref.split('/')[-1])
-            if not filename.endswith('.pdf'):
-                filename = f"{ptext[:50]}.pdf" if ptext else "unknown.pdf"
-            filename = re.sub(r'[^\w\s\-.]', '_', filename)
-            save_path = unit_dir / filename
-
-            pdf_url = phref if phref.startswith('http') else f"{D2L_BASE}{phref}"
-            if download_pdf(page, pdf_url, save_path):
-                downloaded += 1
-
-    return downloaded
+def sanitize(name):
+    return re.sub(r'[^\w\s\-.]', '_', name).strip()
 
 
 def main():
     username, password = get_creds()
     if not username or not password:
         print("ERROR: Could not read credentials from Keychain.")
-        print("Store them: security add-generic-password -a EMAIL -s d2l-langley -w PASSWORD")
         return
 
     print(f"D2L PDF Scraper\nCourse OU: {COURSE_OU}\nUser: {username}\n" + "-" * 40)
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)  # visible for SSO
-        page = browser.new_page(viewport={'width': 1400, 'height': 900})
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1400, "height": 900})
 
         try:
             login(page, username, password)
 
-            # Debug: screenshot the content page to see structure
-            page.goto(f"{D2L_BASE}/d2l/le/content/{COURSE_OU}/Home", timeout=30000)
-            time.sleep(3)
-            page.screenshot(path="d2l_content_debug.png", full_page=True)
-            print("DEBUG: saved d2l_content_debug.png")
+            # Get TOC via API
+            print("\nFetching content structure...")
+            toc = get_toc(page)
 
-            # Dump all links on the page
-            all_links = page.query_selector_all('a')
-            for link in all_links:
-                href = link.get_attribute('href') or ''
-                text = link.inner_text().strip()
-                if text and ('unit' in text.lower() or 'content' in href.lower() or '.pdf' in href.lower()):
-                    print(f"  LINK: {text[:60]} -> {href[:100]}")
+            if not toc:
+                # Fallback: scrape the content page directly
+                print("API unavailable. Scraping content page...")
+                page.goto(f"{D2L_BASE}/d2l/le/content/{COURSE_OU}/Home", timeout=30000)
+                time.sleep(3)
+                # Dump page for debug
+                html = page.content()
+                # Find all PDF-like URLs in the page source
+                pdf_urls = re.findall(r'href=["\']([^"\']*\.pdf[^"\']*)["\']', html)
+                content_urls = re.findall(r'(/d2l/le/content/\d+/viewContent/\d+/View)', html)
+                print(f"  Found {len(pdf_urls)} PDF links, {len(content_urls)} content links")
 
-            total = 0
-            for unit_num in range(1, 10):  # Units 1-9
-                print(f"\n--- Unit {unit_num} ---")
-                count = scrape_content_page(page, unit_num)
-                total += count
-                print(f"  Downloaded: {count} PDFs")
+                SAVE_DIR.mkdir(parents=True, exist_ok=True)
+                for url in pdf_urls:
+                    fname = sanitize(url.split("/")[-1].split("?")[0])
+                    download_file(page, url, SAVE_DIR / fname)
+                browser.close()
+                return
+
+            # Parse TOC
+            topics = extract_topics(toc)
+            print(f"Found {len(topics)} topics across all modules.\n")
+
+            # Save TOC for reference
+            SAVE_DIR.mkdir(parents=True, exist_ok=True)
+            with open(SAVE_DIR / "toc.json", "w") as f:
+                json.dump(toc, f, indent=2)
+
+            # Download PDFs and files
+            downloaded = 0
+            skipped = 0
+            for topic in topics:
+                url = topic["url"]
+                title = topic["title"]
+                module = topic["module_title"]
+
+                if not url:
+                    continue
+
+                # Determine unit folder from module title
+                unit_match = re.search(r'unit\s*(\d+)', module, re.IGNORECASE)
+                if unit_match:
+                    folder = SAVE_DIR / f"unit_{unit_match.group(1)}"
+                else:
+                    folder = SAVE_DIR / sanitize(module)[:50] if module else SAVE_DIR
+
+                # Only download PDFs and documents
+                is_pdf = ".pdf" in url.lower()
+                is_doc = any(ext in url.lower() for ext in [".doc", ".docx", ".ppt", ".pptx"])
+                is_content = "/viewContent/" in url
+
+                if is_pdf or is_doc:
+                    fname = sanitize(url.split("/")[-1].split("?")[0])
+                    if not fname or fname == "_":
+                        fname = sanitize(title) + ".pdf"
+                    if download_file(page, url, folder / fname):
+                        downloaded += 1
+                    else:
+                        skipped += 1
+                elif is_content:
+                    # Navigate to content page and look for PDF links
+                    full_url = url if url.startswith("http") else f"{D2L_BASE}{url}"
+                    page.goto(full_url, timeout=30000)
+                    time.sleep(2)
+                    html = page.content()
+                    pdf_links = re.findall(r'href=["\']([^"\']*\.pdf[^"\']*)["\']', html)
+                    for purl in pdf_links:
+                        fname = sanitize(purl.split("/")[-1].split("?")[0])
+                        if download_file(page, purl, folder / fname):
+                            downloaded += 1
 
             print(f"\n{'=' * 40}")
-            print(f"Total downloaded: {total} PDFs")
+            print(f"Downloaded: {downloaded} files")
+            print(f"Skipped: {skipped} (already exist)")
             print(f"Saved to: {SAVE_DIR}")
 
         except Exception as e:
             print(f"Error: {e}")
-            try:
-                page.screenshot(path="error_scrape.png")
-                print("Screenshot saved: error_scrape.png")
-            except:
-                pass
+            import traceback
+            traceback.print_exc()
         finally:
             browser.close()
 
