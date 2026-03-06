@@ -155,38 +155,51 @@ def fallback_match(blanks, key_text):
 
 
 def fill_pdf(doc, blanks, answers):
-    """White-out blanks and insert answer text, scaled to fit."""
+    """Redact underscore blanks (delete them), then insert answer text."""
+    # Group by page
+    page_data = {}
     for (page_idx, rect, font_size, context), answer in zip(blanks, answers):
         if not answer or answer == "???":
             continue
+        page_data.setdefault(page_idx, []).append((rect, font_size, str(answer)))
+
+    for page_idx in sorted(page_data):
         page = doc[page_idx]
-        answer = str(answer)
-        blank_w = rect.width
-        blank_h = rect.height
-        # Expand white rect to fully cover underscores (proportional to font)
-        pad_x = max(2, font_size * 0.1)
-        pad_y = max(2, font_size * 0.2)
-        pad_rect = fitz.Rect(rect.x0 - pad_x, rect.y0 - pad_y, rect.x1 + pad_x, rect.y1 + pad_y)
-        page.draw_rect(pad_rect, color=(1, 1, 1), fill=(1, 1, 1))
-        # Start at 80% of original font size, scale down until text fits
-        fs = font_size * 0.8
-        min_fs = 4.0
-        text_w = fitz.get_text_length(answer, fontname="helv", fontsize=fs)
-        while text_w > blank_w and fs > min_fs:
-            fs -= 0.5
+        items = page_data[page_idx]
+
+        # Step 1: Add redaction annotations for all blanks on this page
+        for rect, font_size, answer in items:
+            pad_x = max(2, font_size * 0.15)
+            pad_y = max(2, font_size * 0.25)
+            redact_rect = fitz.Rect(
+                rect.x0 - pad_x, rect.y0 - pad_y,
+                rect.x1 + pad_x, rect.y1 + pad_y,
+            )
+            page.add_redact_annot(redact_rect)
+
+        # Step 2: Apply all redactions (actually removes underscore content)
+        page.apply_redactions()
+
+        # Step 3: Insert answer text on the now-clean page
+        for rect, font_size, answer in items:
+            blank_w = rect.width
+            blank_h = rect.height
+            fs = font_size * 0.8
+            min_fs = 4.0
             text_w = fitz.get_text_length(answer, fontname="helv", fontsize=fs)
-        # If still too wide, truncate
-        if text_w > blank_w:
-            while len(answer) > 1 and fitz.get_text_length(answer, fontname="helv", fontsize=fs) > blank_w:
-                answer = answer[:-1]
-        # Vertically center in blank
-        y = rect.y0 + (blank_h + fs * 0.75) / 2
-        insert_point = fitz.Point(rect.x0 + 1, y)
-        page.insert_text(
-            insert_point, answer,
-            fontname="helv", fontsize=fs,
-            color=(0, 0, 0.6),
-        )
+            while text_w > blank_w and fs > min_fs:
+                fs -= 0.5
+                text_w = fitz.get_text_length(answer, fontname="helv", fontsize=fs)
+            if text_w > blank_w:
+                while len(answer) > 1 and fitz.get_text_length(answer, fontname="helv", fontsize=fs) > blank_w:
+                    answer = answer[:-1]
+            y = rect.y0 + (blank_h + fs * 0.75) / 2
+            insert_point = fitz.Point(rect.x0 + 1, y)
+            page.insert_text(
+                insert_point, answer,
+                fontname="helv", fontsize=fs,
+                color=(0, 0, 0.6),
+            )
 
 
 def process_unit(unit, dry_run=False):
