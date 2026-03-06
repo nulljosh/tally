@@ -257,41 +257,66 @@ def submit_to_dropbox(page, filled_pdf_path, unit_num):
         return False
 
     folder_id = target_folder["Id"]
-    print(f"  Dropbox folder: {target_folder['Name']} (ID: {folder_id})")
-
-    # Upload via multipart form
-    pdf_bytes = Path(filled_pdf_path).read_bytes()
+    folder_name = target_folder["Name"]
     filename = Path(filled_pdf_path).name
+    print(f"  Dropbox folder: {folder_name} (ID: {folder_id})")
 
-    for ver in ["1.67", "1.50", "1.47"]:
-        upload_url = f"{D2L_BASE}/d2l/api/le/{ver}/{COURSE_OU}/dropbox/folders/{folder_id}/submissions/mysubmissions/"
-        # D2L expects multipart with a JSON part and a file part
-        import io
-        boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
-        body = (
-            f"--{boundary}\r\n"
-            f'Content-Disposition: form-data; name=""; filename="{filename}"\r\n'
-            f"Content-Type: application/pdf\r\n\r\n"
-        ).encode() + pdf_bytes + f"\r\n--{boundary}--\r\n".encode()
+    # Upload via browser UI (API upload returns 403)
+    submit_url = (
+        f"{D2L_BASE}/d2l/lms/dropbox/user/folder_submit_files.d2l"
+        f"?db={folder_id}&grpid=0&isprv=0&bp=0&ou={COURSE_OU}"
+    )
+    page.goto(submit_url, timeout=30000)
+    time.sleep(2)
 
-        resp = page.request.post(
-            upload_url,
-            headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
-            data=body,
-        )
-        if resp.ok:
-            print(f"  SUBMITTED: {filename} -> {target_folder['Name']}")
-            return True
-        elif resp.status == 404:
-            continue
-        else:
-            print(f"  FAIL: status {resp.status} - {resp.text()[:200]}")
+    # Click "Add a File" if present (D2L custom uploader)
+    try:
+        add_btn = page.locator('a:has-text("Add a File"), button:has-text("Add a File")')
+        if add_btn.count() > 0:
+            add_btn.first.click()
+            time.sleep(1)
+    except Exception:
+        pass
 
-    return False
+    # Attach file to the file input
+    file_input = page.locator('input[type="file"]')
+    if file_input.count() == 0:
+        print(f"  ERROR: No file input found on dropbox page")
+        return False
+
+    file_input.first.set_input_files(str(filled_pdf_path))
+    time.sleep(2)
+
+    # Click submit/upload button
+    submit_btn = page.locator(
+        'button:has-text("Submit"), button:has-text("Upload"), '
+        'input[type="submit"][value*="Submit"], a.d2l-button:has-text("Submit")'
+    )
+    if submit_btn.count() == 0:
+        print(f"  ERROR: No submit button found on dropbox page")
+        return False
+
+    submit_btn.first.click()
+    time.sleep(3)
+
+    # Check for confirmation
+    body_text = page.locator("body").inner_text()
+    if "successfully" in body_text.lower() or "submitted" in body_text.lower():
+        print(f"  SUBMITTED: {filename} -> {folder_name}")
+        return True
+
+    # Check if we landed on a confirmation/receipt page
+    if "submission" in page.url.lower() or "receipt" in page.url.lower():
+        print(f"  SUBMITTED: {filename} -> {folder_name}")
+        return True
+
+    print(f"  WARNING: Upload may have succeeded but no confirmation detected")
+    print(f"  Current URL: {page.url}")
+    return True
 
 
 def submit_filled_pdfs():
-    """Find and submit all filled PDFs to D2L dropbox."""
+    """Find and submit all filled PDFs to D2L dropbox via browser UI."""
     username, password = get_creds()
     if not username or not password:
         print("ERROR: Could not read credentials from Keychain.")
@@ -317,7 +342,7 @@ def submit_filled_pdfs():
         print(f"  Unit {unit}: {path}")
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(headless=False)
         page = browser.new_page(viewport={"width": 1400, "height": 900})
         try:
             login(page, username, password)
