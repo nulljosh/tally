@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
 """
-Biology 12 Answer Extractor - Extracts answers from learning guide answer keys.
-Takes a learning guide PDF, finds the matching answer key, diffs them,
-and outputs a markdown file with all answers.
+Biology 12 PDF Blank Filler -- Uses PyMuPDF to find underscore blanks in
+learning guide PDFs and fills them with answers from the answer key.
+
+Usage: python3 fill_pdf.py <learning_guide.pdf>
 """
 
 import sys
 import re
-import difflib
 from pathlib import Path
+
+try:
+    import fitz
+except ImportError:
+    print("ERROR: PyMuPDF not installed. Run: pip3 install pymupdf")
+    sys.exit(1)
 
 try:
     import pypdf
@@ -21,15 +27,16 @@ KEY_DIRS = [
     Path.home() / "Documents" / "School" / "science",
 ]
 
+STUDENT_NAME = "Joshua Trommel"
+BLANK_PATTERN = re.compile(r'_{3,}')
+
 
 def detect_unit(filename):
-    """Extract unit number from filename like BI12_LG_U03."""
     m = re.search(r'U(\d+)', filename, re.IGNORECASE)
     return int(m.group(1)) if m else None
 
 
 def find_key(unit):
-    """Search known directories for the answer key PDF."""
     key_name = f"BI12_LG_U{unit:02d}-KEY.pdf"
     for base in KEY_DIRS:
         for variant in [f"unit_{unit}", f"unit {unit}"]:
@@ -39,34 +46,85 @@ def find_key(unit):
     return None
 
 
-def extract_text(pdf_path):
-    """Extract all text from a PDF, returning list of (page_num, text)."""
-    reader = pypdf.PdfReader(str(pdf_path))
-    pages = []
-    for i, page in enumerate(reader.pages):
-        text = page.extract_text() or ""
-        pages.append((i + 1, text))
-    return pages
+def extract_key_text(key_path):
+    reader = pypdf.PdfReader(str(key_path))
+    text = ""
+    for page in reader.pages:
+        text += (page.extract_text() or "") + "\n"
+    return text
 
 
-def diff_answers(orig_lines, key_lines):
-    """Find lines in the key that differ from the original (the answers)."""
-    differ = difflib.unified_diff(
-        orig_lines, key_lines,
-        fromfile="original", tofile="answer_key",
-        lineterm="", n=1
-    )
-    additions = []
-    for line in differ:
-        if line.startswith("+") and not line.startswith("+++"):
-            additions.append(line[1:].strip())
-    return [a for a in additions if a and len(a) > 1]
+def find_blanks(doc):
+    """Find all underscore blanks with exact pixel coordinates."""
+    blanks = []
+    for page_idx in range(len(doc)):
+        page = doc[page_idx]
+        text_dict = page.get_text("dict")
+        for block in text_dict.get("blocks", []):
+            if block.get("type") != 0:
+                continue
+            for line in block.get("lines", []):
+                line_text = "".join(s["text"] for s in line.get("spans", []))
+                for span in line.get("spans", []):
+                    txt = span["text"]
+                    for m in BLANK_PATTERN.finditer(txt):
+                        x0, y0, x1, y1 = span["bbox"]
+                        font_size = span["size"]
+                        char_w = (x1 - x0) / len(txt) if len(txt) > 0 else font_size * 0.5
+                        blank_x0 = x0 + m.start() * char_w
+                        blank_x1 = x0 + m.end() * char_w
+                        rect = fitz.Rect(blank_x0, y0, blank_x1, y1)
+                        blanks.append((page_idx, rect, font_size, line_text.strip()))
+    return blanks
+
+
+def extract_answers_from_key(key_text):
+    """Extract answer tokens from key -- text between underscore runs."""
+    answers = []
+    pattern = re.compile(r'_+([^_\n]{1,80}?)_+')
+    for m in pattern.finditer(key_text):
+        ans = m.group(1).strip()
+        if ans:
+            answers.append(ans)
+    return answers
+
+
+def match_answers(blanks, answers):
+    """Match blanks to answers 1:1 sequentially."""
+    matched = []
+    ans_idx = 0
+    for i, (page_idx, rect, font_size, context) in enumerate(blanks):
+        if ans_idx < len(answers):
+            answer = answers[ans_idx]
+            if ans_idx == 0 and ("ANS KEY" in answer or "Name" in context):
+                matched.append((page_idx, rect, font_size, context, STUDENT_NAME))
+            else:
+                matched.append((page_idx, rect, font_size, context, answer))
+            ans_idx += 1
+        else:
+            matched.append((page_idx, rect, font_size, context, "???"))
+    return matched
+
+
+def fill_pdf(doc, matched):
+    """White-out blanks and insert answer text."""
+    for page_idx, rect, font_size, context, answer in matched:
+        page = doc[page_idx]
+        page.draw_rect(rect, color=(1, 1, 1), fill=(1, 1, 1))
+        text_size = min(font_size * 0.85, rect.height * 0.8)
+        if text_size < 4:
+            text_size = font_size * 0.7
+        insert_point = fitz.Point(rect.x0 + 1, rect.y1 - 2)
+        page.insert_text(
+            insert_point, answer,
+            fontname="helv", fontsize=text_size,
+            color=(0, 0, 0.6),
+        )
 
 
 def main():
     if len(sys.argv) < 2:
         print("Usage: python3 fill_pdf.py <learning_guide.pdf>")
-        print("Example: python3 fill_pdf.py ~/Documents/School/science/unit\\ 3/BI12_LG_U03.pdf")
         sys.exit(1)
 
     orig_path = Path(sys.argv[1]).expanduser().resolve()
@@ -76,54 +134,53 @@ def main():
 
     unit = detect_unit(orig_path.name)
     if unit is None:
-        print(f"ERROR: Cannot detect unit number from filename: {orig_path.name}")
-        print("Expected format: BI12_LG_U03.pdf")
+        print(f"ERROR: Cannot detect unit from filename: {orig_path.name}")
         sys.exit(1)
 
-    print(f"[*] Unit {unit} detected from {orig_path.name}")
+    print(f"[*] Unit {unit} -- {orig_path.name}")
 
     key_path = find_key(unit)
     if not key_path:
         print(f"ERROR: Answer key not found for unit {unit}")
-        print(f"Expected: BI12_LG_U{unit:02d}-KEY.pdf in one of:")
-        for d in KEY_DIRS:
-            print(f"  {d}/unit_{unit}/ or {d}/unit {unit}/")
         sys.exit(1)
 
     print(f"[*] Answer key: {key_path}")
 
-    print("[*] Extracting text from original...")
-    orig_pages = extract_text(orig_path)
-    orig_text = "\n".join(text for _, text in orig_pages)
-    print(f"    {len(orig_pages)} pages, {len(orig_text)} chars")
+    key_text = extract_key_text(key_path)
+    answers = extract_answers_from_key(key_text)
+    print(f"[*] Extracted {len(answers)} answer tokens from key")
+    for i, a in enumerate(answers):
+        print(f"    ANS {i:3d}: {a}")
 
-    print("[*] Extracting text from answer key...")
-    key_pages = extract_text(key_path)
-    key_text = "\n".join(text for _, text in key_pages)
-    print(f"    {len(key_pages)} pages, {len(key_text)} chars")
+    doc = fitz.open(str(orig_path))
+    print(f"[*] Opened {orig_path.name}: {len(doc)} pages")
 
-    orig_lines = [l.strip() for l in orig_text.splitlines() if l.strip()]
-    key_lines = [l.strip() for l in key_text.splitlines() if l.strip()]
-    answer_lines = diff_answers(orig_lines, key_lines)
+    blanks = find_blanks(doc)
+    print(f"[*] Found {len(blanks)} blanks in original")
+    for i, (pg, rect, fs, ctx) in enumerate(blanks):
+        ctx_short = ctx[:70] + "..." if len(ctx) > 70 else ctx
+        print(f"    BLANK {i:3d} pg{pg+1} ({rect.x0:.0f},{rect.y0:.0f})-"
+              f"({rect.x1:.0f},{rect.y1:.0f}) fs={fs:.1f}: {ctx_short}")
 
-    out_path = orig_path.parent / f"U{unit:02d}_answers.md"
-    with open(out_path, "w") as f:
-        f.write(f"# Unit {unit} -- Answer Key\n\n")
-        f.write(f"Source: `{key_path.name}`\n\n")
-        f.write("---\n\n")
-        f.write("## Full Answer Key\n\n")
-        for page_num, text in key_pages:
-            f.write(f"### Page {page_num}\n\n")
-            f.write(text.strip() + "\n\n")
-        if answer_lines:
-            f.write("---\n\n")
-            f.write("## Answers Only (diff from original)\n\n")
-            for line in answer_lines:
-                f.write(f"- {line}\n")
-            f.write("\n")
+    if not blanks:
+        print("[!] No blanks found.")
+        doc.close()
+        sys.exit(0)
 
-    print(f"[*] Saved: {out_path}")
-    print(f"    {len(answer_lines)} answer-only lines extracted")
+    matched = match_answers(blanks, answers)
+    print(f"\n[*] Matching {len(matched)} blanks to answers:")
+    for i, (pg, rect, fs, ctx, ans) in enumerate(matched):
+        ctx_short = ctx[:50] + "..." if len(ctx) > 50 else ctx
+        print(f"    {i:3d} pg{pg+1}: '{ans}' <- {ctx_short}")
+
+    fill_pdf(doc, matched)
+
+    out_name = orig_path.stem + "_FILLED.pdf"
+    out_path = orig_path.parent / out_name
+    doc.save(str(out_path))
+    doc.close()
+    print(f"\n[*] Saved: {out_path}")
+    print(f"    {len(matched)} blanks filled")
 
 
 if __name__ == "__main__":
