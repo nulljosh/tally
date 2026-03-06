@@ -175,7 +175,7 @@ Project name: **tally**
 - [ ] PWD payment tracking (update income display when designation approved)
 - [ ] iOS companion app (tally-ios)
 - [ ] Auto-fill monthly reports end-to-end
-- [ ] Push notifications for payment dates
+- [x] ~~Push notifications~~ (dropped -- browser notifs not useful)
 - [ ] DTC application automation
 - [ ] Offline mode with cached data
 - [ ] Multi-province support
