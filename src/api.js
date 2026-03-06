@@ -16,6 +16,7 @@ const PORT = process.env.PORT || 3000;
 const ENCRYPTION_KEY = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
 const DEBUG = process.env.DEBUG === 'true' || process.env.NODE_ENV === 'development';
 const IS_PRODUCTION = !!process.env.VERCEL;
+const PWD_APPROVED = process.env.PWD_APPROVED === 'true';
 const DEFAULT_SESSION_MAX_AGE_MS = 2 * 60 * 60 * 1000; // 2 hours
 const REMEMBER_ME_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 const SESSION_IDLE_TIMEOUT_MS = 60 * 60 * 1000; // 1 hour
@@ -716,6 +717,7 @@ app.get('/api/latest', requireAuth, async (req, res) => {
   try {
     log('[API] /api/latest called');
     const userId = req.session?.userId;
+    const uiConfig = { pwdApproved: PWD_APPROVED };
 
     // On Vercel: try to read from Blob first
     if (process.env.VERCEL) {
@@ -735,7 +737,7 @@ app.get('/api/latest', requireAuth, async (req, res) => {
           const data = await response.json();
 
           log(`[API] Returning data from Vercel Blob: ${targetBlob.pathname}`);
-          return res.json({ file: 'vercel-blob', data });
+          return res.json({ file: 'vercel-blob', data, uiConfig });
         }
 
         return res.status(404).json({
@@ -756,7 +758,7 @@ app.get('/api/latest', requireAuth, async (req, res) => {
     // Return in-memory result if it's good data
     if (lastCheckResult && lastCheckResult.success && !hasErrors(lastCheckResult)) {
       log('[API] Returning cached in-memory result');
-      return res.json({ file: 'in-memory', data: lastCheckResult });
+      return res.json({ file: 'in-memory', data: lastCheckResult, uiConfig });
     }
 
     // If in-memory data has errors, log it
@@ -781,7 +783,7 @@ app.get('/api/latest', requireAuth, async (req, res) => {
         const data = JSON.parse(fs.readFileSync(file.path, 'utf8'));
         if (!hasErrors(data)) {
           log(`[API] Returning good file: ${file.name}`);
-          return res.json({ file: file.name, data });
+          return res.json({ file: file.name, data, uiConfig });
         } else {
           log(`[API] Skipping ${file.name} (has errors)`);
         }
@@ -795,7 +797,7 @@ app.get('/api/latest', requireAuth, async (req, res) => {
     if (fs.existsSync(samplePath)) {
       const data = JSON.parse(fs.readFileSync(samplePath, 'utf8'));
       log('[API] No good results, returning sample-data.json');
-      return res.json({ file: 'sample-data.json', data });
+      return res.json({ file: 'sample-data.json', data, uiConfig });
     }
 
     // No data found anywhere - return demo data
@@ -846,7 +848,7 @@ app.get('/api/latest', requireAuth, async (req, res) => {
         }
       }
     };
-    return res.json({ file: 'demo-data (hardcoded)', data: sampleData });
+    return res.json({ file: 'demo-data (hardcoded)', data: sampleData, uiConfig });
   } catch (error) {
     console.error('[API] /api/latest error:', error);
     res.status(500).json({ error: error.message });

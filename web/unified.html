@@ -10,9 +10,6 @@
   <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
   <meta name="view-transition" content="same-origin">
   <link rel="apple-touch-icon" href="/icon-192.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="design-tokens.css">
   <title>Tally Dashboard</title>
   <style>
@@ -150,6 +147,18 @@
 
     .tab-content.active {
       display: block;
+    }
+
+    .offline-banner {
+      display: none;
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-size: 13px;
+      text-align: center;
     }
 
     /* Glass cards */
@@ -537,6 +546,8 @@
   </nav>
 
   <div class="container">
+    <div id="offline-banner" class="offline-banner">Offline - showing cached data</div>
+
     <!-- Dashboard Tab -->
     <div id="dashboard-tab" class="tab-content active">
       <!-- Messages/Notifications bar -->
