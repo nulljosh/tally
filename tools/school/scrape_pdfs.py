@@ -225,13 +225,17 @@ def main():
 def submit_to_dropbox(page, filled_pdf_path, unit_num):
     """Submit a filled PDF to the D2L dropbox for the given unit."""
     # Get dropbox folders
+    api_ver = None
+    folders = None
     for ver in ["1.67", "1.50", "1.47"]:
         url = f"{D2L_BASE}/d2l/api/le/{ver}/{COURSE_OU}/dropbox/folders/"
         resp = page.request.get(url)
         if resp.ok:
             folders = resp.json()
+            api_ver = ver
             break
-    else:
+
+    if not folders:
         print(f"  ERROR: Could not fetch dropbox folders")
         return False
 
@@ -257,127 +261,176 @@ def submit_to_dropbox(page, filled_pdf_path, unit_num):
 
     folder_id = target_folder["Id"]
     folder_name = target_folder["Name"]
-    filename = Path(filled_pdf_path).name
+    file_path = Path(filled_pdf_path)
+    filename = file_path.name
     print(f"  Dropbox folder: {folder_name} (ID: {folder_id})")
 
-    # Navigate to dropbox submit page
+    # Strategy 1: API multipart upload
+    print(f"  Trying API upload...")
+    file_bytes = file_path.read_bytes()
+    import base64
+    b64_data = base64.b64encode(file_bytes).decode()
+
+    api_uploaded = False
+    for ver in ([api_ver] if api_ver else ["1.67", "1.50", "1.47"]):
+        api_url = f"{D2L_BASE}/d2l/api/le/{ver}/{COURSE_OU}/dropbox/folders/{folder_id}/submissions/mysubmissions/"
+        # D2L expects multipart/mixed or simple JSON+file -- try multipart form via JS fetch
+        upload_result = page.evaluate('''async ([url, fileName, b64]) => {
+            try {
+                const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+                const blob = new Blob([bytes], {type: 'application/pdf'});
+                const formData = new FormData();
+                // D2L submission API: JSON description part + file part
+                const desc = JSON.stringify({"Text": {"Content": "", "Type": "Text"}, "Html": {"Content": "", "Type": "Html"}});
+                formData.append('', new Blob([desc], {type: 'application/json'}));
+                formData.append('', blob, fileName);
+                const resp = await fetch(url, {method: 'POST', body: formData, credentials: 'same-origin'});
+                return {status: resp.status, ok: resp.ok, text: await resp.text()};
+            } catch (e) {
+                return {status: 0, ok: false, text: e.toString()};
+            }
+        }''', [api_url, filename, b64_data])
+
+        status = upload_result.get("status", 0)
+        print(f"  API response: {status}")
+        if upload_result.get("ok"):
+            print(f"  SUBMITTED (API): {filename} -> {folder_name}")
+            return True
+        if status not in [403, 404, 405, 0]:
+            # Got a real response but not success -- log it
+            print(f"  API body: {upload_result.get('text', '')[:200]}")
+
+    # Strategy 2: Browser UI with scroll-to-top and force file input
+    print(f"  API failed, falling back to browser UI...")
     submit_url = (
         f"{D2L_BASE}/d2l/lms/dropbox/user/folder_submit_files.d2l"
         f"?db={folder_id}&grpid=0&isprv=0&bp=0&ou={COURSE_OU}"
     )
     page.goto(submit_url, timeout=30000)
-    time.sleep(3)
+    time.sleep(5)
 
-    # Strategy 1: Shadow DOM pierce -- Playwright >> operator
-    file_input = page.locator('d2l-file-uploader >> input[type=file]')
+    # Scroll to top -- upload widget is above the rubric
+    page.evaluate('window.scrollTo(0, 0)')
+    time.sleep(1)
+
+    # Debug: dump page structure
+    debug_info = page.evaluate('''() => {
+        const customs = document.querySelectorAll('*');
+        const customEls = [];
+        const fileInputs = [];
+        const iframes = [];
+        for (const el of customs) {
+            if (el.tagName.includes('-')) customEls.push(el.tagName.toLowerCase());
+            if (el.tagName === 'INPUT' && el.type === 'file') fileInputs.push(el.outerHTML);
+            if (el.tagName === 'IFRAME') iframes.push(el.src || '(no src)');
+        }
+        // Check shadow roots for file inputs
+        const shadowInputs = [];
+        for (const el of customs) {
+            if (el.shadowRoot) {
+                const inputs = el.shadowRoot.querySelectorAll('input[type="file"]');
+                for (const inp of inputs) shadowInputs.push(el.tagName.toLowerCase() + ' >> ' + inp.outerHTML);
+            }
+        }
+        return {
+            customElements: [...new Set(customEls)],
+            fileInputs,
+            shadowInputs,
+            iframes,
+            title: document.title
+        };
+    }''')
+    print(f"  Page: {debug_info.get('title', '?')}")
+    print(f"  Custom elements: {len(debug_info.get('customElements', []))}")
+    print(f"  File inputs (DOM): {debug_info.get('fileInputs', [])}")
+    print(f"  File inputs (Shadow): {debug_info.get('shadowInputs', [])}")
+    print(f"  Iframes: {debug_info.get('iframes', [])}")
+
+    uploaded = False
+
+    # Try 2a: Playwright force on any input[type=file] (pierces shadow DOM)
+    file_input = page.locator('input[type="file"]')
     if file_input.count() > 0:
-        print(f"  Found file input via shadow DOM pierce")
+        print(f"  Found {file_input.count()} file input(s), setting files...")
         file_input.first.set_input_files(str(filled_pdf_path))
         time.sleep(2)
-    else:
-        # Strategy 2: Evaluate shadow root manually
-        found = page.evaluate('''() => {
-            const uploaders = document.querySelectorAll('d2l-file-uploader, d2l-labs-file-uploader, [class*="file-uploader"]');
-            for (const el of uploaders) {
-                const root = el.shadowRoot;
-                if (root) {
-                    const input = root.querySelector('input[type="file"]');
-                    if (input) return true;
-                }
-            }
-            // Also check nested shadow roots
-            const allCustom = document.querySelectorAll('*');
-            for (const el of allCustom) {
-                if (el.shadowRoot) {
-                    const input = el.shadowRoot.querySelector('input[type="file"]');
-                    if (input) return true;
-                    // One level deeper
-                    const nested = el.shadowRoot.querySelectorAll('*');
-                    for (const n of nested) {
-                        if (n.shadowRoot) {
-                            const deepInput = n.shadowRoot.querySelector('input[type="file"]');
-                            if (deepInput) return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        }''')
+        uploaded = True
 
-        if found:
-            print(f"  Found file input via shadow root evaluation")
-            # Use Playwright's built-in shadow piercing with broader selector
-            broader = page.locator('input[type="file"]').first
-            if broader.count() > 0:
-                broader.set_input_files(str(filled_pdf_path))
+    # Try 2b: Shadow DOM pierce
+    if not uploaded:
+        for tag in ['d2l-file-uploader', 'd2l-labs-file-uploader', 'd2l-consistent-evaluation-submission-item']:
+            pierced = page.locator(f'{tag} >> input[type=file]')
+            if pierced.count() > 0:
+                print(f"  Found via shadow pierce: {tag}")
+                pierced.first.set_input_files(str(filled_pdf_path))
                 time.sleep(2)
-            else:
-                # Strategy 3: File chooser event
-                print(f"  Trying file chooser event...")
-                try:
-                    add_btn = page.locator('text="Add a File"').or_(
-                        page.locator('button:has-text("Add")').or_(
-                            page.locator('d2l-button-subtle:has-text("Add")')
-                        )
-                    )
-                    with page.expect_file_chooser(timeout=5000) as fc_info:
-                        add_btn.first.click()
-                    file_chooser = fc_info.value
-                    file_chooser.set_files(str(filled_pdf_path))
-                    time.sleep(2)
-                except Exception as e:
-                    print(f"  ERROR: File chooser strategy failed: {e}")
-                    page.screenshot(path=str(Path.home() / "Downloads" / f"d2l-upload-fail-u{unit_num}.png"))
-                    return False
-        else:
-            # Strategy 3: File chooser event -- click any "Add" button and intercept
-            print(f"  No shadow DOM input found, trying file chooser event...")
-            try:
-                # Look for any clickable add/upload element
-                add_btn = page.locator(
-                    'a:has-text("Add a File"), button:has-text("Add a File"), '
-                    'button:has-text("Upload"), d2l-button-subtle, '
-                    '.d2l-fileupload-input, [class*="upload"]'
-                )
-                if add_btn.count() > 0:
-                    with page.expect_file_chooser(timeout=10000) as fc_info:
-                        add_btn.first.click()
-                    file_chooser = fc_info.value
-                    file_chooser.set_files(str(filled_pdf_path))
-                    time.sleep(2)
-                else:
-                    # Strategy 4: Plain file input (legacy D2L)
-                    plain_input = page.locator('input[type="file"]')
-                    if plain_input.count() > 0:
-                        plain_input.first.set_input_files(str(filled_pdf_path))
-                        time.sleep(2)
-                    else:
-                        print(f"  ERROR: No upload mechanism found on page")
-                        page.screenshot(path=str(Path.home() / "Downloads" / f"d2l-upload-fail-u{unit_num}.png"))
-                        return False
-            except Exception as e:
-                print(f"  ERROR: All upload strategies failed: {e}")
-                page.screenshot(path=str(Path.home() / "Downloads" / f"d2l-upload-fail-u{unit_num}.png"))
-                return False
+                uploaded = True
+                break
 
-    # Find and click submit button (may also be in shadow DOM)
-    submit_btn = page.locator(
-        'd2l-button:has-text("Submit") >> button, '
-        'button:has-text("Submit"), '
-        'input[type="submit"][value*="Submit"], '
-        'a.d2l-button:has-text("Submit"), '
-        'd2l-button-icon:has-text("Submit")'
-    )
-    if submit_btn.count() == 0:
-        # Try shadow DOM pierce for submit
-        submit_btn = page.locator('d2l-button >> button')
-    if submit_btn.count() == 0:
-        print(f"  ERROR: No submit button found on dropbox page")
-        page.screenshot(path=str(Path.home() / "Downloads" / f"d2l-submit-fail-u{unit_num}.png"))
+    # Try 2c: Inject file input via JS and dispatch change event
+    if not uploaded:
+        print(f"  Trying JS file injection into shadow root...")
+        injected = page.evaluate('''async (b64) => {
+            // Find any shadow root with a file input
+            const all = document.querySelectorAll('*');
+            for (const el of all) {
+                if (!el.shadowRoot) continue;
+                const input = el.shadowRoot.querySelector('input[type="file"]');
+                if (input) {
+                    // Create a DataTransfer to set files programmatically
+                    const dt = new DataTransfer();
+                    const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+                    const file = new File([bytes], "submission.pdf", {type: "application/pdf"});
+                    dt.items.add(file);
+                    input.files = dt.files;
+                    input.dispatchEvent(new Event('change', {bubbles: true}));
+                    input.dispatchEvent(new Event('input', {bubbles: true}));
+                    return {found: true, tag: el.tagName};
+                }
+            }
+            return {found: false};
+        }''', b64_data)
+        if injected.get("found"):
+            print(f"  Injected file via JS into {injected.get('tag')}")
+            time.sleep(3)
+            uploaded = True
+
+    # Try 2d: File chooser with click on "Add a File" link/button
+    if not uploaded:
+        print(f"  Trying file chooser intercept...")
+        try:
+            add_btn = page.locator(
+                'a:has-text("Add a File"), button:has-text("Add a File"), '
+                'button:has-text("Upload"), d2l-button-subtle, '
+                '[class*="upload"], [class*="file"]'
+            ).first
+            with page.expect_file_chooser(timeout=10000) as fc_info:
+                add_btn.click(force=True)
+            file_chooser = fc_info.value
+            file_chooser.set_files(str(filled_pdf_path))
+            time.sleep(2)
+            uploaded = True
+        except Exception as e:
+            print(f"  File chooser failed: {e}")
+
+    if not uploaded:
+        print(f"  ERROR: All upload strategies failed for unit {unit_num}")
+        page.screenshot(path=str(Path.home() / "Downloads" / f"d2l-upload-fail-u{unit_num}.png"), full_page=True)
         return False
 
-    submit_btn.first.click()
-    time.sleep(3)
+    # Click Submit button (visible in screenshot -- plain HTML at bottom)
+    time.sleep(1)
+    submit_btn = page.locator('button:has-text("Submit")').first
+    if submit_btn.count() == 0:
+        submit_btn = page.locator('d2l-button:has-text("Submit") >> button').first
+    if submit_btn.count() == 0:
+        submit_btn = page.locator('input[type="submit"][value*="Submit"]').first
+
+    if submit_btn.count() > 0:
+        submit_btn.click()
+        time.sleep(3)
+    else:
+        print(f"  WARNING: No submit button found, but file was attached")
 
     # Check for confirmation
     body_text = page.locator("body").inner_text()
