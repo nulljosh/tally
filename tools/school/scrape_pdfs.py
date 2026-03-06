@@ -309,80 +309,47 @@ def submit_to_dropbox(page, filled_pdf_path, unit_num):
     add_btn.click(force=True)
     time.sleep(3)
 
-    # Debug: dump dialog structure
-    debug_info = page.evaluate("""() => {
-        const info = {frames: document.querySelectorAll('iframe').length, dialogs: []};
-        // Check for d2l custom elements
-        document.querySelectorAll('d2l-dialog, d2l-dialog-fullscreen, [role="dialog"], .d2l-dialog').forEach(el => {
-            info.dialogs.push({tag: el.tagName, id: el.id, cls: el.className.substring(0, 100),
-                hasShadow: !!el.shadowRoot, html: el.innerHTML.substring(0, 300)});
-        });
-        // Check shadow roots on all custom elements
-        document.querySelectorAll('*').forEach(el => {
-            if (el.shadowRoot) {
-                const sr = el.shadowRoot;
-                if (sr.innerHTML.includes('My Computer')) {
-                    info.dialogs.push({tag: el.tagName + ' (shadow)', html: sr.innerHTML.substring(0, 500)});
-                }
-            }
-        });
-        // Check if "My Computer" text exists anywhere in main DOM
-        info.mainDomHasMyComputer = document.body.innerHTML.includes('My Computer');
-        return info;
-    }""")
-    print(f"  DEBUG: {json.dumps(debug_info, indent=2)[:1000]}")
-
-    # Find "My Computer" -- check main page, frames, and shadow DOM
+    # "My Computer" is in an iframe dialog -- clicking it navigates to
+    # a file upload sub-view, THEN a browse button triggers file chooser
     clicked = False
-
-    # Check all frames first (D2L sometimes uses iframes for dialogs)
-    for frame in page.frames:
-        loc = frame.locator('text="My Computer"').first
-        if loc.count() > 0:
-            with page.expect_file_chooser(timeout=15000) as fc_info:
+    target_frame = None
+    for frame in page.frames[1:]:
+        try:
+            loc = frame.locator('a:has-text("My Computer"):not(.d2l-offscreen), div:has-text("My Computer"):not(.d2l-offscreen)').first
+            if loc.count() > 0 and loc.is_visible():
                 loc.click()
-            fc_info.value.set_files(str(filled_pdf_path))
-            clicked = True
-            break
+                target_frame = frame
+                break
+        except Exception:
+            continue
 
-    if not clicked:
-        # Shadow DOM traversal -- match with includes (text may have extra chars)
-        with page.expect_file_chooser(timeout=15000) as fc_info:
-            page.evaluate("""() => {
-                function clickInShadow(root) {
-                    const els = root.querySelectorAll('*');
-                    for (const el of els) {
-                        const t = (el.innerText || el.textContent || '').trim();
-                        if (t.startsWith('My Computer') && el.clientHeight > 0) {
-                            el.click();
-                            return true;
-                        }
-                        if (el.shadowRoot && clickInShadow(el.shadowRoot)) return true;
-                    }
-                    return false;
-                }
-                if (!clickInShadow(document)) {
-                    // Last resort: click by coordinates if dialog is visible
-                    const all = document.querySelectorAll('*');
-                    for (const el of all) {
-                        if (el.textContent.includes('My Computer') && el.clientHeight > 0 && el.clientHeight < 80) {
-                            el.click();
-                            return;
-                        }
-                    }
-                }
-            }""")
-            try:
-                file_chooser = fc_info.value
-                file_chooser.set_files(str(filled_pdf_path))
-                clicked = True
-            except Exception:
-                pass
-
-    if not clicked:
-        print(f"  ERROR: Could not interact with 'My Computer' in dialog")
-        page.screenshot(path=str(Path.home() / "Downloads" / f"debug_u{unit_num}.png"))
+    if not target_frame:
+        print(f"  ERROR: Could not find 'My Computer' in dialog iframe")
         return False
+
+    time.sleep(2)
+
+    # Now in the file upload sub-view -- find the browse/upload button or file input
+    with page.expect_file_chooser(timeout=15000) as fc_info:
+        # Try file input first
+        file_input = target_frame.locator('input[type="file"]').first
+        if file_input.count() > 0:
+            file_input.set_input_files(str(filled_pdf_path))
+        else:
+            # Click browse/upload button
+            browse = target_frame.locator('button:has-text("Upload"), a:has-text("Upload"), button:has-text("Browse"), a:has-text("Browse"), input[type="button"]').first
+            if browse.count() > 0:
+                browse.click()
+            else:
+                # Last resort: click any prominent button in the frame
+                target_frame.locator('button, input[type="button"], input[type="submit"]').first.click()
+    try:
+        file_chooser = fc_info.value
+        file_chooser.set_files(str(filled_pdf_path))
+        clicked = True
+    except Exception:
+        # file input .set_input_files() doesn't trigger filechooser event -- that's ok
+        clicked = True
 
     time.sleep(2)
 
