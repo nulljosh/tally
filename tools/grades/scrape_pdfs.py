@@ -222,5 +222,119 @@ def main():
             browser.close()
 
 
+def submit_to_dropbox(page, filled_pdf_path, unit_num):
+    """Submit a filled PDF to the D2L dropbox for the given unit."""
+    # Get dropbox folders
+    for ver in ["1.67", "1.50", "1.47"]:
+        url = f"{D2L_BASE}/d2l/api/le/{ver}/{COURSE_OU}/dropbox/folders/"
+        resp = page.request.get(url)
+        if resp.ok:
+            folders = resp.json()
+            break
+    else:
+        print(f"  ERROR: Could not fetch dropbox folders")
+        return False
+
+    # Find the folder matching this unit
+    target_folder = None
+    for folder in folders:
+        title = folder.get("Name", "").lower()
+        if f"unit {unit_num}" in title or f"u{unit_num:02d}" in title or f"u{unit_num}" in title:
+            if "learning guide" in title or "lg" in title:
+                target_folder = folder
+                break
+    if not target_folder:
+        # Try broader match
+        for folder in folders:
+            title = folder.get("Name", "").lower()
+            if f"unit {unit_num}" in title or f"u{unit_num}" in title:
+                target_folder = folder
+                break
+
+    if not target_folder:
+        print(f"  ERROR: No dropbox folder found for unit {unit_num}")
+        print(f"  Available folders: {[f.get('Name') for f in folders]}")
+        return False
+
+    folder_id = target_folder["Id"]
+    print(f"  Dropbox folder: {target_folder['Name']} (ID: {folder_id})")
+
+    # Upload via multipart form
+    pdf_bytes = Path(filled_pdf_path).read_bytes()
+    filename = Path(filled_pdf_path).name
+
+    for ver in ["1.67", "1.50", "1.47"]:
+        upload_url = f"{D2L_BASE}/d2l/api/le/{ver}/{COURSE_OU}/dropbox/folders/{folder_id}/submissions/mysubmissions/"
+        # D2L expects multipart with a JSON part and a file part
+        import io
+        boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
+        body = (
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name=""; filename="{filename}"\r\n'
+            f"Content-Type: application/pdf\r\n\r\n"
+        ).encode() + pdf_bytes + f"\r\n--{boundary}--\r\n".encode()
+
+        resp = page.request.post(
+            upload_url,
+            headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+            data=body,
+        )
+        if resp.ok:
+            print(f"  SUBMITTED: {filename} -> {target_folder['Name']}")
+            return True
+        elif resp.status == 404:
+            continue
+        else:
+            print(f"  FAIL: status {resp.status} - {resp.text()[:200]}")
+
+    return False
+
+
+def submit_filled_pdfs():
+    """Find and submit all filled PDFs to D2L dropbox."""
+    username, password = get_creds()
+    if not username or not password:
+        print("ERROR: Could not read credentials from Keychain.")
+        return
+
+    # Find all filled PDFs
+    filled = []
+    for base in [Path.home() / "Documents" / "School" / "science"]:
+        for unit_dir in sorted(base.iterdir()):
+            if not unit_dir.is_dir():
+                continue
+            for pdf in unit_dir.glob("*_FILLED.pdf"):
+                unit_match = re.search(r'U(\d+)', pdf.name, re.IGNORECASE)
+                if unit_match:
+                    filled.append((int(unit_match.group(1)), pdf))
+
+    if not filled:
+        print("No filled PDFs found to submit.")
+        return
+
+    print(f"Found {len(filled)} filled PDFs:")
+    for unit, path in filled:
+        print(f"  Unit {unit}: {path}")
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1400, "height": 900})
+        try:
+            login(page, username, password)
+            for unit, path in filled:
+                print(f"\nSubmitting Unit {unit}...")
+                submit_to_dropbox(page, path, unit)
+        except Exception as e:
+            print(f"Error: {e}")
+            import traceback
+            traceback.print_exc()
+        finally:
+            browser.close()
+
+
 if __name__ == "__main__":
-    main()
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == "submit":
+        submit_filled_pdfs()
+    else:
+        main()
