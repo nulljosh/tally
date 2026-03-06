@@ -14,6 +14,12 @@
   <rect x="84" y="108" width="45" height="6" rx="3" fill="#1a5a96" opacity="0.6"/>
   <rect x="62" y="130" width="14" height="14" rx="3" fill="none" stroke="#2472b2" stroke-width="1.5"/>
   <rect x="84" y="134" width="50" height="6" rx="3" fill="#1a5a96" opacity="0.3"/>
-  <!-- Dollar sign accent -->
-  <text x="100" y="170" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#1d6fb8" opacity="0.5">$</text>
+  <!-- Graduation cap (bottom-right corner) -->
+  <g transform="translate(130, 148)">
+    <polygon points="20,8 0,16 20,24 40,16" fill="#1a5a96" opacity="0.8"/>
+    <line x1="20" y1="24" x2="20" y2="16" stroke="#2472b2" stroke-width="1.5"/>
+    <rect x="18" y="14" width="4" height="4" rx="1" fill="#2472b2"/>
+    <line x1="38" y1="16" x2="38" y2="26" stroke="#1a5a96" stroke-width="1.5"/>
+    <circle cx="38" cy="27" r="1.5" fill="#1a5a96"/>
+  </g>
 </svg>

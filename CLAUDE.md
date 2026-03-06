@@ -16,7 +16,7 @@
 - **Animations**: Spring hover on interactive elements -- `transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)`
 
 ## Project Overview
-Multi-user BC Self-Serve scraper with DTC Navigator. Each user logs in with their own BC Self-Serve credentials to view their benefits data.
+Multi-user BC Self-Serve scraper with DTC Navigator + D2L school grade dashboard. Benefits tracking with BCEID login, plus Playwright-based D2L Brightspace integration for grades, PDF download, auto-fill, and dropbox submission.
 
 ## Security Model
 - Users authenticate with BC Self-Serve username/password
@@ -64,6 +64,8 @@ npm run upload-blob  # Upload to Vercel Blob
 - `api/upload.js` - Vercel Blob upload endpoint
 - `api/latest.js` - Vercel Blob read endpoint
 - `scripts/upload-to-blob.js` - Local upload script
+- `tools/school/scrape_pdfs.py` - D2L PDF scraper + dropbox submitter (Playwright, shadow DOM)
+- `web/school.html` - School grade dashboard
 
 ## Multi-User Flow
 1. User enters BC Self-Serve credentials (or leaves blank for .env defaults)
@@ -167,6 +169,9 @@ Project name: **tally**
 - Dashboard should reflect PWD payment amounts once approved
 
 ## Roadmap
+- [x] D2L grade scraper + PDF auto-fill
+- [x] School grade dashboard (school.html)
+- [x] D2L dropbox submission (shadow DOM piercing)
 - [ ] PWD payment tracking (update income display when designation approved)
 - [ ] iOS companion app (tally-ios)
 - [ ] Auto-fill monthly reports end-to-end
