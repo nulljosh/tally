@@ -265,43 +265,7 @@ def submit_to_dropbox(page, filled_pdf_path, unit_num):
     filename = file_path.name
     print(f"  Dropbox folder: {folder_name} (ID: {folder_id})")
 
-    # Strategy 1: API multipart upload
-    print(f"  Trying API upload...")
-    file_bytes = file_path.read_bytes()
-    import base64
-    b64_data = base64.b64encode(file_bytes).decode()
-
-    api_uploaded = False
-    for ver in ([api_ver] if api_ver else ["1.67", "1.50", "1.47"]):
-        api_url = f"{D2L_BASE}/d2l/api/le/{ver}/{COURSE_OU}/dropbox/folders/{folder_id}/submissions/mysubmissions/"
-        # D2L expects multipart/mixed or simple JSON+file -- try multipart form via JS fetch
-        upload_result = page.evaluate('''async ([url, fileName, b64]) => {
-            try {
-                const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-                const blob = new Blob([bytes], {type: 'application/pdf'});
-                const formData = new FormData();
-                // D2L submission API: JSON description part + file part
-                const desc = JSON.stringify({"Text": {"Content": "", "Type": "Text"}, "Html": {"Content": "", "Type": "Html"}});
-                formData.append('', new Blob([desc], {type: 'application/json'}));
-                formData.append('', blob, fileName);
-                const resp = await fetch(url, {method: 'POST', body: formData, credentials: 'same-origin'});
-                return {status: resp.status, ok: resp.ok, text: await resp.text()};
-            } catch (e) {
-                return {status: 0, ok: false, text: e.toString()};
-            }
-        }''', [api_url, filename, b64_data])
-
-        status = upload_result.get("status", 0)
-        print(f"  API response: {status}")
-        if upload_result.get("ok"):
-            print(f"  SUBMITTED (API): {filename} -> {folder_name}")
-            return True
-        if status not in [403, 404, 405, 0]:
-            # Got a real response but not success -- log it
-            print(f"  API body: {upload_result.get('text', '')[:200]}")
-
-    # Strategy 2: Browser UI -- scroll to bottom "Add a File" button, use file chooser
-    print(f"  API failed, falling back to browser UI...")
+    # Browser UI: Add a File -> My Computer (in iframe dialog) -> file chooser -> Submit
     submit_url = (
         f"{D2L_BASE}/d2l/lms/dropbox/user/folder_submit_files.d2l"
         f"?db={folder_id}&grpid=0&isprv=0&bp=0&ou={COURSE_OU}"
@@ -309,100 +273,52 @@ def submit_to_dropbox(page, filled_pdf_path, unit_num):
     page.goto(submit_url, timeout=30000)
     time.sleep(5)
 
-    # Scroll to bottom where "Submit Assignment" section lives
+    # Scroll to bottom and click "Add a File"
     page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
     time.sleep(2)
+    add_btn = page.locator('button:has-text("Add a File")').first
+    add_btn.scroll_into_view_if_needed()
+    time.sleep(1)
+    add_btn.click(force=True)
+    time.sleep(4)
 
-    uploaded = False
+    # Find the file dialog iframe (d2l/common/dialogs/file/main.d2l)
+    dialog_frame = None
+    for frame in page.frames:
+        if "dialogs/file/main" in frame.url:
+            dialog_frame = frame
+            break
 
-    # The "Add a File" button triggers a file chooser dialog -- it's a d2l-button-subtle
-    # Try multiple selectors for the Add a File button
-    add_selectors = [
-        'button:has-text("Add a File")',
-        'd2l-button-subtle:has-text("Add a File")',
-        'd2l-button-subtle:has-text("Add a File") >> button',
-        'text="Add a File"',
-        '[class*="d2l-button-subtle"]:has-text("Add")',
-    ]
-    for sel in add_selectors:
-        try:
-            btn = page.locator(sel)
-            if btn.count() > 0:
-                print(f"  Found 'Add a File' via: {sel}")
-                btn.first.scroll_into_view_if_needed()
-                time.sleep(1)
-                with page.expect_file_chooser(timeout=10000) as fc_info:
-                    btn.first.click(force=True)
-                file_chooser = fc_info.value
-                file_chooser.set_files(str(filled_pdf_path))
-                time.sleep(3)
-                uploaded = True
-                break
-        except Exception as e:
-            print(f"  Selector '{sel}' failed: {e}")
-            continue
-
-    # Fallback: try clicking d2l-button-subtle via JS with file chooser pre-armed
-    if not uploaded:
-        print(f"  Trying shadow DOM click on d2l-button-subtle...")
-        try:
-            result = page.evaluate('''() => {
-                const btns = document.querySelectorAll('d2l-button-subtle');
-                const found = [];
-                for (const b of btns) {
-                    found.push(b.getAttribute('text') || b.textContent.trim());
-                }
-                return found;
-            }''')
-            print(f"  d2l-button-subtle elements: {result}")
-
-            # Pre-arm the file chooser, then click via JS
-            with page.expect_file_chooser(timeout=10000) as fc_info:
-                page.evaluate('''() => {
-                    const btns = document.querySelectorAll('d2l-button-subtle');
-                    for (const b of btns) {
-                        const text = (b.getAttribute('text') || b.textContent || '').toLowerCase();
-                        if (text.includes('add a file') || text.includes('add')) {
-                            b.click();
-                            return true;
-                        }
-                    }
-                    return false;
-                }''')
-            file_chooser = fc_info.value
-            file_chooser.set_files(str(filled_pdf_path))
-            time.sleep(3)
-            uploaded = True
-        except Exception as e:
-            print(f"  Shadow DOM click failed: {e}")
-
-    # Last resort: look for any input[type=file] that may have appeared after interaction
-    if not uploaded:
-        file_input = page.locator('input[type="file"]')
-        if file_input.count() > 0:
-            print(f"  Found late file input, setting files...")
-            file_input.first.set_input_files(str(filled_pdf_path))
-            time.sleep(2)
-            uploaded = True
-
-    if not uploaded:
-        print(f"  ERROR: All upload strategies failed for unit {unit_num}")
+    if not dialog_frame:
+        print(f"  ERROR: File dialog iframe not found")
         page.screenshot(path=str(Path.home() / "Downloads" / f"d2l-upload-fail-u{unit_num}.png"), full_page=True)
         return False
 
-    # Click Submit button at bottom of page
+    # Click "My Computer" inside the iframe, which triggers native file chooser
+    my_computer = dialog_frame.locator('text="My Computer"').first
+    with page.expect_file_chooser(timeout=15000) as fc_info:
+        my_computer.click()
+    file_chooser = fc_info.value
+    file_chooser.set_files(str(filled_pdf_path))
+    time.sleep(3)
+
+    # Click "Add" button in the dialog iframe to confirm the file
+    add_confirm = dialog_frame.locator('button:has-text("Add"), input[value="Add"]')
+    if add_confirm.count() > 0:
+        add_confirm.first.click()
+        time.sleep(3)
+
+    # Back in main page -- click Submit
+    page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
     time.sleep(1)
     submit_btn = page.locator('button:has-text("Submit")').first
     if submit_btn.count() == 0:
-        submit_btn = page.locator('d2l-button:has-text("Submit") >> button').first
-    if submit_btn.count() == 0:
         submit_btn = page.locator('input[type="submit"][value*="Submit"]').first
-
     if submit_btn.count() > 0:
         submit_btn.click()
-        time.sleep(3)
+        time.sleep(5)
     else:
-        print(f"  WARNING: No submit button found, but file was attached")
+        print(f"  WARNING: No submit button found")
 
     # Check for confirmation
     body_text = page.locator("body").inner_text()
