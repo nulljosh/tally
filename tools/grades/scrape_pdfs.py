@@ -13,15 +13,15 @@ from playwright.sync_api import sync_playwright
 
 D2L_BASE = "https://langleysd35.onlinelearningbc.com"
 COURSE_OU = "153403"
-SAVE_DIR = Path.home() / "Documents" / "School" / "science"
+SAVE_DIR = Path.home() / "Downloads" / "d2l-science"
 
 
 def get_creds():
-    username = subprocess.run(
+    result = subprocess.run(
         ["security", "find-generic-password", "-s", "d2l-langley", "-g"],
         capture_output=True, text=True
     )
-    acct = re.search(r'"acct"<blob>="(.+?)"', username.stderr)
+    acct = re.search(r'"acct"<blob>="(.+?)"', result.stdout)
     pw = subprocess.run(
         ["security", "find-generic-password", "-s", "d2l-langley", "-w"],
         capture_output=True, text=True
@@ -199,8 +199,22 @@ def main():
         try:
             login(page, username, password)
 
+            # Debug: screenshot the content page to see structure
+            page.goto(f"{D2L_BASE}/d2l/le/content/{COURSE_OU}/Home", timeout=30000)
+            time.sleep(3)
+            page.screenshot(path="d2l_content_debug.png", full_page=True)
+            print("DEBUG: saved d2l_content_debug.png")
+
+            # Dump all links on the page
+            all_links = page.query_selector_all('a')
+            for link in all_links:
+                href = link.get_attribute('href') or ''
+                text = link.inner_text().strip()
+                if text and ('unit' in text.lower() or 'content' in href.lower() or '.pdf' in href.lower()):
+                    print(f"  LINK: {text[:60]} -> {href[:100]}")
+
             total = 0
-            for unit_num in range(1, 6):  # Units 1-5
+            for unit_num in range(1, 10):  # Units 1-9
                 print(f"\n--- Unit {unit_num} ---")
                 count = scrape_content_page(page, unit_num)
                 total += count
