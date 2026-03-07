@@ -15,3 +15,4 @@ api-calls-*.json
 .env*.local
 .env.production
 .env.vercel
+.DS_Store
