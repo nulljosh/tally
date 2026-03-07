@@ -10,6 +10,8 @@ BC benefits tracker + D2L school automation.
 
 </div>
 
+![version](https://img.shields.io/badge/version-v1.0.0-blue)
+
 ## Architecture
 
 ![Architecture](architecture.svg)
